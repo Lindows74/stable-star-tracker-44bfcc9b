@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import HorseSearch from "./pages/HorseSearch";
@@ -16,8 +16,8 @@ const queryClient = new QueryClient();
 const App = () => {
   console.log('App.tsx: App component rendering...');
   
-  // Set basename for GitHub Pages deployment
-  const basename = import.meta.env.PROD ? '/stable-star-tracker' : '';
+  // Use HashRouter in production to avoid 404 on refresh in GitHub Pages
+  const isProd = import.meta.env.PROD;
   
   return (
     <QueryClientProvider client={queryClient}>
@@ -25,14 +25,25 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter basename={basename}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/search" element={<HorseSearch />} />
-              <Route path="/breeding" element={<LiveEvents />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          {isProd ? (
+            <HashRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/search" element={<HorseSearch />} />
+                <Route path="/breeding" element={<LiveEvents />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </HashRouter>
+          ) : (
+            <BrowserRouter basename="">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/search" element={<HorseSearch />} />
+                <Route path="/breeding" element={<LiveEvents />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          )}
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
