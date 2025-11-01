@@ -14,8 +14,6 @@ interface UseHorseSearchParams {
   selectedBreeds: string[];
   minTierInput: string;
   maxTierInput: string;
-  fromDate: Date | undefined;
-  toDate: Date | undefined;
   selectedDateSort: DateSortType;
 }
 
@@ -34,8 +32,6 @@ export const useHorseSearch = (params: UseHorseSearchParams) => {
     selectedBreeds,
     minTierInput,
     maxTierInput,
-    fromDate,
-    toDate,
     selectedDateSort,
   } = params;
 
@@ -56,8 +52,6 @@ export const useHorseSearch = (params: UseHorseSearchParams) => {
       selectedBreeds,
       minTierNum,
       maxTierNum,
-      fromDate,
-      toDate,
       selectedDateSort,
     ],
     queryFn: async () => {
@@ -95,22 +89,10 @@ export const useHorseSearch = (params: UseHorseSearchParams) => {
         query = query.lte("tier", maxTierNum);
       }
 
-      // Apply date filters and sorting only if a date sort option is selected
+      // Apply date sorting if selected
       let data, error;
       if (selectedDateSort) {
         const dateField = selectedDateSort.startsWith("created") ? "created_at" : "updated_at";
-        if (fromDate) {
-          const fromDateISO = fromDate.toISOString();
-          query = query.gte(dateField, fromDateISO);
-        }
-        if (toDate) {
-          // Set to end of day for toDate
-          const toDateEndOfDay = new Date(toDate);
-          toDateEndOfDay.setHours(23, 59, 59, 999);
-          const toDateISO = toDateEndOfDay.toISOString();
-          query = query.lte(dateField, toDateISO);
-        }
-
         const sortAscending = selectedDateSort.endsWith("_asc");
         const result = await query.order(dateField, { ascending: sortAscending });
         data = result.data;

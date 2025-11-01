@@ -13,8 +13,6 @@ export interface HorseFilters {
   selectedBreeds: string[];
   minTierInput: string;
   maxTierInput: string;
-  fromDate: Date | undefined;
-  toDate: Date | undefined;
   selectedDateSort: DateSortType;
 }
 
@@ -28,8 +26,6 @@ export const useHorseFilters = () => {
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [minTierInput, setMinTierInput] = useState<string>("");
   const [maxTierInput, setMaxTierInput] = useState<string>("");
-  const [fromDate, setFromDate] = useState<Date | undefined>();
-  const [toDate, setToDate] = useState<Date | undefined>();
   const [selectedDateSort, setSelectedDateSort] = useState<DateSortType>(null);
 
   const clearAllFilters = () => {
@@ -42,8 +38,6 @@ export const useHorseFilters = () => {
     setSelectedBreeds([]);
     setMinTierInput("");
     setMaxTierInput("");
-    setFromDate(undefined);
-    setToDate(undefined);
     setSelectedDateSort(null);
   };
 
@@ -76,8 +70,6 @@ export const useHorseFilters = () => {
     selectedBreeds,
     minTierInput,
     maxTierInput,
-    fromDate,
-    toDate,
     selectedDateSort,
     
     // Setters
@@ -90,8 +82,6 @@ export const useHorseFilters = () => {
     setSelectedBreeds,
     setMinTierInput,
     setMaxTierInput,
-    setFromDate,
-    setToDate,
     setSelectedDateSort,
     
     // Helper functions

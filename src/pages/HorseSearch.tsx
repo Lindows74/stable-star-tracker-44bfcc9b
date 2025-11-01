@@ -14,7 +14,6 @@ import { useHorseSearch } from "@/hooks/useHorseSearch";
 import { useBreeds } from "@/hooks/useBreeds";
 import { NameSearchFilter } from "@/components/filters/NameSearchFilter";
 import { TierRangeFilter } from "@/components/filters/TierRangeFilter";
-import { DateRangeFilter } from "@/components/filters/DateRangeFilter";
 import { CheckboxListFilter } from "@/components/filters/CheckboxListFilter";
 import { SelectWithBadges } from "@/components/filters/SelectWithBadges";
 import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
@@ -67,13 +66,6 @@ const HorseSearch = () => {
         maxValue={filters.maxTierInput}
         onMinChange={filters.setMinTierInput}
         onMaxChange={filters.setMaxTierInput}
-      />
-
-      <DateRangeFilter
-        fromDate={filters.fromDate}
-        toDate={filters.toDate}
-        onFromDateChange={filters.setFromDate}
-        onToDateChange={filters.setToDate}
       />
 
       <CheckboxListFilter
