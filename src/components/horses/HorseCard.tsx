@@ -161,11 +161,6 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                 {hasJumpingStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🐸</span>}
               </CardTitle>
             </div>
-            {horse.tier && (
-              <Badge variant="secondary" className="text-xs flex-shrink-0">
-                T{horse.tier}
-              </Badge>
-            )}
           </div>
           <div className="flex flex-col items-end gap-2 flex-shrink-0">
             <div className="flex gap-1.5 md:gap-2">
@@ -211,14 +206,21 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
-            {/* Timestamp */}
-            <div className="text-[9px] md:text-[10px] text-gray-400">
-              {horse.created_at && horse.updated_at && 
-               new Date(horse.created_at).toISOString() !== new Date(horse.updated_at).toISOString() ? (
-                <>Updated: {new Date(horse.updated_at).toLocaleDateString()}</>
-              ) : (
-                <>Added: {new Date(horse.created_at || horse.updated_at).toLocaleDateString()}</>
+            {/* Tier and Timestamp */}
+            <div className="flex items-center gap-2 text-[9px] md:text-[10px] text-gray-400">
+              {horse.tier && (
+                <Badge variant="secondary" className="text-xs">
+                  Tier {horse.tier}
+                </Badge>
               )}
+              <span>
+                {horse.created_at && horse.updated_at && 
+                 new Date(horse.created_at).toISOString() !== new Date(horse.updated_at).toISOString() ? (
+                  <>Updated: {new Date(horse.updated_at).toLocaleDateString()}</>
+                ) : (
+                  <>Added: {new Date(horse.created_at || horse.updated_at).toLocaleDateString()}</>
+                )}
+              </span>
             </div>
           </div>
         </div>
