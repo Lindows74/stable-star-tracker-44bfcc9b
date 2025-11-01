@@ -1,28 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { HorseCard } from "@/components/horses/HorseCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { X, Search, Filter, Calendar as CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
+import { X, Filter } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import Layout from "@/components/layout/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { formatLabel } from "@/utils/formatUtils";
 import { CATEGORIES, SURFACES, DISTANCES, POSITIONS, TRAITS } from "@/utils/constants";
 import { useHorseFilters } from "@/hooks/useHorseFilters";
 import { useHorseSearch } from "@/hooks/useHorseSearch";
 import { useBreeds } from "@/hooks/useBreeds";
+import { NameSearchFilter } from "@/components/filters/NameSearchFilter";
+import { TierRangeFilter } from "@/components/filters/TierRangeFilter";
+import { DateRangeFilter } from "@/components/filters/DateRangeFilter";
+import { CheckboxListFilter } from "@/components/filters/CheckboxListFilter";
+import { SelectWithBadges } from "@/components/filters/SelectWithBadges";
+import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
+import { DateSortFilter } from "@/components/filters/DateSortFilter";
 
 const HorseSearch = () => {
   const filters = useHorseFilters();
@@ -60,395 +56,82 @@ const HorseSearch = () => {
 
   const filterContent = (
     <div className="space-y-6">
-      {/* Search by Name */}
-      <div>
-        <Label htmlFor="search">Horse Name</Label>
-        <div className="relative mt-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              id="search"
-              placeholder="Search by name..."
-              value={filters.searchTerm}
-              onChange={(e) => filters.setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-        </div>
-      </div>
+      <NameSearchFilter
+        ref={searchInputRef}
+        value={filters.searchTerm}
+        onChange={filters.setSearchTerm}
+      />
 
-      {/* Tier Range */}
-      <div>
-        <Label>Tier Range</Label>
-        <div className="grid grid-cols-2 gap-2 mt-1">
-          <Input
-            type="number"
-            placeholder="Min"
-            value={filters.minTierInput}
-            onChange={(e) => filters.setMinTierInput(e.target.value)}
-            min="1"
-            max="10"
-          />
-          <Input
-            type="number"
-            placeholder="Max"
-            value={filters.maxTierInput}
-            onChange={(e) => filters.setMaxTierInput(e.target.value)}
-            min="1"
-            max="10"
-          />
-        </div>
-      </div>
+      <TierRangeFilter
+        minValue={filters.minTierInput}
+        maxValue={filters.maxTierInput}
+        onMinChange={filters.setMinTierInput}
+        onMaxChange={filters.setMaxTierInput}
+      />
 
-      {/* Date Range Filter */}
-      <div>
-        <Label>Date Range Filter</Label>
-        <div className="space-y-3 mt-2">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label className="text-xs text-muted-foreground">From</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !filters.fromDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.fromDate ? format(filters.fromDate, "PPP") : <span>From date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.fromDate}
-                    onSelect={filters.setFromDate}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div>
-              <Label className="text-xs text-muted-foreground">To</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !filters.toDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.toDate ? format(filters.toDate, "PPP") : <span>To date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.toDate}
-                    onSelect={filters.setToDate}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          
-          {(filters.fromDate || filters.toDate) && (
-            <div className="flex gap-1">
-              {filters.fromDate && (
-                <Badge variant="secondary" className="text-xs">
-                  From: {format(filters.fromDate, "MMM d, yyyy")}
-                  <button
-                    onClick={() => filters.setFromDate(undefined)}
-                    className="ml-1 hover:bg-muted/50 rounded-full"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              {filters.toDate && (
-                <Badge variant="secondary" className="text-xs">
-                  To: {format(filters.toDate, "MMM d, yyyy")}
-                  <button
-                    onClick={() => filters.setToDate(undefined)}
-                    className="ml-1 hover:bg-muted/50 rounded-full"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      <DateRangeFilter
+        fromDate={filters.fromDate}
+        toDate={filters.toDate}
+        onFromDateChange={filters.setFromDate}
+        onToDateChange={filters.setToDate}
+      />
 
-      {/* Categories */}
-      <div>
-        <Label>Categories</Label>
-        <div className="mt-2 space-y-2">
-          {categories.map((category) => (
-            <div key={category} className="flex items-center space-x-2">
-              <Checkbox
-                id={`category-${category}`}
-                checked={filters.selectedCategories.includes(category)}
-                onCheckedChange={() => filters.toggleCategory(category)}
-              />
-              <Label htmlFor={`category-${category}`} className="text-sm font-normal">
-                {formatLabel(category)}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
+      <CheckboxListFilter
+        label="Categories"
+        options={categories}
+        selectedValues={filters.selectedCategories}
+        onToggle={filters.toggleCategory}
+      />
 
-      {/* Surfaces */}
-      <div>
-        <Label>Preferred Surfaces</Label>
-        <div className="mt-2 space-y-2">
-          {surfaces.map((surface) => (
-            <div key={surface} className="flex items-center space-x-2">
-              <Checkbox
-                id={`surface-${surface}`}
-                checked={filters.selectedSurfaces.includes(surface)}
-                onCheckedChange={() => filters.toggleSurface(surface)}
-              />
-              <Label htmlFor={`surface-${surface}`} className="text-sm font-normal">
-                {formatLabel(surface)}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
+      <CheckboxListFilter
+        label="Preferred Surfaces"
+        options={surfaces}
+        selectedValues={filters.selectedSurfaces}
+        onToggle={filters.toggleSurface}
+      />
 
-      {/* Distances */}
-      <div>
-        <Label>Distances</Label>
-        <Select onValueChange={(value) => filters.toggleDistance(value)}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Select distances..." />
-          </SelectTrigger>
-          <SelectContent>
-            {distances.map((distance) => (
-              <SelectItem key={distance} value={distance}>
-                {distance}m
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {filters.selectedDistances.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {filters.selectedDistances.map((distance) => (
-              <Badge key={distance} variant="secondary" className="text-xs">
-                {distance}m
-                <button
-                  onClick={() => filters.toggleDistance(distance)}
-                  className="ml-1 hover:bg-muted/50 rounded-full"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
+      <SelectWithBadges
+        label="Distances"
+        placeholder="Select distances..."
+        options={distances}
+        selectedValues={filters.selectedDistances}
+        onToggle={filters.toggleDistance}
+        formatValue={(v) => `${v}m`}
+      />
 
-      {/* Positions */}
-      <div>
-        <Label>Field Positions</Label>
-        <div className="mt-2 space-y-2">
-          {positions.map((position) => (
-            <div key={position} className="flex items-center space-x-2">
-              <Checkbox
-                id={`position-${position}`}
-                checked={filters.selectedPositions.includes(position)}
-                onCheckedChange={() => filters.togglePosition(position)}
-              />
-              <Label htmlFor={`position-${position}`} className="text-sm font-normal">
-                {formatLabel(position)}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
+      <CheckboxListFilter
+        label="Field Positions"
+        options={positions}
+        selectedValues={filters.selectedPositions}
+        onToggle={filters.togglePosition}
+      />
 
-      {/* Traits */}
-      <div>
-        <Label>Traits</Label>
-        <Popover open={traitsOpen} onOpenChange={setTraitsOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={traitsOpen}
-              className="w-full justify-between mt-1"
-            >
-              {filters.selectedTraits.length > 0
-                ? `${filters.selectedTraits.length} trait${filters.selectedTraits.length > 1 ? 's' : ''} selected`
-                : "Select traits..."}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent onOpenAutoFocus={(e) => e.preventDefault()} className="z-50 w-full p-0 bg-popover" align="start">
-            <Command>
-              <CommandInput placeholder="Search traits..." className="h-9" />
-              <CommandList>
-                <CommandEmpty>No trait found.</CommandEmpty>
-                <CommandGroup>
-                  {traits.map((trait) => (
-                    <CommandItem
-                      key={trait}
-                      value={trait}
-                      onSelect={(currentValue) => {
-                        filters.toggleTrait(trait);
-                        // Keep popover open for multiple selections
-                      }}
-                    >
-                      {trait}
-                      <Check
-                        className={cn(
-                          "ml-auto h-4 w-4",
-                          filters.selectedTraits.includes(trait) ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        {filters.selectedTraits.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {filters.selectedTraits.map((trait) => (
-              <Badge key={trait} variant="secondary" className="text-xs">
-                {trait}
-                <button
-                  onClick={() => filters.toggleTrait(trait)}
-                  className="ml-1 hover:bg-muted/50 rounded-full"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
+      <MultiSelectDropdown
+        label="Traits"
+        placeholder="Select traits..."
+        searchPlaceholder="Search traits..."
+        options={traits}
+        selectedValues={filters.selectedTraits}
+        onToggle={filters.toggleTrait}
+        open={traitsOpen}
+        onOpenChange={setTraitsOpen}
+      />
 
-      {/* Breeds */}
-      <div>
-        <Label>Breeds</Label>
-        <Popover open={breedsOpen} onOpenChange={setBreedsOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={breedsOpen}
-              className="w-full justify-between mt-1"
-            >
-              {filters.selectedBreeds.length > 0
-                ? `${filters.selectedBreeds.length} breed${filters.selectedBreeds.length > 1 ? 's' : ''} selected`
-                : "Select breeds..."}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent onOpenAutoFocus={(e) => e.preventDefault()} className="z-50 w-full p-0 bg-popover" align="start">
-            <Command>
-              <CommandInput placeholder="Search breeds..." className="h-9" />
-              <CommandList>
-                <CommandEmpty>No breed found.</CommandEmpty>
-                <CommandGroup>
-                  {availableBreeds?.map((breed) => (
-                    <CommandItem
-                      key={breed}
-                      value={breed}
-                      onSelect={(currentValue) => {
-                        filters.toggleBreed(breed);
-                        // Keep popover open for multiple selections
-                      }}
-                    >
-                      {breed}
-                      <Check
-                        className={cn(
-                          "ml-auto h-4 w-4",
-                          filters.selectedBreeds.includes(breed) ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        {filters.selectedBreeds.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {filters.selectedBreeds.map((breed) => (
-              <Badge key={breed} variant="secondary" className="text-xs">
-                {breed}
-                <button
-                  onClick={() => filters.toggleBreed(breed)}
-                  className="ml-1 hover:bg-muted/50 rounded-full"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
+      <MultiSelectDropdown
+        label="Breeds"
+        placeholder="Select breeds..."
+        searchPlaceholder="Search breeds..."
+        options={availableBreeds || []}
+        selectedValues={filters.selectedBreeds}
+        onToggle={filters.toggleBreed}
+        open={breedsOpen}
+        onOpenChange={setBreedsOpen}
+      />
 
-      {/* Date Sort Options */}
-      <div>
-        <Label>Sort by Date</Label>
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="date-created-desc"
-              checked={filters.selectedDateSort === "created_desc"}
-              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "created_desc" : null)}
-            />
-            <Label htmlFor="date-created-desc" className="text-sm font-normal">
-              Date Added ↓ (Newest First)
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="date-created-asc"
-              checked={filters.selectedDateSort === "created_asc"}
-              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "created_asc" : null)}
-            />
-            <Label htmlFor="date-created-asc" className="text-sm font-normal">
-              Date Added ↑ (Oldest First)
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="date-updated-desc"
-              checked={filters.selectedDateSort === "updated_desc"}
-              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "updated_desc" : null)}
-            />
-            <Label htmlFor="date-updated-desc" className="text-sm font-normal">
-              Last Updated ↓ (Newest First)
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="date-updated-asc"
-              checked={filters.selectedDateSort === "updated_asc"}
-              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "updated_asc" : null)}
-            />
-            <Label htmlFor="date-updated-asc" className="text-sm font-normal">
-              Last Updated ↑ (Oldest First)
-            </Label>
-          </div>
-        </div>
-      </div>
+      <DateSortFilter
+        selectedSort={filters.selectedDateSort}
+        onSortChange={filters.setSelectedDateSort}
+      />
     </div>
   );
 
