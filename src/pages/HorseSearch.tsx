@@ -229,9 +229,9 @@ const HorseSearch = () => {
                 </Button>
               </div>
 
-              <ScrollArea className="h-[calc(100vh-16rem)]">
+              <div className="space-y-6">
                 {filterContent}
-              </ScrollArea>
+              </div>
             </div>
           )}
 
