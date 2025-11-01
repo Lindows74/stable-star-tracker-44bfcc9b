@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stable-star-tracker</title>
+    
+    <!-- GitHub Pages SPA redirect script -->
+    <script>
+      // Store the path in sessionStorage so we can redirect after loading index.html
+      sessionStorage.setItem('redirect', location.pathname + location.search + location.hash);
+      // Redirect to index.html with path stored
+      location.replace(location.pathname.split('/').slice(0, -1).join('/') + '/index.html');
+    </script>
+  </head>
+  <body>
+    <!-- This page will redirect immediately, so no content needed -->
+  </body>
+</html>
