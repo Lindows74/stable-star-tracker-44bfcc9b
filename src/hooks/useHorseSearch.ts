@@ -1,0 +1,181 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { sortHorses } from "@/utils/horseUtils";
+import { validateTierInput } from "@/utils/filterUtils";
+import type { DateSortType } from "./useHorseFilters";
+
+interface UseHorseSearchParams {
+  searchTerm: string;
+  selectedCategories: string[];
+  selectedSurfaces: string[];
+  selectedDistances: string[];
+  selectedPositions: string[];
+  selectedTraits: string[];
+  selectedBreeds: string[];
+  minTierInput: string;
+  maxTierInput: string;
+  fromDate: Date | undefined;
+  toDate: Date | undefined;
+  selectedDateSort: DateSortType;
+}
+
+/**
+ * Complex horse search query with filtering and sorting
+ * Preserves all original logic for date sorting and client-side filtering
+ */
+export const useHorseSearch = (params: UseHorseSearchParams) => {
+  const {
+    searchTerm,
+    selectedCategories,
+    selectedSurfaces,
+    selectedDistances,
+    selectedPositions,
+    selectedTraits,
+    selectedBreeds,
+    minTierInput,
+    maxTierInput,
+    fromDate,
+    toDate,
+    selectedDateSort,
+  } = params;
+
+  // Validate tier inputs
+  const minTierNum = validateTierInput(minTierInput);
+  const maxTierNum = validateTierInput(maxTierInput);
+
+  return useQuery({
+    queryKey: [
+      "horses",
+      "search",
+      searchTerm,
+      selectedCategories,
+      selectedSurfaces,
+      selectedDistances,
+      selectedPositions,
+      selectedTraits,
+      selectedBreeds,
+      minTierNum,
+      maxTierNum,
+      fromDate,
+      toDate,
+      selectedDateSort,
+    ],
+    queryFn: async () => {
+      console.log("HorseSearch: Fetching horses with filters...");
+      
+      let query = supabase
+        .from("horses")
+        .select(`
+          *,
+          horse_categories(category),
+          horse_surfaces(surface),
+          horse_distances(distance),
+          horse_positions(position),
+          horse_breeding(
+            percentage,
+            breeds(name)
+          ),
+          horse_traits(
+            trait_name,
+            trait_value,
+            trait_category
+          )
+        `);
+
+      // Apply search term filter
+      if (searchTerm) {
+        query = query.ilike("name", `%${searchTerm}%`);
+      }
+
+      // Apply tier filters
+      if (minTierNum !== null) {
+        query = query.gte("tier", minTierNum);
+      }
+      if (maxTierNum !== null) {
+        query = query.lte("tier", maxTierNum);
+      }
+
+      // Apply date filters and sorting only if a date sort option is selected
+      let data, error;
+      if (selectedDateSort) {
+        const dateField = selectedDateSort.startsWith("created") ? "created_at" : "updated_at";
+        if (fromDate) {
+          const fromDateISO = fromDate.toISOString();
+          query = query.gte(dateField, fromDateISO);
+        }
+        if (toDate) {
+          // Set to end of day for toDate
+          const toDateEndOfDay = new Date(toDate);
+          toDateEndOfDay.setHours(23, 59, 59, 999);
+          const toDateISO = toDateEndOfDay.toISOString();
+          query = query.lte(dateField, toDateISO);
+        }
+
+        const sortAscending = selectedDateSort.endsWith("_asc");
+        const result = await query.order(dateField, { ascending: sortAscending });
+        data = result.data;
+        error = result.error;
+      } else {
+        // Default query without date sorting
+        const result = await query.order("created_at", { ascending: false });
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) {
+        console.error("HorseSearch: Error fetching horses:", error);
+        throw error;
+      }
+
+      // Filter by categories, surfaces, distances, positions, and traits on the client side
+      // since these require joining multiple tables
+      let filteredData = data || [];
+
+      if (selectedCategories.length > 0) {
+        filteredData = filteredData.filter(horse => 
+          horse.horse_categories?.some(cat => selectedCategories.includes(cat.category))
+        );
+      }
+
+      if (selectedSurfaces.length > 0) {
+        filteredData = filteredData.filter(horse => 
+          horse.horse_surfaces?.some(surf => selectedSurfaces.includes(surf.surface))
+        );
+      }
+
+      if (selectedDistances.length > 0) {
+        filteredData = filteredData.filter(horse => 
+          horse.horse_distances?.some(dist => selectedDistances.includes(dist.distance))
+        );
+      }
+
+      if (selectedPositions.length > 0) {
+        filteredData = filteredData.filter(horse => 
+          horse.horse_positions?.some(pos => selectedPositions.includes(pos.position))
+        );
+      }
+
+      if (selectedTraits.length > 0) {
+        filteredData = filteredData.filter(horse => 
+          horse.horse_traits?.some(trait => selectedTraits.includes(trait.trait_name))
+        );
+      }
+
+      if (selectedBreeds.length > 0) {
+        filteredData = filteredData.filter(horse => 
+          horse.horse_breeding?.some(breeding => selectedBreeds.includes(breeding.breeds.name))
+        );
+      }
+
+      // Sort horses using the default logic only if no date sort is selected
+      if (!selectedDateSort) {
+        const sortedData = sortHorses(filteredData);
+        console.log("HorseSearch: Filtered and sorted horses:", sortedData);
+        return sortedData;
+      } else {
+        console.log("HorseSearch: Filtered horses (date sorted):", filteredData);
+        return filteredData;
+      }
+    },
+  });
+};

@@ -1,6 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useRef, useState } from "react";
 import { HorseCard } from "@/components/horses/HorseCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { X, Search, Filter, Calendar as CalendarIcon, Menu, Check, ChevronsUpDown } from "lucide-react";
+import { X, Search, Filter, Calendar as CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -20,24 +18,14 @@ import { cn } from "@/lib/utils";
 import Layout from "@/components/layout/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { sortHorses } from "@/utils/horseUtils";
 import { formatLabel } from "@/utils/formatUtils";
-import { toggleArrayValue, validateTierInput } from "@/utils/filterUtils";
 import { CATEGORIES, SURFACES, DISTANCES, POSITIONS, TRAITS } from "@/utils/constants";
+import { useHorseFilters } from "@/hooks/useHorseFilters";
+import { useHorseSearch } from "@/hooks/useHorseSearch";
+import { useBreeds } from "@/hooks/useBreeds";
 
 const HorseSearch = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedSurfaces, setSelectedSurfaces] = useState<string[]>([]);
-  const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
-  const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
-  const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
-  const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
-  const [minTierInput, setMinTierInput] = useState<string>("");
-  const [maxTierInput, setMaxTierInput] = useState<string>("");
-  const [fromDate, setFromDate] = useState<Date | undefined>();
-  const [toDate, setToDate] = useState<Date | undefined>();
-  const [selectedDateSort, setSelectedDateSort] = useState<"created_desc" | "created_asc" | "updated_desc" | "updated_asc" | null>(null);
+  const filters = useHorseFilters();
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [traitsOpen, setTraitsOpen] = useState(false);
   const [breedsOpen, setBreedsOpen] = useState(false);
@@ -58,148 +46,9 @@ const HorseSearch = () => {
   }, [])
 
 
-  // Derived numeric tier values for filtering and query keys
-  const minTierNum = validateTierInput(minTierInput);
-  const maxTierNum = validateTierInput(maxTierInput);
-
-  const { data: horses, isLoading, error } = useQuery({
-    queryKey: ["horses", "search", searchTerm, selectedCategories, selectedSurfaces, selectedDistances, selectedPositions, selectedTraits, selectedBreeds, minTierNum, maxTierNum, fromDate, toDate, selectedDateSort],
-    queryFn: async () => {
-      console.log("HorseSearch: Fetching horses with filters...");
-      
-      let query = supabase
-        .from("horses")
-        .select(`
-          *,
-          horse_categories(category),
-          horse_surfaces(surface),
-          horse_distances(distance),
-          horse_positions(position),
-          horse_breeding(
-            percentage,
-            breeds(name)
-          ),
-          horse_traits(
-            trait_name,
-            trait_value,
-            trait_category
-          )
-        `);
-
-      // Apply search term filter
-      if (searchTerm) {
-        query = query.ilike("name", `%${searchTerm}%`);
-      }
-
-      // Apply tier filters
-      if (minTierNum !== null) {
-        query = query.gte("tier", minTierNum);
-      }
-      if (maxTierNum !== null) {
-        query = query.lte("tier", maxTierNum);
-      }
-
-      // Apply date filters and sorting only if a date sort option is selected
-      let data, error;
-      if (selectedDateSort) {
-        const dateField = selectedDateSort.startsWith("created") ? "created_at" : "updated_at";
-        if (fromDate) {
-          const fromDateISO = fromDate.toISOString();
-          query = query.gte(dateField, fromDateISO);
-        }
-        if (toDate) {
-          // Set to end of day for toDate
-          const toDateEndOfDay = new Date(toDate);
-          toDateEndOfDay.setHours(23, 59, 59, 999);
-          const toDateISO = toDateEndOfDay.toISOString();
-          query = query.lte(dateField, toDateISO);
-        }
-
-        const sortAscending = selectedDateSort.endsWith("_asc");
-        const result = await query.order(dateField, { ascending: sortAscending });
-        data = result.data;
-        error = result.error;
-      } else {
-        // Default query without date sorting
-        const result = await query.order("created_at", { ascending: false });
-        data = result.data;
-        error = result.error;
-      }
-
-      if (error) {
-        console.error("HorseSearch: Error fetching horses:", error);
-        throw error;
-      }
-
-      // Filter by categories, surfaces, distances, positions, and traits on the client side
-      // since these require joining multiple tables
-      let filteredData = data || [];
-
-      if (selectedCategories.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_categories?.some(cat => selectedCategories.includes(cat.category))
-        );
-      }
-
-      if (selectedSurfaces.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_surfaces?.some(surf => selectedSurfaces.includes(surf.surface))
-        );
-      }
-
-      if (selectedDistances.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_distances?.some(dist => selectedDistances.includes(dist.distance))
-        );
-      }
-
-      if (selectedPositions.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_positions?.some(pos => selectedPositions.includes(pos.position))
-        );
-      }
-
-      if (selectedTraits.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_traits?.some(trait => selectedTraits.includes(trait.trait_name))
-        );
-      }
-
-      if (selectedBreeds.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_breeding?.some(breeding => selectedBreeds.includes(breeding.breeds.name))
-        );
-      }
-
-      // Sort horses using the default logic only if no date sort is selected
-      if (!selectedDateSort) {
-        const sortedData = sortHorses(filteredData);
-        console.log("HorseSearch: Filtered and sorted horses:", sortedData);
-        return sortedData;
-      } else {
-        console.log("HorseSearch: Filtered horses (date sorted):", filteredData);
-        return filteredData;
-      }
-    },
-  });
-
-  // Fetch available breeds
-  const { data: availableBreeds } = useQuery({
-    queryKey: ["breeds"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("breeds")
-        .select("name")
-        .order("name");
-      
-      if (error) {
-        console.error("Error fetching breeds:", error);
-        throw error;
-      }
-      
-      return data?.map(breed => breed.name) || [];
-    },
-  });
+  // Use custom hooks for data fetching
+  const { data: horses, isLoading, error } = useHorseSearch(filters);
+  const { data: availableBreeds } = useBreeds();
 
 
   const categories = [...CATEGORIES];
@@ -207,21 +56,6 @@ const HorseSearch = () => {
   const distances = [...DISTANCES];
   const positions = [...POSITIONS];
   const traits = [...TRAITS];
-
-  const clearAllFilters = () => {
-    setSearchTerm("");
-    setSelectedCategories([]);
-    setSelectedSurfaces([]);
-    setSelectedDistances([]);
-    setSelectedPositions([]);
-    setSelectedTraits([]);
-    setSelectedBreeds([]);
-    setMinTierInput("");
-    setMaxTierInput("");
-    setFromDate(undefined);
-    setToDate(undefined);
-    setSelectedDateSort(null);
-  };
 
 
   const filterContent = (
@@ -231,14 +65,14 @@ const HorseSearch = () => {
         <Label htmlFor="search">Horse Name</Label>
         <div className="relative mt-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            ref={searchInputRef}
-            id="search"
-            placeholder="Search by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+            <Input
+              ref={searchInputRef}
+              id="search"
+              placeholder="Search by name..."
+              value={filters.searchTerm}
+              onChange={(e) => filters.setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
         </div>
       </div>
 
@@ -249,16 +83,16 @@ const HorseSearch = () => {
           <Input
             type="number"
             placeholder="Min"
-            value={minTierInput}
-            onChange={(e) => setMinTierInput(e.target.value)}
+            value={filters.minTierInput}
+            onChange={(e) => filters.setMinTierInput(e.target.value)}
             min="1"
             max="10"
           />
           <Input
             type="number"
             placeholder="Max"
-            value={maxTierInput}
-            onChange={(e) => setMaxTierInput(e.target.value)}
+            value={filters.maxTierInput}
+            onChange={(e) => filters.setMaxTierInput(e.target.value)}
             min="1"
             max="10"
           />
@@ -278,18 +112,18 @@ const HorseSearch = () => {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !fromDate && "text-muted-foreground"
+                      !filters.fromDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fromDate ? format(fromDate, "PPP") : <span>From date</span>}
+                    {filters.fromDate ? format(filters.fromDate, "PPP") : <span>From date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={fromDate}
-                    onSelect={setFromDate}
+                    selected={filters.fromDate}
+                    onSelect={filters.setFromDate}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
@@ -305,18 +139,18 @@ const HorseSearch = () => {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !toDate && "text-muted-foreground"
+                      !filters.toDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {toDate ? format(toDate, "PPP") : <span>To date</span>}
+                    {filters.toDate ? format(filters.toDate, "PPP") : <span>To date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={toDate}
-                    onSelect={setToDate}
+                    selected={filters.toDate}
+                    onSelect={filters.setToDate}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
@@ -325,24 +159,24 @@ const HorseSearch = () => {
             </div>
           </div>
           
-          {(fromDate || toDate) && (
+          {(filters.fromDate || filters.toDate) && (
             <div className="flex gap-1">
-              {fromDate && (
+              {filters.fromDate && (
                 <Badge variant="secondary" className="text-xs">
-                  From: {format(fromDate, "MMM d, yyyy")}
+                  From: {format(filters.fromDate, "MMM d, yyyy")}
                   <button
-                    onClick={() => setFromDate(undefined)}
+                    onClick={() => filters.setFromDate(undefined)}
                     className="ml-1 hover:bg-muted/50 rounded-full"
                   >
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               )}
-              {toDate && (
+              {filters.toDate && (
                 <Badge variant="secondary" className="text-xs">
-                  To: {format(toDate, "MMM d, yyyy")}
+                  To: {format(filters.toDate, "MMM d, yyyy")}
                   <button
-                    onClick={() => setToDate(undefined)}
+                    onClick={() => filters.setToDate(undefined)}
                     className="ml-1 hover:bg-muted/50 rounded-full"
                   >
                     <X className="h-3 w-3" />
@@ -362,8 +196,8 @@ const HorseSearch = () => {
             <div key={category} className="flex items-center space-x-2">
               <Checkbox
                 id={`category-${category}`}
-                checked={selectedCategories.includes(category)}
-                onCheckedChange={() => toggleArrayValue(selectedCategories, setSelectedCategories, category)}
+                checked={filters.selectedCategories.includes(category)}
+                onCheckedChange={() => filters.toggleCategory(category)}
               />
               <Label htmlFor={`category-${category}`} className="text-sm font-normal">
                 {formatLabel(category)}
@@ -381,8 +215,8 @@ const HorseSearch = () => {
             <div key={surface} className="flex items-center space-x-2">
               <Checkbox
                 id={`surface-${surface}`}
-                checked={selectedSurfaces.includes(surface)}
-                onCheckedChange={() => toggleArrayValue(selectedSurfaces, setSelectedSurfaces, surface)}
+                checked={filters.selectedSurfaces.includes(surface)}
+                onCheckedChange={() => filters.toggleSurface(surface)}
               />
               <Label htmlFor={`surface-${surface}`} className="text-sm font-normal">
                 {formatLabel(surface)}
@@ -395,7 +229,7 @@ const HorseSearch = () => {
       {/* Distances */}
       <div>
         <Label>Distances</Label>
-        <Select onValueChange={(value) => toggleArrayValue(selectedDistances, setSelectedDistances, value)}>
+        <Select onValueChange={(value) => filters.toggleDistance(value)}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Select distances..." />
           </SelectTrigger>
@@ -407,13 +241,13 @@ const HorseSearch = () => {
             ))}
           </SelectContent>
         </Select>
-        {selectedDistances.length > 0 && (
+        {filters.selectedDistances.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {selectedDistances.map((distance) => (
+            {filters.selectedDistances.map((distance) => (
               <Badge key={distance} variant="secondary" className="text-xs">
                 {distance}m
                 <button
-                  onClick={() => toggleArrayValue(selectedDistances, setSelectedDistances, distance)}
+                  onClick={() => filters.toggleDistance(distance)}
                   className="ml-1 hover:bg-muted/50 rounded-full"
                 >
                   <X className="h-3 w-3" />
@@ -432,8 +266,8 @@ const HorseSearch = () => {
             <div key={position} className="flex items-center space-x-2">
               <Checkbox
                 id={`position-${position}`}
-                checked={selectedPositions.includes(position)}
-                onCheckedChange={() => toggleArrayValue(selectedPositions, setSelectedPositions, position)}
+                checked={filters.selectedPositions.includes(position)}
+                onCheckedChange={() => filters.togglePosition(position)}
               />
               <Label htmlFor={`position-${position}`} className="text-sm font-normal">
                 {formatLabel(position)}
@@ -454,8 +288,8 @@ const HorseSearch = () => {
               aria-expanded={traitsOpen}
               className="w-full justify-between mt-1"
             >
-              {selectedTraits.length > 0
-                ? `${selectedTraits.length} trait${selectedTraits.length > 1 ? 's' : ''} selected`
+              {filters.selectedTraits.length > 0
+                ? `${filters.selectedTraits.length} trait${filters.selectedTraits.length > 1 ? 's' : ''} selected`
                 : "Select traits..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -471,7 +305,7 @@ const HorseSearch = () => {
                       key={trait}
                       value={trait}
                       onSelect={(currentValue) => {
-                        toggleArrayValue(selectedTraits, setSelectedTraits, trait);
+                        filters.toggleTrait(trait);
                         // Keep popover open for multiple selections
                       }}
                     >
@@ -479,7 +313,7 @@ const HorseSearch = () => {
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          selectedTraits.includes(trait) ? "opacity-100" : "opacity-0"
+                          filters.selectedTraits.includes(trait) ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -489,13 +323,13 @@ const HorseSearch = () => {
             </Command>
           </PopoverContent>
         </Popover>
-        {selectedTraits.length > 0 && (
+        {filters.selectedTraits.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {selectedTraits.map((trait) => (
+            {filters.selectedTraits.map((trait) => (
               <Badge key={trait} variant="secondary" className="text-xs">
                 {trait}
                 <button
-                  onClick={() => toggleArrayValue(selectedTraits, setSelectedTraits, trait)}
+                  onClick={() => filters.toggleTrait(trait)}
                   className="ml-1 hover:bg-muted/50 rounded-full"
                 >
                   <X className="h-3 w-3" />
@@ -517,8 +351,8 @@ const HorseSearch = () => {
               aria-expanded={breedsOpen}
               className="w-full justify-between mt-1"
             >
-              {selectedBreeds.length > 0
-                ? `${selectedBreeds.length} breed${selectedBreeds.length > 1 ? 's' : ''} selected`
+              {filters.selectedBreeds.length > 0
+                ? `${filters.selectedBreeds.length} breed${filters.selectedBreeds.length > 1 ? 's' : ''} selected`
                 : "Select breeds..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -534,7 +368,7 @@ const HorseSearch = () => {
                       key={breed}
                       value={breed}
                       onSelect={(currentValue) => {
-                        toggleArrayValue(selectedBreeds, setSelectedBreeds, breed);
+                        filters.toggleBreed(breed);
                         // Keep popover open for multiple selections
                       }}
                     >
@@ -542,7 +376,7 @@ const HorseSearch = () => {
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          selectedBreeds.includes(breed) ? "opacity-100" : "opacity-0"
+                          filters.selectedBreeds.includes(breed) ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -552,13 +386,13 @@ const HorseSearch = () => {
             </Command>
           </PopoverContent>
         </Popover>
-        {selectedBreeds.length > 0 && (
+        {filters.selectedBreeds.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {selectedBreeds.map((breed) => (
+            {filters.selectedBreeds.map((breed) => (
               <Badge key={breed} variant="secondary" className="text-xs">
                 {breed}
                 <button
-                  onClick={() => toggleArrayValue(selectedBreeds, setSelectedBreeds, breed)}
+                  onClick={() => filters.toggleBreed(breed)}
                   className="ml-1 hover:bg-muted/50 rounded-full"
                 >
                   <X className="h-3 w-3" />
@@ -576,8 +410,8 @@ const HorseSearch = () => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="date-created-desc"
-              checked={selectedDateSort === "created_desc"}
-              onCheckedChange={(checked) => setSelectedDateSort(checked ? "created_desc" : null)}
+              checked={filters.selectedDateSort === "created_desc"}
+              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "created_desc" : null)}
             />
             <Label htmlFor="date-created-desc" className="text-sm font-normal">
               Date Added ↓ (Newest First)
@@ -586,8 +420,8 @@ const HorseSearch = () => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="date-created-asc"
-              checked={selectedDateSort === "created_asc"}
-              onCheckedChange={(checked) => setSelectedDateSort(checked ? "created_asc" : null)}
+              checked={filters.selectedDateSort === "created_asc"}
+              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "created_asc" : null)}
             />
             <Label htmlFor="date-created-asc" className="text-sm font-normal">
               Date Added ↑ (Oldest First)
@@ -596,8 +430,8 @@ const HorseSearch = () => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="date-updated-desc"
-              checked={selectedDateSort === "updated_desc"}
-              onCheckedChange={(checked) => setSelectedDateSort(checked ? "updated_desc" : null)}
+              checked={filters.selectedDateSort === "updated_desc"}
+              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "updated_desc" : null)}
             />
             <Label htmlFor="date-updated-desc" className="text-sm font-normal">
               Last Updated ↓ (Newest First)
@@ -606,8 +440,8 @@ const HorseSearch = () => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="date-updated-asc"
-              checked={selectedDateSort === "updated_asc"}
-              onCheckedChange={(checked) => setSelectedDateSort(checked ? "updated_asc" : null)}
+              checked={filters.selectedDateSort === "updated_asc"}
+              onCheckedChange={(checked) => filters.setSelectedDateSort(checked ? "updated_asc" : null)}
             />
             <Label htmlFor="date-updated-asc" className="text-sm font-normal">
               Last Updated ↑ (Oldest First)
@@ -648,7 +482,7 @@ const HorseSearch = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={clearAllFilters}
+                    onClick={filters.clearAllFilters}
                     className="w-full flex items-center justify-center gap-2"
                   >
                     <X className="h-4 w-4" />
@@ -684,7 +518,7 @@ const HorseSearch = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={clearAllFilters}
+                  onClick={filters.clearAllFilters}
                   className="flex items-center gap-2"
                 >
                   <X className="h-4 w-4" />
