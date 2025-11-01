@@ -1,53 +1,9 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { HorseCard } from "./HorseCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-const sortHorses = (horses: any[]) => {
-  return horses.sort((a, b) => {
-    // First sort by tier (higher tier first)
-    const tierA = a.tier || 0;
-    const tierB = b.tier || 0;
-    if (tierA !== tierB) {
-      return tierB - tierA;
-    }
-
-    // Then by total speed (including diet bonus)
-    const totalSpeedA = (a.speed || 0) + (a.diet_speed || 0);
-    const totalSpeedB = (b.speed || 0) + (b.diet_speed || 0);
-    if (totalSpeedA !== totalSpeedB) {
-      return totalSpeedB - totalSpeedA;
-    }
-
-    // Then by total sprint energy (including diet bonus)
-    const totalSprintEnergyA = (a.sprint_energy || 0) + (a.diet_sprint_energy || 0);
-    const totalSprintEnergyB = (b.sprint_energy || 0) + (b.diet_sprint_energy || 0);
-    if (totalSprintEnergyA !== totalSprintEnergyB) {
-      return totalSprintEnergyB - totalSprintEnergyA;
-    }
-
-    // Then by total acceleration (including diet bonus)
-    const totalAccelerationA = (a.acceleration || 0) + (a.diet_acceleration || 0);
-    const totalAccelerationB = (b.acceleration || 0) + (b.diet_acceleration || 0);
-    if (totalAccelerationA !== totalAccelerationB) {
-      return totalAccelerationB - totalAccelerationA;
-    }
-
-    // Then by total agility (including diet bonus)
-    const totalAgilityA = (a.agility || 0) + (a.diet_agility || 0);
-    const totalAgilityB = (b.agility || 0) + (b.diet_agility || 0);
-    if (totalAgilityA !== totalAgilityB) {
-      return totalAgilityB - totalAgilityA;
-    }
-
-    // Finally by total jump (including diet bonus)
-    const totalJumpA = (a.jump || 0) + (a.diet_jump || 0);
-    const totalJumpB = (b.jump || 0) + (b.diet_jump || 0);
-    return totalJumpB - totalJumpA;
-  });
-};
+import { sortHorses } from "@/utils/horseUtils";
 
 export const HorseList = () => {
   const { data: horses, isLoading, error } = useQuery({

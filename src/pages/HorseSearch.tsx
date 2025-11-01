@@ -20,50 +20,10 @@ import { cn } from "@/lib/utils";
 import Layout from "@/components/layout/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-
-const sortHorses = (horses: any[]) => {
-  return horses.sort((a, b) => {
-    // First sort by tier (higher tier first)
-    const tierA = a.tier || 0;
-    const tierB = b.tier || 0;
-    if (tierA !== tierB) {
-      return tierB - tierA;
-    }
-
-    // Then by total speed (including diet bonus)
-    const totalSpeedA = (a.speed || 0) + (a.diet_speed || 0);
-    const totalSpeedB = (b.speed || 0) + (b.diet_speed || 0);
-    if (totalSpeedA !== totalSpeedB) {
-      return totalSpeedB - totalSpeedA;
-    }
-
-    // Then by total sprint energy (including diet bonus)
-    const totalSprintEnergyA = (a.sprint_energy || 0) + (a.diet_sprint_energy || 0);
-    const totalSprintEnergyB = (b.sprint_energy || 0) + (b.diet_sprint_energy || 0);
-    if (totalSprintEnergyA !== totalSprintEnergyB) {
-      return totalSprintEnergyB - totalSprintEnergyA;
-    }
-
-    // Then by total acceleration (including diet bonus)
-    const totalAccelerationA = (a.acceleration || 0) + (a.diet_acceleration || 0);
-    const totalAccelerationB = (b.acceleration || 0) + (a.diet_acceleration || 0);
-    if (totalAccelerationA !== totalAccelerationB) {
-      return totalAccelerationB - totalAccelerationA;
-    }
-
-    // Then by total agility (including diet bonus)
-    const totalAgilityA = (a.agility || 0) + (a.diet_agility || 0);
-    const totalAgilityB = (b.agility || 0) + (b.diet_agility || 0);
-    if (totalAgilityA !== totalAgilityB) {
-      return totalAgilityB - totalAgilityA;
-    }
-
-    // Finally by total jump (including diet bonus)
-    const totalJumpA = (a.jump || 0) + (a.diet_jump || 0);
-    const totalJumpB = (b.jump || 0) + (b.diet_jump || 0);
-    return totalJumpB - totalJumpA;
-  });
-};
+import { sortHorses } from "@/utils/horseUtils";
+import { formatLabel } from "@/utils/formatUtils";
+import { toggleArrayValue, validateTierInput } from "@/utils/filterUtils";
+import { CATEGORIES, SURFACES, DISTANCES, POSITIONS, TRAITS } from "@/utils/constants";
 
 const HorseSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,17 +59,8 @@ const HorseSearch = () => {
 
 
   // Derived numeric tier values for filtering and query keys
-  const minTierNum = (() => {
-    const n = parseInt(minTierInput, 10)
-    if (isNaN(n)) return null
-    return Math.min(10, Math.max(1, n))
-  })()
-
-  const maxTierNum = (() => {
-    const n = parseInt(maxTierInput, 10)
-    if (isNaN(n)) return null
-    return Math.min(10, Math.max(1, n))
-  })()
+  const minTierNum = validateTierInput(minTierInput);
+  const maxTierNum = validateTierInput(maxTierInput);
 
   const { data: horses, isLoading, error } = useQuery({
     queryKey: ["horses", "search", searchTerm, selectedCategories, selectedSurfaces, selectedDistances, selectedPositions, selectedTraits, selectedBreeds, minTierNum, maxTierNum, fromDate, toDate, selectedDateSort],
@@ -251,28 +202,11 @@ const HorseSearch = () => {
   });
 
 
-  const categories = ["flat_racing", "steeplechase", "cross_country", "misc"];
-  const surfaces = ["very_hard", "hard", "firm", "medium", "soft", "very_soft"];
-  const distances = ["800", "900", "1000", "1100", "1200", "1400", "1600", "1800", "2000", "2200", "2400", "2600", "2800", "3000", "3200"];
-  const positions = ["front", "middle", "back"];
-  const traits = [
-    "Agile Arrow", "Agile Arrow Pro", "Blazing Hoof", "Blazing Hoof Pro", "Fast Draw",
-    "Flash Ignite", "Flash Ignite Pro", "Fleet Dash", "Fleet Dash Pro", "Lightning Bolt",
-    "Quick Gallop", "Swift Trot", "Thundering Hooves", "Endurance Charger", "Energy Saver",
-    "Marathon Master", "Marathon Trotter", "Top Endurance", "Mid Dash", "Mid Miracle",
-    "Short Star", "Granite Gallop", "Hard N' Fast", "Meadow Runner", "Meadowstride",
-    "River Rider", "Steady Strider", "Swampy Strider", "Leaping Lancer", "Leaping Star",
-    "Perfect Step", "Elite Lineage", "Thrifty Spender", "To the Moon", "Top Student",
-    "Revitalizing Surge", "Steam Burst", "Majestic Mane", "Crystal Coat"
-  ];
-
-  const toggleArrayValue = (array: string[], setValue: (value: string[]) => void, value: string) => {
-    if (array.includes(value)) {
-      setValue(array.filter(item => item !== value));
-    } else {
-      setValue([...array, value]);
-    }
-  };
+  const categories = [...CATEGORIES];
+  const surfaces = [...SURFACES];
+  const distances = [...DISTANCES];
+  const positions = [...POSITIONS];
+  const traits = [...TRAITS];
 
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -289,9 +223,6 @@ const HorseSearch = () => {
     setSelectedDateSort(null);
   };
 
-  const formatLabel = (value: string) => {
-    return value.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
 
   const filterContent = (
     <div className="space-y-6">

@@ -10,6 +10,8 @@ import Layout from "@/components/layout/Layout";
 import AddRaceForm from "@/components/races/AddRaceForm";
 import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDisciplineInline";
 import { getHorseSpecialIcons, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits, checkHorseHasFullStaminaTrait } from "@/utils/horseTraitUtils";
+import { formatSurface, formatDateTime } from "@/utils/formatUtils";
+import { isMaxTrained } from "@/utils/horseUtils";
 
 interface MatchingHorse {
   id: number;
@@ -207,19 +209,6 @@ const LiveEvents = () => {
     }
   };
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatSurface = (surface: string) => {
-    return surface.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
-  const isMaxTrained = (horse: MatchingHorse | NonMatchingHorse) => {
-    return horse.max_speed && horse.max_sprint_energy && horse.max_acceleration && 
-           horse.max_agility && horse.max_jump;
-  };
 
   return (
     <Layout>

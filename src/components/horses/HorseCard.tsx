@@ -13,6 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { checkHorseLiveRaceMatches, formatSurfaceName, type HorseRaceMatch } from "@/utils/liveRaces";
 import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullStaminaTrait, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits } from "@/utils/horseTraitUtils";
+import { calculateAllStats, getMaxTrainedStats } from "@/utils/horseUtils";
+import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,26 +94,9 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     );
   }
 
-  const totalSpeed = (horse.speed || 0) + (horse.diet_speed || 0);
-  const totalSprintEnergy = (horse.sprint_energy || 0) + (horse.diet_sprint_energy || 0);
-  const totalAcceleration = (horse.acceleration || 0) + (horse.diet_acceleration || 0);
-  const totalAgility = (horse.agility || 0) + (horse.diet_agility || 0);
-  const totalJump = (horse.jump || 0) + (horse.diet_jump || 0);
-
-  const maxTrainedStats = [
-    horse.max_speed && "Speed",
-    horse.max_sprint_energy && "Sprint Energy", 
-    horse.max_acceleration && "Acceleration",
-    horse.max_agility && "Agility",
-    horse.max_jump && "Jump"
-  ].filter(Boolean);
-
-  // Determine gender background color for the name
-  const getGenderNameBackgroundClass = (gender: string) => {
-    if (gender === 'stallion') return 'bg-blue-200 border border-blue-300';
-    if (gender === 'mare') return 'bg-pink-200 border border-pink-300';
-    return 'bg-gray-200 border border-gray-300';
-  };
+  const { totalSpeed, totalSprintEnergy, totalAcceleration, totalAgility, totalJump } = 
+    calculateAllStats(horse);
+  const maxTrainedStats = getMaxTrainedStats(horse);
 
   // Extract all trait names for stacking detection
   const allTraitNames = horse.horse_traits?.map((trait: any) => trait.trait_name) || [];
