@@ -12,6 +12,7 @@ import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDiscipline
 import { getHorseSpecialIcons, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits, checkHorseHasFullStaminaTrait } from "@/utils/horseTraitUtils";
 import { formatSurface, formatDateTime } from "@/utils/formatUtils";
 import { isMaxTrained } from "@/utils/horseUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MatchingHorse {
   id: number;
@@ -56,6 +57,7 @@ const LiveEvents = () => {
   const [loading, setLoading] = useState(false);
   const [totalHorses, setTotalHorses] = useState(0);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Auto-load data when component mounts
   useEffect(() => {
@@ -212,15 +214,15 @@ const LiveEvents = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Live Events</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl md:text-3xl font-bold">Live Events</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
               All upcoming races and matching horses from your database
             </p>
           </div>
-          <Button onClick={fetchLiveRaces} disabled={loading} size="lg">
+          <Button onClick={fetchLiveRaces} disabled={loading} size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -236,38 +238,38 @@ const LiveEvents = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center gap-3">
-                <Calendar className="h-8 w-8 text-blue-500" />
+                <Calendar className="h-6 w-6 md:h-8 md:w-8 text-blue-500" />
                 <div>
-                  <div className="text-2xl font-bold">{raceMatches.length}</div>
-                  <div className="text-sm text-muted-foreground">Live Events</div>
+                  <div className="text-xl md:text-2xl font-bold">{raceMatches.length}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Live Events</div>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center gap-3">
-                <Trophy className="h-8 w-8 text-yellow-500" />
+                <Trophy className="h-6 w-6 md:h-8 md:w-8 text-yellow-500" />
                 <div>
-                  <div className="text-2xl font-bold">{totalHorses}</div>
-                  <div className="text-sm text-muted-foreground">Total Horses</div>
+                  <div className="text-xl md:text-2xl font-bold">{totalHorses}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Total Horses</div>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center gap-3">
-                <Trophy className="h-8 w-8 text-green-500" />
+                <Trophy className="h-6 w-6 md:h-8 md:w-8 text-green-500" />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-xl md:text-2xl font-bold">
                     {raceMatches.reduce((sum, race) => sum + race.matchingHorses.length, 0)}
                   </div>
-                  <div className="text-sm text-muted-foreground">Total Matches</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Total Matches</div>
                 </div>
               </div>
             </CardContent>
@@ -308,19 +310,19 @@ const LiveEvents = () => {
                   const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
                   
                   return (
-                    <div key={race.id} className="border rounded-lg p-6">
-                       <div className="mb-4">
-                           <h3 className="text-lg font-semibold">{raceLabel}</h3>
+                     <div key={race.id} className="border rounded-lg p-3 md:p-6">
+                       <div className="mb-3 md:mb-4">
+                           <h3 className="text-sm md:text-lg font-semibold">{raceLabel}</h3>
                        </div>
 
-                    <div className="flex gap-4 mb-4">
+                    <div className="flex flex-wrap gap-2 md:gap-4 mb-3 md:mb-4">
                       {race.distance !== '0' && (
-                        <Badge variant="outline" className="text-sm">
-                          Distance: {race.distance}m
+                        <Badge variant="outline" className="text-xs md:text-sm">
+                          {race.distance}m
                         </Badge>
                       )}
-                      <Badge variant="outline" className="text-sm">
-                        Surface: {formatSurface(race.surface)}
+                      <Badge variant="outline" className="text-xs md:text-sm">
+                        {formatSurface(race.surface)}
                       </Badge>
                       {race.tier_restriction && (
                         <Badge variant="outline" className="text-sm">
@@ -374,8 +376,8 @@ const LiveEvents = () => {
                       {race.is_active === false && (
                         <Badge variant="destructive" className="text-sm">Under Repair</Badge>
                       )}
-                      <Badge variant="secondary" className="text-sm">
-                        {race.matchingHorses.length} Matching Horses
+                      <Badge variant="secondary" className="text-xs md:text-sm">
+                        {race.matchingHorses.length} Matches
                       </Badge>
                      </div>
 

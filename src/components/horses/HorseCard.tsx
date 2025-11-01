@@ -149,44 +149,46 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2">
-            <div className={`inline-block px-3 py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')}`}>
-              <CardTitle className="text-lg flex items-center gap-1">
-                {horse.name}
-                {hasEliteLineage && <Star className="h-4 w-4 fill-purple-500 text-purple-500" />}
-                {hasFullStaminaTrait && <span className="text-lg">💯</span>}
-                {hasSpeedStackingTraits && <span className="text-lg">🔥</span>}
-                {hasJumpingStackingTraits && <span className="text-lg">🐸</span>}
+      <CardHeader className="pb-2 md:pb-3 p-3 md:p-6">
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
+            <div className={`inline-block px-2 py-1.5 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} flex-shrink-0`}>
+              <CardTitle className="text-sm md:text-lg flex items-center gap-1 whitespace-nowrap">
+                <span className="truncate max-w-[120px] sm:max-w-none">{horse.name}</span>
+                {hasEliteLineage && <Star className="h-3 w-3 md:h-4 md:w-4 fill-purple-500 text-purple-500 flex-shrink-0" />}
+                {hasFullStaminaTrait && <span className="text-sm md:text-lg flex-shrink-0">💯</span>}
+                {hasSpeedStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🔥</span>}
+                {hasJumpingStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🐸</span>}
               </CardTitle>
             </div>
             {horse.tier && (
-              <Badge variant="secondary">
-                Tier {horse.tier}
+              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                T{horse.tier}
               </Badge>
             )}
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex gap-2">
+          <div className="flex flex-col items-end gap-2 flex-shrink-0">
+            <div className="flex gap-1.5 md:gap-2">
               <Button
                 variant="outline"
-                size="sm"
+                size="icon"
                 onClick={handleEdit}
+                className="h-8 w-8 md:h-9 md:w-9"
               >
-                {!isAuthenticated && <Lock className="h-3 w-3 mr-1" />}
-                <Edit2 className="h-4 w-4" />
+                {!isAuthenticated && <Lock className="h-3 w-3" />}
+                <Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
                     variant="outline" 
-                    size="sm"
+                    size="icon"
                     onClick={() => !isAuthenticated && handleDelete()}
                     disabled={!isAuthenticated && pendingAction === 'delete'}
+                    className="h-8 w-8 md:h-9 md:w-9"
                   >
-                    {!isAuthenticated && <Lock className="h-3 w-3 mr-1" />}
-                    <Trash2 className="h-4 w-4" />
+                    {!isAuthenticated && <Lock className="h-3 w-3" />}
+                    <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -210,7 +212,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               </AlertDialog>
             </div>
             {/* Timestamp */}
-            <div className="text-[10px] text-gray-400">
+            <div className="text-[9px] md:text-[10px] text-gray-400">
               {horse.created_at && horse.updated_at && 
                new Date(horse.created_at).toISOString() !== new Date(horse.updated_at).toISOString() ? (
                 <>Updated: {new Date(horse.updated_at).toLocaleDateString()}</>
@@ -231,12 +233,12 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         />
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 md:space-y-4 p-3 md:p-6 pt-0">
         {/* Breed Information */}
         {horse.horse_breeding && horse.horse_breeding.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2">Breed Composition</h4>
-            <p className="text-sm">
+            <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2">Breed Composition</h4>
+            <p className="text-xs md:text-sm">
               {horse.horse_breeding
                 .map((breeding: any) => `${breeding.breeds?.name || 'Unknown Breed'} ${breeding.percentage}%`)
                 .join(' / ')}
@@ -247,10 +249,10 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         {/* Categories */}
         {horse.horse_categories && horse.horse_categories.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2">Categories</h4>
+            <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2">Categories</h4>
             <div className="flex flex-wrap gap-1">
               {horse.horse_categories.map((cat: any, idx: number) => (
-                <Badge key={idx} variant="outline" className="text-xs">
+                <Badge key={idx} variant="outline" className="text-[10px] md:text-xs">
                   {cat.category?.replace('_', ' ')}
                 </Badge>
               ))}
@@ -260,8 +262,8 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
 
         {/* Stats */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Stats</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2">Stats</h4>
+          <div className="grid grid-cols-2 gap-1.5 md:gap-2 text-xs md:text-sm">
             <div className="flex justify-between">
               <span>Speed:</span>
               <span className="font-medium">
@@ -272,7 +274,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               </span>
             </div>
             <div className="flex justify-between">
-              <span>Sprint Energy:</span>
+              <span>Sprint:</span>
               <span className="font-medium">
                 {totalSprintEnergy}
                 {horse.diet_sprint_energy > 0 && (
@@ -281,7 +283,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               </span>
             </div>
             <div className="flex justify-between">
-              <span>Acceleration:</span>
+              <span>Accel:</span>
               <span className="font-medium">
                 {totalAcceleration}
                 {horse.diet_acceleration > 0 && (
@@ -311,13 +313,13 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         </div>
 
         {/* Racing Info */}
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-3 gap-1.5 md:gap-2 text-[10px] md:text-xs">
           {horse.horse_surfaces && horse.horse_surfaces.length > 0 && (
             <div>
               <span className="font-medium">Surface:</span>
-              <div className="mt-1">
+              <div className="mt-1 space-y-0.5">
                 {horse.horse_surfaces.map((surf: any, idx: number) => (
-                  <Badge key={idx} variant="outline" className="text-xs mr-1">
+                  <Badge key={idx} variant="outline" className="text-[9px] md:text-xs mr-1">
                     {surf.surface?.replace('_', ' ')}
                   </Badge>
                 ))}
@@ -328,9 +330,9 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
           {horse.horse_distances && horse.horse_distances.length > 0 && (
             <div>
               <span className="font-medium">Distance:</span>
-              <div className="mt-1">
+              <div className="mt-1 space-y-0.5">
                 {horse.horse_distances.map((dist: any, idx: number) => (
-                  <Badge key={idx} variant="outline" className="text-xs mr-1">
+                  <Badge key={idx} variant="outline" className="text-[9px] md:text-xs mr-1">
                     {dist.distance}m
                   </Badge>
                 ))}
@@ -341,9 +343,9 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
           {horse.horse_positions && horse.horse_positions.length > 0 && (
             <div>
               <span className="font-medium">Position:</span>
-              <div className="mt-1">
+              <div className="mt-1 space-y-0.5">
                 {horse.horse_positions.map((pos: any, idx: number) => (
-                  <Badge key={idx} variant="outline" className="text-xs mr-1">
+                  <Badge key={idx} variant="outline" className="text-[9px] md:text-xs mr-1">
                     {pos.position}
                   </Badge>
                 ))}
@@ -355,25 +357,25 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         {/* Live Race Matches */}
         {liveRaceMatches.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2 flex items-center gap-2">
               <span className="text-red-600">🔴 LIVE</span>
               <span>Race Matches</span>
             </h4>
             <div className="space-y-1">
               {liveRaceMatches.map((match: HorseRaceMatch, idx: number) => (
-                <div key={idx} className="flex items-center gap-2 text-xs">
-                  <Badge variant="default" className="text-xs bg-blue-600 text-white hover:bg-blue-700">
+                <div key={idx} className="flex flex-wrap items-center gap-1 md:gap-2 text-[10px] md:text-xs">
+                  <Badge variant="default" className="text-[10px] md:text-xs bg-blue-600 text-white hover:bg-blue-700">
                     {match.category}
                   </Badge>
                   {match.distance > 0 && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-[10px] md:text-xs">
                       {match.distance}m
                     </Badge>
                   )}
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-[10px] md:text-xs">
                     {formatSurfaceName(match.surface)}
                   </Badge>
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-[10px] md:text-xs">
                     {match.grades} Grades
                   </Badge>
                 </div>
@@ -385,7 +387,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         {/* Traits */}
         {horse.horse_traits && horse.horse_traits.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2">Traits ({horse.horse_traits.length})</h4>
+            <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2">Traits ({horse.horse_traits.length})</h4>
             <TraitsByDiscipline 
               traits={horse.horse_traits}
               allTraitNames={allTraitNames}
@@ -397,10 +399,10 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         {/* Max Training Status */}
         {maxTrainedStats.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2">Max Trained</h4>
+            <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2">Max Trained</h4>
             <div className="flex flex-wrap gap-1">
               {maxTrainedStats.map((stat, idx) => (
-                <Badge key={idx} variant="default" className="text-xs bg-green-100 text-green-800">
+                <Badge key={idx} variant="default" className="text-[10px] md:text-xs bg-green-100 text-green-800">
                   {stat}
                 </Badge>
               ))}
@@ -411,8 +413,8 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
         {/* Notes */}
         {horse.notes && (
           <div>
-            <h4 className="text-sm font-medium mb-1">Notes</h4>
-            <p className="text-sm text-gray-600">{horse.notes}</p>
+            <h4 className="text-xs md:text-sm font-medium mb-1">Notes</h4>
+            <p className="text-xs md:text-sm text-gray-600">{horse.notes}</p>
           </div>
         )}
       </CardContent>

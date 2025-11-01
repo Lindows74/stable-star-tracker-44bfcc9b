@@ -70,7 +70,7 @@ export const HorseList = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {[...Array(6)].map((_, i) => (
           <Skeleton key={i} className="h-48 w-full" />
         ))}
@@ -101,7 +101,7 @@ export const HorseList = () => {
   console.log("HorseList: About to render", horses.length, "horses");
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
       {horses.map((horse) => (
         <HorseCard key={horse.id} horse={horse} />
       ))}

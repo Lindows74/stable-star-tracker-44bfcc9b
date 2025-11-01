@@ -100,7 +100,76 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Mobile-optimized typography */
+  html {
+    font-size: 16px; /* Base for mobile */
+  }
+
+  @media (min-width: 768px) {
+    html {
+      font-size: 18px; /* Slightly larger for tablets/desktop */
+    }
+  }
+
+  /* Touch-friendly minimum sizes */
+  button, a, [role="button"] {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Smooth scrolling for mobile */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Better focus states for mobile */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2;
+  }
 }
 
 /* Prevent Radix focus guards from causing scroll-to-top on mobile */
 [data-radix-focus-guard] { position: fixed; }
+
+/* Mobile-optimized scrollbars */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  /* Touch-friendly tap highlight removal */
+  .tap-highlight-transparent {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Improved mobile spacing */
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}

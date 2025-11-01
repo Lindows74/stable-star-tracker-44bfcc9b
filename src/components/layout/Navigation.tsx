@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Home, Search, Heart, Plus, Lock } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Home, Search, Heart, Plus, Lock, Menu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { HorseForm } from "@/components/horses/HorseForm";
+import { MobileNavigation } from "./MobileNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
   const [showForm, setShowForm] = useState(false);
   const [showMasterKeyDialog, setShowMasterKeyDialog] = useState(false);
 
@@ -29,16 +31,17 @@ const Navigation = () => {
   ];
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1">
-            <h1 className="text-xl font-bold mr-6">
-              <Link to="/" className="text-foreground hover:text-primary transition-colors">
-                Stable Star Tracker
-              </Link>
-            </h1>
-            <nav className="flex items-center space-x-1">
+    <>
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 h-14 md:h-16">
+          <div className="flex items-center justify-between h-full">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <span className="font-bold text-base md:text-xl">Stable Star</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -46,36 +49,87 @@ const Navigation = () => {
                   <Button
                     key={item.path}
                     variant={isActive ? "default" : "ghost"}
+                    size="sm"
                     asChild
-                    className="flex items-center gap-2"
                   >
-                    <Link to={item.path}>
+                    <Link to={item.path} className="flex items-center gap-2">
                       <Icon className="h-4 w-4" />
-                      {item.label}
+                      <span className="hidden lg:inline">{item.label}</span>
                     </Link>
                   </Button>
                 );
               })}
             </nav>
-          </div>
-          
-          <Button onClick={handleAddHorse} className="flex items-center gap-2">
-            {!isAuthenticated && <Lock className="h-3 w-3" />}
-            <Plus className="h-4 w-4" />
-            Add Horse
-          </Button>
-        </div>
-      </div>
 
-      {/* Add Horse Dialog */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Horse</DialogTitle>
-          </DialogHeader>
-          <HorseForm onSuccess={() => setShowForm(false)} />
-        </DialogContent>
-      </Dialog>
+            {/* Desktop Add Button */}
+            <Button 
+              onClick={handleAddHorse} 
+              size="sm"
+              className="hidden md:flex items-center gap-2"
+            >
+              {!isAuthenticated && <Lock className="h-3 w-3" />}
+              <Plus className="h-4 w-4" />
+              <span className="hidden lg:inline">Add Horse</span>
+            </Button>
+
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px]">
+                <div className="flex flex-col gap-4 mt-8">
+                  <h2 className="font-semibold mb-4">Menu</h2>
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && <MobileNavigation onAddHorse={handleAddHorse} />}
+
+      {/* Add Horse Sheet (Mobile) / Dialog (Desktop) */}
+      {isMobile ? (
+        <Sheet open={showForm} onOpenChange={setShowForm}>
+          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
+            <div className="pb-20">
+              <h2 className="text-lg font-semibold mb-4">Add New Horse</h2>
+              <HorseForm onSuccess={() => setShowForm(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Sheet open={showForm} onOpenChange={setShowForm}>
+          <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+            <div className="py-6">
+              <h2 className="text-xl font-semibold mb-6">Add New Horse</h2>
+              <HorseForm onSuccess={() => setShowForm(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Master Key Dialog */}
       <MasterKeyDialog
@@ -83,7 +137,7 @@ const Navigation = () => {
         onClose={() => setShowMasterKeyDialog(false)}
         onSuccess={() => setShowForm(true)}
       />
-    </header>
+    </>
   );
 };
 
