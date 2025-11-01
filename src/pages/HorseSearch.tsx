@@ -169,28 +169,33 @@ const HorseSearch = () => {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[85vh] flex flex-col">
-                <SheetHeader className="mb-4">
+              <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0">
+                <SheetHeader className="px-4 pt-6 pb-4 border-b">
                   <SheetTitle className="flex items-center gap-2">
                     <Filter className="h-5 w-5" />
                     Filters
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex-1 space-y-4 overflow-hidden">
+                
+                <div className="flex-1 min-h-0 px-4 py-4">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={filters.clearAllFilters}
-                    className="w-full flex items-center justify-center gap-2"
+                    className="w-full flex items-center justify-center gap-2 mb-4"
                   >
                     <X className="h-4 w-4" />
                     Clear All Filters
                   </Button>
-                  <ScrollArea className="h-[calc(100%-8rem)] pr-4">
-                    {filterContent}
+                  
+                  <ScrollArea className="h-[calc(100%-3rem)]">
+                    <div className="pr-4 pb-4">
+                      {filterContent}
+                    </div>
                   </ScrollArea>
                 </div>
-                <div className="pt-4 border-t mt-auto">
+                
+                <div className="p-4 border-t bg-background">
                   <Button 
                     onClick={() => setFilterSheetOpen(false)}
                     className="w-full"
