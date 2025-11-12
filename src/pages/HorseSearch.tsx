@@ -6,7 +6,7 @@ import { X, Filter } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import Layout from "@/components/layout/Layout";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CATEGORIES, SURFACES, DISTANCES, POSITIONS, TRAITS } from "@/utils/constants";
 import { useHorseFilters } from "@/hooks/useHorseFilters";
@@ -24,7 +24,7 @@ const HorseSearch = () => {
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [traitsOpen, setTraitsOpen] = useState(false);
   const [breedsOpen, setBreedsOpen] = useState(false);
-  const isMobile = useIsMobile();
+  
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,94 +138,92 @@ const HorseSearch = () => {
             </p>
           </div>
           
-          {isMobile && (
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Filters
-                  {(filters.selectedCategories.length + 
-                    filters.selectedSurfaces.length + 
-                    filters.selectedDistances.length + 
-                    filters.selectedPositions.length + 
-                    filters.selectedTraits.length +
-                    filters.selectedBreeds.length) > 0 && (
-                    <span className="ml-1 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
-                      {filters.selectedCategories.length + 
-                       filters.selectedSurfaces.length + 
-                       filters.selectedDistances.length + 
-                       filters.selectedPositions.length + 
-                       filters.selectedTraits.length +
-                       filters.selectedBreeds.length}
-                    </span>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0">
-                <SheetHeader className="px-4 pt-6 pb-4 border-b">
-                  <SheetTitle className="flex items-center gap-2">
-                    <Filter className="h-5 w-5" />
+            <div className="lg:hidden">
+              <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
                     Filters
-                  </SheetTitle>
-                </SheetHeader>
-                
-                <div className="flex-1 min-h-0 px-4 py-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={filters.clearAllFilters}
-                    className="w-full flex items-center justify-center gap-2 mb-4"
-                  >
-                    <X className="h-4 w-4" />
-                    Clear All Filters
+                    {(filters.selectedCategories.length + 
+                      filters.selectedSurfaces.length + 
+                      filters.selectedDistances.length + 
+                      filters.selectedPositions.length + 
+                      filters.selectedTraits.length +
+                      filters.selectedBreeds.length) > 0 && (
+                      <span className="ml-1 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
+                        {filters.selectedCategories.length + 
+                         filters.selectedSurfaces.length + 
+                         filters.selectedDistances.length + 
+                         filters.selectedPositions.length + 
+                         filters.selectedTraits.length +
+                         filters.selectedBreeds.length}
+                      </span>
+                    )}
                   </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0">
+                  <SheetHeader className="px-4 pt-6 pb-4 border-b">
+                    <SheetTitle className="flex items-center gap-2">
+                      <Filter className="h-5 w-5" />
+                      Filters
+                    </SheetTitle>
+                  </SheetHeader>
                   
-                  <ScrollArea className="h-[calc(100%-3rem)]">
-                    <div className="pr-4 pb-4">
-                      {filterContent}
-                    </div>
-                  </ScrollArea>
-                </div>
-                
-                <div className="p-4 border-t bg-background">
-                  <Button 
-                    onClick={() => setFilterSheetOpen(false)}
-                    className="w-full"
-                    size="lg"
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
+                  <div className="flex-1 min-h-0 px-4 py-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={filters.clearAllFilters}
+                      className="w-full flex items-center justify-center gap-2 mb-4"
+                    >
+                      <X className="h-4 w-4" />
+                      Clear All Filters
+                    </Button>
+                    
+                    <ScrollArea className="h-[calc(100%-3rem)]">
+                      <div className="pr-4 pb-4">
+                        {filterContent}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                  
+                  <div className="p-4 border-t bg-background">
+                    <Button 
+                      onClick={() => setFilterSheetOpen(false)}
+                      className="w-full"
+                      size="lg"
+                    >
+                      Apply Filters
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
           {/* Desktop Filter Sidebar */}
-          {!isMobile && (
-            <div className="w-full lg:w-80 bg-card rounded-lg border p-4 md:p-6 h-fit">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Filters
-                </h3>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={filters.clearAllFilters}
-                  className="flex items-center gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  Clear All
-                </Button>
-              </div>
-
-              <div className="space-y-6">
-                {filterContent}
-              </div>
+          <div className="hidden lg:block lg:w-80 bg-card rounded-lg border p-4 md:p-6 h-fit">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Filters
+              </h3>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={filters.clearAllFilters}
+                className="flex items-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                Clear All
+              </Button>
             </div>
-          )}
+
+            <div className="space-y-6">
+              {filterContent}
+            </div>
+          </div>
 
           {/* Results Area */}
           <div className="flex-1 min-w-0">
