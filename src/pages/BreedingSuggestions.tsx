@@ -10,6 +10,7 @@ import Layout from "@/components/layout/Layout";
 import { formatSurface } from "@/utils/formatUtils";
 import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDisciplineInline";
 import { getHorseSpecialIcons } from "@/utils/horseTraitUtils";
+import { isMaxTrained } from "@/utils/horseUtils";
 
 interface Horse {
   id: number;
@@ -38,6 +39,9 @@ interface RaceWithPairs {
   distance: string;
   tier_restriction: string | null;
   pairs: BreedingPair[];
+  matchingHorses: any[];
+  hasMaxTrained: boolean;
+  hasMatches: boolean;
 }
 
 const BreedingSuggestions = () => {
@@ -80,8 +84,22 @@ const BreedingSuggestions = () => {
 
         const results: RaceWithPairs[] = matches.map((race: any) => {
           const matchingHorses = race.matchingHorses
-            .map((mh: any) => horsesMap.get(mh.id))
+            .map((mh: any) => {
+              const horse = horsesMap.get(mh.id);
+              if (!horse) return null;
+              return {
+                ...horse,
+                max_speed: mh.max_speed,
+                max_sprint_energy: mh.max_sprint_energy,
+                max_acceleration: mh.max_acceleration,
+                max_agility: mh.max_agility,
+                max_jump: mh.max_jump
+              };
+            })
             .filter((h: any) => h && h.gender);
+
+          const hasMaxTrained = matchingHorses.some((h: any) => isMaxTrained(h));
+          const hasMatches = matchingHorses.length > 0;
 
           const mares = matchingHorses.filter((h: any) => h.gender?.toLowerCase() === 'mare');
           const stallions = matchingHorses.filter((h: any) => h.gender?.toLowerCase() === 'stallion');
@@ -122,7 +140,10 @@ const BreedingSuggestions = () => {
             surface: race.surface,
             distance: race.distance,
             tier_restriction: race.tier_restriction,
-            pairs: pairs.slice(0, 5)
+            pairs: pairs.slice(0, 5),
+            matchingHorses,
+            hasMaxTrained,
+            hasMatches
           };
         });
 
@@ -198,25 +219,38 @@ const BreedingSuggestions = () => {
         </div>
 
         <div className="space-y-6">
-          {racePairs.map((race, idx) => (
-            <Card key={race.id}>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  Race {idx + 1} - {race.race_name || 'Unknown Race'}
-                </CardTitle>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {race.distance !== '0' && (
-                    <Badge variant="outline">{race.distance}m</Badge>
-                  )}
-                  <Badge variant="outline">{formatSurface(race.surface)}</Badge>
-                  {race.tier_restriction && (
-                    <Badge variant="outline">
-                      {race.tier_restriction === 'odd_grades' ? 'Odd Grades' : 'Even Grades'}
+          {racePairs.map((race, idx) => {
+            const matchStatusColor = !race.hasMatches 
+              ? 'text-destructive' 
+              : race.hasMaxTrained 
+                ? 'text-cyan-400' 
+                : 'text-foreground';
+            
+            return (
+              <Card key={race.id}>
+                <CardHeader>
+                  <CardTitle className={`text-lg ${matchStatusColor}`}>
+                    Race {idx + 1} - {race.race_name || 'Unknown Race'}
+                  </CardTitle>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {race.distance !== '0' && (
+                      <Badge variant="outline">{race.distance}m</Badge>
+                    )}
+                    <Badge variant="outline">{formatSurface(race.surface)}</Badge>
+                    {race.tier_restriction && (
+                      <Badge variant="outline">
+                        {race.tier_restriction === 'odd_grades' ? 'Odd Grades' : 'Even Grades'}
+                      </Badge>
+                    )}
+                    <Badge 
+                      variant={!race.hasMatches ? 'destructive' : race.hasMaxTrained ? 'default' : 'secondary'}
+                      className={race.hasMaxTrained ? 'bg-cyan-500/20 text-cyan-400 border-cyan-400/30' : ''}
+                    >
+                      {race.matchingHorses.length} Matches
                     </Badge>
-                  )}
-                  <Badge variant="secondary">{race.pairs.length} Pairs</Badge>
-                </div>
-              </CardHeader>
+                    <Badge variant="secondary">{race.pairs.length} Breeding Pairs</Badge>
+                  </div>
+                </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
@@ -271,7 +305,8 @@ const BreedingSuggestions = () => {
                 </Table>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
 
           {racePairs.length === 0 && !loading && (
             <Card>
