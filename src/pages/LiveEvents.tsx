@@ -3,16 +3,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar, Trophy, RefreshCw } from "lucide-react";
+import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import AddRaceForm from "@/components/races/AddRaceForm";
+import EditRaceForm from "@/components/races/EditRaceForm";
 import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDisciplineInline";
 import { getHorseSpecialIcons, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits, checkHorseHasFullStaminaTrait } from "@/utils/horseTraitUtils";
 import { formatSurface, formatDateTime } from "@/utils/formatUtils";
 import { isMaxTrained } from "@/utils/horseUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface MatchingHorse {
   id: number;
@@ -56,6 +67,8 @@ const LiveEvents = () => {
   const [nonMatchingHorses, setNonMatchingHorses] = useState<NonMatchingHorse[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalHorses, setTotalHorses] = useState(0);
+  const [editingRace, setEditingRace] = useState<RaceMatch | null>(null);
+  const [deletingRaceId, setDeletingRaceId] = useState<number | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -211,6 +224,32 @@ const LiveEvents = () => {
     }
   };
 
+  const handleDeleteRace = async (raceId: number) => {
+    try {
+      const { error } = await supabase
+        .from('live_races')
+        .delete()
+        .eq('id', raceId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Race deleted successfully!",
+      });
+
+      setDeletingRaceId(null);
+      fetchLiveRaces();
+    } catch (error) {
+      console.error('Error deleting race:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete race. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   return (
     <Layout>
@@ -311,8 +350,24 @@ const LiveEvents = () => {
                   
                   return (
                      <div key={race.id} className="border rounded-lg p-3 md:p-6">
-                       <div className="mb-3 md:mb-4">
+                       <div className="mb-3 md:mb-4 flex justify-between items-start">
                            <h3 className="text-sm md:text-lg font-semibold">{raceLabel}</h3>
+                           <div className="flex gap-2">
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => setEditingRace(race)}
+                             >
+                               <Edit className="h-4 w-4" />
+                             </Button>
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => setDeletingRaceId(race.id)}
+                             >
+                               <Trash2 className="h-4 w-4" />
+                             </Button>
+                           </div>
                        </div>
 
                     <div className="flex flex-wrap gap-2 md:gap-4 mb-3 md:mb-4">
@@ -489,10 +544,38 @@ const LiveEvents = () => {
                </Table>
              </CardContent>
            </Card>
-         )}
-       </div>
-     </Layout>
-   );
- };
+          )}
+        </div>
+
+        {/* Edit Race Dialog */}
+        {editingRace && (
+          <EditRaceForm
+            race={editingRace}
+            open={!!editingRace}
+            onOpenChange={(open) => !open && setEditingRace(null)}
+            onRaceUpdated={fetchLiveRaces}
+          />
+        )}
+
+        {/* Delete Race Confirmation */}
+        <AlertDialog open={!!deletingRaceId} onOpenChange={(open) => !open && setDeletingRaceId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Race</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this race? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deletingRaceId && handleDeleteRace(deletingRaceId)}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Layout>
+    );
+  };
 
 export default LiveEvents;
