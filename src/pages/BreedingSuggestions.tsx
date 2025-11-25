@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import { formatSurface } from "@/utils/formatUtils";
 import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDisciplineInline";
+import { getHorseSpecialIcons } from "@/utils/horseTraitUtils";
 
 interface Horse {
   id: number;
@@ -231,13 +232,23 @@ const BreedingSuggestions = () => {
                       <TableRow key={pidx}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{pair.mare.name}</div>
+                            <div className="font-medium flex items-center gap-1.5">
+                              {pair.mare.name}
+                              {getHorseSpecialIcons(pair.mare.traits || []) && (
+                                <span className="text-sm">{getHorseSpecialIcons(pair.mare.traits || [])}</span>
+                              )}
+                            </div>
                             <Badge variant="outline" className="mt-1">T{pair.mare.tier}</Badge>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{pair.stallion.name}</div>
+                            <div className="font-medium flex items-center gap-1.5">
+                              {pair.stallion.name}
+                              {getHorseSpecialIcons(pair.stallion.traits || []) && (
+                                <span className="text-sm">{getHorseSpecialIcons(pair.stallion.traits || [])}</span>
+                              )}
+                            </div>
                             <Badge variant="outline" className="mt-1">T{pair.stallion.tier}</Badge>
                           </div>
                         </TableCell>
