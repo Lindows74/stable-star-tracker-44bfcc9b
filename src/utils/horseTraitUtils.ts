@@ -67,7 +67,8 @@ const TRAIT_BREEDING_REQUIREMENTS = {
   "Flash Ignite": ["Quarter Horse"],
   "To The Moon": ["Selle Francais", "Knabstrupper"],
   "Endless Stride": ["Akhal-Teke"],
-  "Rolling Current": ["Anglo-Arab"]
+  "Rolling Current": ["Anglo-Arab"],
+  "Streak Shield": [] // No specific breed requirement for Pro
 };
 
 // Check if a trait should be displayed as Pro based on breeding percentages
