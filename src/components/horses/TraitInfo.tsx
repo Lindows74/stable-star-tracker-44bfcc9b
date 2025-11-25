@@ -53,56 +53,6 @@ interface TraitInfo {
 // The breeding requirements are defined in horseTraitUtils.ts
 
 export const TRAIT_INFO: Record<string, TraitInfo> = {
-  // Pro Traits
-  "Blazing Hoof Pro": {
-    icon: Flame,
-    description: "Superior Speed across all game modes.",
-    category: "Pro",
-    isPro: true,
-  },
-  "Fleet Dash Pro": {
-    icon: Zap,
-    description: "Superior Sprint Energy across all game modes.",
-    category: "Pro",
-    isPro: true,
-  },
-  "Agile Arrow Pro": {
-    icon: TrendingUp,
-    description: "Superior Agility across all game modes.",
-    category: "Pro",
-    isPro: true,
-  },
-  "Flash Ignite Pro": {
-    icon: Rocket,
-    description: "Superior Acceleration across all game modes.",
-    category: "Pro",
-    isPro: true,
-  },
-  "To The Moon Pro": {
-    icon: Moon,
-    description: "Superior Jump across all game modes.",
-    category: "Pro",
-    isPro: true,
-  },
-  "Endless Stride Pro": {
-    icon: Footprints,
-    description: "On Flat Racing tracks of 2400m or more, gain superior acceleration and Sprint Energy lasts longer.",
-    category: "Pro",
-    isPro: true,
-  },
-  "Rolling Current Pro": {
-    icon: Waves,
-    description: "On hard surfaces recharge extra Sprint Energy when jumping and gain superior Acceleration in Cross Country races.",
-    category: "Pro",
-    isPro: true,
-  },
-  "Streak Shield Pro": {
-    icon: Shield,
-    description: "In SteepleChase mode, while a perfect streak is active, missing a perfect jump will not break the streak. Activates 3 times per race.",
-    category: "Pro",
-    isPro: true,
-  },
-
   // General Traits
   "Blazing Hoof": {
     icon: Flame,
