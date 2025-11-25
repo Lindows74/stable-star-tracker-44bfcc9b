@@ -238,16 +238,55 @@ const BreedingSuggestions = () => {
                     )}
                     <Badge variant="outline">{formatSurface(race.surface)}</Badge>
                     {race.tier_restriction && (
-                      <Badge variant="outline">
-                        {race.tier_restriction === 'odd_grades' ? 'Odd Grades' : 'Even Grades'}
+                      <Badge variant="outline" className="text-sm">
+                        {race.tier_restriction === 'odd_grades' ? (
+                          <>
+                            Odd Grades (
+                            {[3, 5, 7, 9].map((tier, index) => {
+                              const matchingHorsesForTier = race.matchingHorses.filter((h: any) => h.tier === tier);
+                              const hasMatch = matchingHorsesForTier.length > 0;
+                              const hasMaxTrained = matchingHorsesForTier.some((h: any) => isMaxTrained(h));
+                              return (
+                                <span key={tier}>
+                                  {index > 0 && ','}
+                                  <span className={
+                                    !hasMatch 
+                                      ? 'text-destructive font-semibold' 
+                                      : hasMaxTrained 
+                                        ? 'text-cyan-400 font-semibold' 
+                                        : ''
+                                  }>{tier}</span>
+                                </span>
+                              );
+                            })}
+                            )
+                          </>
+                        ) : (
+                          <>
+                            Even Grades (
+                            {[2, 4, 6, 8].map((tier, index) => {
+                              const matchingHorsesForTier = race.matchingHorses.filter((h: any) => h.tier === tier);
+                              const hasMatch = matchingHorsesForTier.length > 0;
+                              const hasMaxTrained = matchingHorsesForTier.some((h: any) => isMaxTrained(h));
+                              return (
+                                <span key={tier}>
+                                  {index > 0 && ','}
+                                  <span className={
+                                    !hasMatch 
+                                      ? 'text-destructive font-semibold' 
+                                      : hasMaxTrained 
+                                        ? 'text-cyan-400 font-semibold' 
+                                        : ''
+                                  }>{tier}</span>
+                                </span>
+                              );
+                            })}
+                            )
+                          </>
+                        )}
                       </Badge>
                     )}
-                    <Badge 
-                      variant={!race.hasMatches ? 'destructive' : race.hasMaxTrained ? 'default' : 'secondary'}
-                      className={race.hasMaxTrained ? 'bg-cyan-500/20 text-cyan-400 border-cyan-400/30' : ''}
-                    >
-                      {race.matchingHorses.length} Matches
-                    </Badge>
+                    <Badge variant="secondary">{race.matchingHorses.length} Matches</Badge>
                     <Badge variant="secondary">{race.pairs.length} Breeding Pairs</Badge>
                   </div>
                 </CardHeader>
