@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import HorseSearch from "./pages/HorseSearch";
 import LiveEvents from "./pages/LiveEvents";
+import BreedingSuggestions from "./pages/BreedingSuggestions";
 import NotFound from "./pages/NotFound";
 
 console.log('App.tsx: Component loading...');
@@ -30,6 +31,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/search" element={<HorseSearch />} />
               <Route path="/breeding" element={<LiveEvents />} />
+              <Route path="/pairs" element={<BreedingSuggestions />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
