@@ -77,7 +77,6 @@ const TRAIT_BREEDING_REQUIREMENTS = {
   "To The Moon": ["Selle Francais", "Knabstrupper"],
   "Endless Stride": ["Akhal-Teke"],
   "Rolling Current": ["Anglo-Arab"],
-  "Streak Shield": ["Unknown"] // Pro variant exists but breed not specified
 };
 
 // Check if a trait should be displayed as Pro based on breeding percentages
