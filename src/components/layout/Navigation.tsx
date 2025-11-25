@@ -28,6 +28,7 @@ const Navigation = () => {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/search", label: "Search Horses", icon: Search },
     { path: "/breeding", label: "Live Events", icon: Heart },
+    { path: "/pairs", label: "Breeding Pairs", icon: Heart },
   ];
 
   return (
