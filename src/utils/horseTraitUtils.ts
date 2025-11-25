@@ -59,7 +59,16 @@ export const checkHorseHasFullStaminaTrait = (horseTraits: string[]): boolean =>
   return FULL_STAMINA_TRAITS.some(trait => horseTraits.includes(trait));
 };
 
-// Mapping of traits to their required breeds for Pro status (based on 80% breeding requirement)
+// IMPORTANT: PRO TRAIT SYSTEM
+// Pro traits are displayed with a special gold/yellow color and marked as "Pro" in the UI.
+// A trait becomes "Pro" when a horse has 80% or more breeding of the specific breed(s) 
+// associated with that trait. For example, "Blazing Hoof" becomes "Blazing Hoof Pro" 
+// when the horse is 80%+ Thoroughbred.
+// 
+// This mapping defines which breeds are required for each trait to achieve Pro status.
+// The checkTraitShouldBePro function uses this mapping along with horse_breeding data
+// to determine if a trait should display as Pro for a specific horse.
+
 const TRAIT_BREEDING_REQUIREMENTS = {
   "Blazing Hoof": ["Thoroughbred"],
   "Fleet Dash": ["Arabian", "Mustang"],  
@@ -67,7 +76,8 @@ const TRAIT_BREEDING_REQUIREMENTS = {
   "Flash Ignite": ["Quarter Horse"],
   "To The Moon": ["Selle Francais", "Knabstrupper"],
   "Endless Stride": ["Akhal-Teke"],
-  "Rolling Current": ["Anglo-Arab"]
+  "Rolling Current": ["Anglo-Arab"],
+  "Streak Shield": ["Unknown"] // Pro variant exists but breed not specified
 };
 
 // Check if a trait should be displayed as Pro based on breeding percentages
