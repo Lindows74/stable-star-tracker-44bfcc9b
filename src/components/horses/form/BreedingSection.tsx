@@ -6,8 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, X, Save, ChevronsUpDown, Check } from "lucide-react";
-import { useState, useEffect, useRef, memo, useCallback, type KeyboardEvent, type RefObject } from "react";
+import { useState, useRef, memo, useCallback, type KeyboardEvent, type RefObject } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useBreeds } from "@/hooks/useBreeds";
 
 export interface BreedSelection {
   breed: string;
@@ -22,19 +23,8 @@ interface BreedingSectionProps {
   nextFocusRef?: RefObject<HTMLElement>;
 }
 
-const breedOptions = [
-  "Arabian",
-  "Thoroughbred", 
-  "Mustang",
-  "Quarter Horse",
-  "Selle Francais",
-  "Appaloosa",
-  "Akhal-Teke",
-  "Anglo-Arab",
-  "Knabstrupper"
-];
-
 export const BreedingSection = memo(({ breedSelections, setBreedSelections, gender, setGender, nextFocusRef }: BreedingSectionProps) => {
+  const { data: breedOptions = [], isLoading: breedsLoading } = useBreeds();
   const { toast } = useToast();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
@@ -190,7 +180,7 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                       autoFocus
                     />
                     <CommandList className="max-h-60">
-                      <CommandEmpty>No breeds found.</CommandEmpty>
+                      <CommandEmpty>{breedsLoading ? "Loading breeds..." : "No breeds found."}</CommandEmpty>
                       <CommandGroup>
                         {breedOptions.map((breed) => (
                           <CommandItem
