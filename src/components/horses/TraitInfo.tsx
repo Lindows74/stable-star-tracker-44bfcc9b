@@ -66,7 +66,7 @@ export const TRAIT_INFO: Record<string, TraitInfo> = {
   },
   "Agile Arrow": {
     icon: TrendingUp,
-    description: "Improved Agility across all game modes. Turns Pro if the horse is 80% KS.",
+    description: "Improved Agility across all game modes. Turns Pro if the horse is 80% Knabstrupper or Friesian.",
     category: "General",
   },
   "Flash Ignite": {
@@ -265,6 +265,23 @@ export const TRAIT_INFO: Record<string, TraitInfo> = {
     icon: HeartPulse,
     description: "Regenerates Sprint Energy when passing gates in Cross Country.",
     category: "Misc",
+  },
+
+  // Friesian Cosmetic Traits
+  "Wavy Mane": {
+    icon: Sparkles,
+    description: "Adds flowing, wavy styling to the mane. Exclusive to Friesians.",
+    category: "Exotic",
+  },
+  "Wavy Tail": {
+    icon: Sparkles,
+    description: "Adds elegant waves to the tail. Exclusive to Friesians.",
+    category: "Exotic",
+  },
+  "Classic Feathering": {
+    icon: Sparkles,
+    description: "Adds distinctive feathering around the lower legs. Exclusive to Friesians.",
+    category: "Exotic",
   },
 };
 

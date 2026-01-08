@@ -73,7 +73,10 @@ export const TRAITS = [
   "Thundering Hooves",
   "To The Moon",
   "Top Endurance",
-  "Top Student"
+  "Top Student",
+  "Wavy Mane",
+  "Wavy Tail",
+  "Classic Feathering"
 ] as const;
 
 export type Category = typeof CATEGORIES[number];
