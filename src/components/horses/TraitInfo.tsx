@@ -96,7 +96,7 @@ export const TRAIT_INFO: Record<string, TraitInfo> = {
   },
   "Streak Shield": {
     icon: Shield,
-    description: "In SteepleChase mode, while a perfect streak is active, missing a perfect jump will not break the streak. Activates 2 times per race.",
+    description: "In SteepleChase mode, while a perfect streak is active, missing a perfect jump will not break the streak. Activates 2 times per race. Turns Pro (3 times per race) if horse is 80% or higher French Chaser.",
     category: "General",
   },
 
