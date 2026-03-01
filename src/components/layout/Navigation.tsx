@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Home, Search, Heart, Plus, Lock, Menu } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Home, Search, Heart, Plus, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { HorseForm } from "@/components/horses/HorseForm";
@@ -72,38 +72,6 @@ const Navigation = () => {
               <Plus className="h-4 w-4" />
               <span className="hidden lg:inline">Add Horse</span>
             </Button>
-
-            {/* Mobile Menu */}
-            <Sheet>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[280px]">
-                <div className="flex flex-col gap-4 mt-8">
-                  <h2 className="font-semibold mb-4">Menu</h2>
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
-                    return (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent"
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
         </div>
       </header>
