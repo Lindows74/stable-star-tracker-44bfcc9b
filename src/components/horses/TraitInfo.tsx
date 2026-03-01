@@ -283,6 +283,11 @@ export const TRAIT_INFO: Record<string, TraitInfo> = {
     description: "Adds distinctive feathering around the lower legs. Exclusive to Friesians.",
     category: "Exotic",
   },
+  "Classic Braid": {
+    icon: Sparkles,
+    description: "Straight braids to add a classic and stylish look.",
+    category: "Exotic",
+  },
 };
 
 export const getTraitInfo = (traitName: string): TraitInfo | null => {
