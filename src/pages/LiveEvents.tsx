@@ -277,38 +277,38 @@ const LiveEvents = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 gap-2 md:gap-4">
           <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-6 w-6 md:h-8 md:w-8 text-blue-500" />
-                <div>
-                  <div className="text-xl md:text-2xl font-bold">{raceMatches.length}</div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Live Events</div>
+            <CardContent className="p-3 md:p-6">
+              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
+                <Calendar className="h-5 w-5 md:h-8 md:w-8 text-blue-500" />
+                <div className="text-center md:text-left">
+                  <div className="text-lg md:text-2xl font-bold">{raceMatches.length}</div>
+                  <div className="text-[10px] md:text-sm text-muted-foreground">Events</div>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <Trophy className="h-6 w-6 md:h-8 md:w-8 text-yellow-500" />
-                <div>
-                  <div className="text-xl md:text-2xl font-bold">{totalHorses}</div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Total Horses</div>
+            <CardContent className="p-3 md:p-6">
+              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
+                <Trophy className="h-5 w-5 md:h-8 md:w-8 text-yellow-500" />
+                <div className="text-center md:text-left">
+                  <div className="text-lg md:text-2xl font-bold">{totalHorses}</div>
+                  <div className="text-[10px] md:text-sm text-muted-foreground">Horses</div>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center gap-3">
-                <Trophy className="h-6 w-6 md:h-8 md:w-8 text-green-500" />
-                <div>
-                  <div className="text-xl md:text-2xl font-bold">
+            <CardContent className="p-3 md:p-6">
+              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
+                <Trophy className="h-5 w-5 md:h-8 md:w-8 text-green-500" />
+                <div className="text-center md:text-left">
+                  <div className="text-lg md:text-2xl font-bold">
                     {raceMatches.reduce((sum, race) => sum + race.matchingHorses.length, 0)}
                   </div>
-                  <div className="text-xs md:text-sm text-muted-foreground">Total Matches</div>
+                  <div className="text-[10px] md:text-sm text-muted-foreground">Matches</div>
                 </div>
               </div>
             </CardContent>
@@ -349,158 +349,161 @@ const LiveEvents = () => {
                   const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
                   
                   return (
-                     <div key={race.id} className="border rounded-lg p-3 md:p-6">
-                       <div className="mb-3 md:mb-4 flex justify-between items-start">
-                           <h3 className="text-sm md:text-lg font-semibold">{raceLabel}</h3>
-                           <div className="flex gap-2">
-                             <Button
-                               variant="outline"
-                               size="sm"
-                               onClick={() => setEditingRace(race)}
-                             >
-                               <Edit className="h-4 w-4" />
-                             </Button>
-                             <Button
-                               variant="outline"
-                               size="sm"
-                               onClick={() => setDeletingRaceId(race.id)}
-                             >
-                               <Trash2 className="h-4 w-4" />
-                             </Button>
+                     <div key={race.id} className="border rounded-lg overflow-hidden">
+                       {/* Race Header */}
+                       <div className="bg-muted/40 px-3 py-2 md:px-6 md:py-3 flex justify-between items-center border-b">
+                         <div className="min-w-0 flex-1">
+                           <h3 className="text-xs md:text-lg font-semibold truncate">{raceLabel}</h3>
+                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                             {race.distance !== '0' && (
+                               <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                                 {race.distance}m
+                               </span>
+                             )}
+                             <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                               {formatSurface(race.surface)}
+                             </span>
+                             {race.tier_restriction && (
+                               <span className="text-[10px] md:text-xs font-medium bg-background px-1.5 py-0.5 rounded border">
+                                 {race.tier_restriction === 'odd_grades' ? (
+                                   <>
+                                     {[3, 5, 7, 9].map((tier, index) => {
+                                       const matchingHorsesForTier = race.matchingHorses.filter(h => h.tier === tier);
+                                       const hasMatch = matchingHorsesForTier.length > 0;
+                                       const hasMaxTrained = matchingHorsesForTier.some(h => isMaxTrained(h));
+                                       return (
+                                         <span key={tier}>
+                                           {index > 0 && ','}
+                                           <span className={
+                                             !hasMatch 
+                                               ? 'text-destructive font-semibold' 
+                                               : hasMaxTrained 
+                                                 ? 'text-cyan-400 font-semibold' 
+                                                 : ''
+                                           }>{tier}</span>
+                                         </span>
+                                       );
+                                     })}
+                                   </>
+                                 ) : (
+                                   <>
+                                     {[2, 4, 6, 8].map((tier, index) => {
+                                       const matchingHorsesForTier = race.matchingHorses.filter(h => h.tier === tier);
+                                       const hasMatch = matchingHorsesForTier.length > 0;
+                                       const hasMaxTrained = matchingHorsesForTier.some(h => isMaxTrained(h));
+                                       return (
+                                         <span key={tier}>
+                                           {index > 0 && ','}
+                                           <span className={
+                                             !hasMatch 
+                                               ? 'text-destructive font-semibold' 
+                                               : hasMaxTrained 
+                                                 ? 'text-cyan-400 font-semibold' 
+                                                 : ''
+                                           }>{tier}</span>
+                                         </span>
+                                       );
+                                     })}
+                                   </>
+                                 )}
+                               </span>
+                             )}
+                             {race.is_active === false && (
+                               <span className="text-[10px] md:text-xs font-medium text-destructive-foreground bg-destructive px-1.5 py-0.5 rounded">⚠ Repair</span>
+                             )}
+                             <span className="text-[10px] md:text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                               {race.matchingHorses.length} match{race.matchingHorses.length !== 1 ? 'es' : ''}
+                             </span>
                            </div>
+                         </div>
+                         <div className="flex gap-1 ml-2 flex-shrink-0">
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             className="h-7 w-7 md:h-9 md:w-9"
+                             onClick={() => setEditingRace(race)}
+                           >
+                             <Edit className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                           </Button>
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             className="h-7 w-7 md:h-9 md:w-9"
+                             onClick={() => setDeletingRaceId(race.id)}
+                           >
+                             <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                           </Button>
+                         </div>
                        </div>
 
-                    <div className="flex flex-wrap gap-2 md:gap-4 mb-3 md:mb-4">
-                      {race.distance !== '0' && (
-                        <Badge variant="outline" className="text-xs md:text-sm">
-                          {race.distance}m
-                        </Badge>
-                      )}
-                      <Badge variant="outline" className="text-xs md:text-sm">
-                        {formatSurface(race.surface)}
-                      </Badge>
-                      {race.tier_restriction && (
-                        <Badge variant="outline" className="text-sm">
-                          {race.tier_restriction === 'odd_grades' ? (
-                            <>
-                              Odd Grades (
-                              {[3, 5, 7, 9].map((tier, index) => {
-                                const matchingHorsesForTier = race.matchingHorses.filter(h => h.tier === tier);
-                                const hasMatch = matchingHorsesForTier.length > 0;
-                                const hasMaxTrained = matchingHorsesForTier.some(h => isMaxTrained(h));
-                                return (
-                                  <span key={tier}>
-                                    {index > 0 && ','}
-                                    <span className={
-                                      !hasMatch 
-                                        ? 'text-destructive font-semibold' 
-                                        : hasMaxTrained 
-                                          ? 'text-cyan-400 font-semibold' 
-                                          : ''
-                                    }>{tier}</span>
-                                  </span>
-                                );
-                              })}
-                              )
-                            </>
-                          ) : (
-                            <>
-                              Even Grades (
-                              {[2, 4, 6, 8].map((tier, index) => {
-                                const matchingHorsesForTier = race.matchingHorses.filter(h => h.tier === tier);
-                                const hasMatch = matchingHorsesForTier.length > 0;
-                                const hasMaxTrained = matchingHorsesForTier.some(h => isMaxTrained(h));
-                                return (
-                                  <span key={tier}>
-                                    {index > 0 && ','}
-                                    <span className={
-                                      !hasMatch 
-                                        ? 'text-destructive font-semibold' 
-                                        : hasMaxTrained 
-                                          ? 'text-cyan-400 font-semibold' 
-                                          : ''
-                                    }>{tier}</span>
-                                  </span>
-                                );
-                              })}
-                              )
-                            </>
-                          )}
-                        </Badge>
-                      )}
-                      {race.is_active === false && (
-                        <Badge variant="destructive" className="text-sm">Under Repair</Badge>
-                      )}
-                      <Badge variant="secondary" className="text-xs md:text-sm">
-                        {race.matchingHorses.length} Matches
-                      </Badge>
-                     </div>
-
-                    {race.matchingHorses.length > 0 ? (
-                       isMobile ? (
-                         <div className="space-y-2">
-                           {race.matchingHorses.map((horse) => (
-                             <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
-                               <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                                 <span className="font-medium text-sm truncate">{horse.name}</span>
-                                 {isMaxTrained(horse) && (
-                                   <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30 flex-shrink-0">
-                                     MAX
-                                   </span>
-                                 )}
-                                 {getHorseSpecialIcons(horse.traits || []) && (
-                                   <span className="text-sm flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                 )}
-                               </div>
-                               <Badge variant="outline" className="text-[10px] flex-shrink-0 ml-2">T{horse.tier}</Badge>
-                             </div>
-                           ))}
-                         </div>
-                       ) : (
-                         <Table>
-                           <TableHeader>
-                             <TableRow>
-                               <TableHead>Horse Name</TableHead>
-                               <TableHead>Tier</TableHead>
-                               <TableHead>Traits</TableHead>
-                             </TableRow>
-                           </TableHeader>
-                           <TableBody>
+                       {/* Race Content */}
+                       <div className="p-2 md:p-6">
+                       {race.matchingHorses.length > 0 ? (
+                         isMobile ? (
+                           <div className="divide-y">
                              {race.matchingHorses.map((horse) => (
-                               <TableRow key={horse.id}>
-                                 <TableCell className="font-medium">
-                                   <div className="flex items-center gap-1.5">
-                                     {horse.name}
-                                     {isMaxTrained(horse) && (
-                                       <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
-                                         MAX
-                                       </span>
-                                     )}
-                                     {getHorseSpecialIcons(horse.traits || []) && (
-                                       <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                     )}
-                                   </div>
-                                 </TableCell>
-                                 <TableCell>
-                                   <Badge variant="outline">Tier {horse.tier}</Badge>
-                                 </TableCell>
-                                 <TableCell className="max-w-md">
-                                   <TraitsByDisciplineInline 
-                                     traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
-                                     allTraitNames={horse.traits || []}
-                                   />
-                                 </TableCell>
-                               </TableRow>
+                               <div key={horse.id} className="flex items-center justify-between py-1.5 px-1">
+                                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                   <span className="font-medium text-xs truncate">{horse.name}</span>
+                                   {isMaxTrained(horse) && (
+                                     <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">
+                                       MAX
+                                     </span>
+                                   )}
+                                   {getHorseSpecialIcons(horse.traits || []) && (
+                                     <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                   )}
+                                 </div>
+                                 <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">T{horse.tier}</span>
+                               </div>
                              ))}
-                           </TableBody>
-                         </Table>
-                       )
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        No horses match this race's surface and distance requirements
-                      </div>
-                    )}
-                   </div>
+                           </div>
+                         ) : (
+                           <Table>
+                             <TableHeader>
+                               <TableRow>
+                                 <TableHead>Horse Name</TableHead>
+                                 <TableHead>Tier</TableHead>
+                                 <TableHead>Traits</TableHead>
+                               </TableRow>
+                             </TableHeader>
+                             <TableBody>
+                               {race.matchingHorses.map((horse) => (
+                                 <TableRow key={horse.id}>
+                                   <TableCell className="font-medium">
+                                     <div className="flex items-center gap-1.5">
+                                       {horse.name}
+                                       {isMaxTrained(horse) && (
+                                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
+                                           MAX
+                                         </span>
+                                       )}
+                                       {getHorseSpecialIcons(horse.traits || []) && (
+                                         <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                       )}
+                                     </div>
+                                   </TableCell>
+                                   <TableCell>
+                                     <Badge variant="outline">Tier {horse.tier}</Badge>
+                                   </TableCell>
+                                   <TableCell className="max-w-md">
+                                     <TraitsByDisciplineInline 
+                                       traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
+                                       allTraitNames={horse.traits || []}
+                                     />
+                                   </TableCell>
+                                 </TableRow>
+                               ))}
+                             </TableBody>
+                           </Table>
+                         )
+                       ) : (
+                         <p className="text-center py-4 text-xs text-muted-foreground">
+                           No horses match this race
+                         </p>
+                       )}
+                       </div>
+                     </div>
                   );
                 })}
                </div>
