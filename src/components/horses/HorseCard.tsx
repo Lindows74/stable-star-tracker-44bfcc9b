@@ -152,9 +152,9 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
       <CardHeader className="pb-2 md:pb-3 p-3 md:p-6">
         <div className="flex justify-between items-start gap-2">
           <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
-            <div className={`inline-block px-2 py-1.5 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} flex-shrink-0`}>
-              <CardTitle className="text-sm md:text-lg flex items-center gap-1 whitespace-nowrap">
-                <span className="truncate max-w-[120px] sm:max-w-none">{horse.name}</span>
+            <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} flex-shrink min-w-0`}>
+              <CardTitle className="text-sm md:text-lg flex items-center gap-1">
+                <span className="truncate max-w-[140px] sm:max-w-none">{horse.name}</span>
                 {hasEliteLineage && <Star className="h-3 w-3 md:h-4 md:w-4 fill-purple-500 text-purple-500 flex-shrink-0" />}
                 {hasFullStaminaTrait && <span className="text-sm md:text-lg flex-shrink-0">💯</span>}
                 {hasSpeedStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🔥</span>}

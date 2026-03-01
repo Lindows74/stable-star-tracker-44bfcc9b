@@ -112,10 +112,7 @@
     }
   }
 
-  /* Touch-friendly minimum sizes */
-  button, a, [role="button"] {
-    @apply min-h-[44px] min-w-[44px];
-  }
+  /* Touch-friendly minimum sizes - only for standalone interactive elements, not badges/inline */
 
   /* Smooth scrolling for mobile */
   html {

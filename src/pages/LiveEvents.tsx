@@ -437,16 +437,36 @@ const LiveEvents = () => {
                      </div>
 
                     {race.matchingHorses.length > 0 ? (
-                       <Table>
-                         <TableHeader>
-                           <TableRow>
-                             <TableHead>Horse Name</TableHead>
-                             <TableHead>Tier</TableHead>
-                             <TableHead>Traits</TableHead>
-                           </TableRow>
-                         </TableHeader>
-                         <TableBody>
+                       isMobile ? (
+                         <div className="space-y-2">
                            {race.matchingHorses.map((horse) => (
+                             <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
+                               <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                 <span className="font-medium text-sm truncate">{horse.name}</span>
+                                 {isMaxTrained(horse) && (
+                                   <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30 flex-shrink-0">
+                                     MAX
+                                   </span>
+                                 )}
+                                 {getHorseSpecialIcons(horse.traits || []) && (
+                                   <span className="text-sm flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                 )}
+                               </div>
+                               <Badge variant="outline" className="text-[10px] flex-shrink-0 ml-2">T{horse.tier}</Badge>
+                             </div>
+                           ))}
+                         </div>
+                       ) : (
+                         <Table>
+                           <TableHeader>
+                             <TableRow>
+                               <TableHead>Horse Name</TableHead>
+                               <TableHead>Tier</TableHead>
+                               <TableHead>Traits</TableHead>
+                             </TableRow>
+                           </TableHeader>
+                           <TableBody>
+                             {race.matchingHorses.map((horse) => (
                                <TableRow key={horse.id}>
                                  <TableCell className="font-medium">
                                    <div className="flex items-center gap-1.5">
@@ -461,24 +481,25 @@ const LiveEvents = () => {
                                      )}
                                    </div>
                                  </TableCell>
-                               <TableCell>
-                                 <Badge variant="outline">Tier {horse.tier}</Badge>
-                               </TableCell>
-                               <TableCell className="max-w-md">
-                                 <TraitsByDisciplineInline 
-                                   traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
-                                   allTraitNames={horse.traits || []}
-                                 />
-                               </TableCell>
-                             </TableRow>
-                           ))}
-                         </TableBody>
-                       </Table>
+                                 <TableCell>
+                                   <Badge variant="outline">Tier {horse.tier}</Badge>
+                                 </TableCell>
+                                 <TableCell className="max-w-md">
+                                   <TraitsByDisciplineInline 
+                                     traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
+                                     allTraitNames={horse.traits || []}
+                                   />
+                                 </TableCell>
+                               </TableRow>
+                             ))}
+                           </TableBody>
+                         </Table>
+                       )
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">
                         No horses match this race's surface and distance requirements
                       </div>
-                     )}
+                    )}
                    </div>
                   );
                 })}
@@ -505,43 +526,64 @@ const LiveEvents = () => {
                </p>
              </CardHeader>
              <CardContent>
-               <Table>
-                 <TableHeader>
-                   <TableRow>
-                     <TableHead>Horse Name</TableHead>
-                     <TableHead>Tier</TableHead>
-                     <TableHead>Traits</TableHead>
-                   </TableRow>
-                 </TableHeader>
-                 <TableBody>
+               {isMobile ? (
+                 <div className="space-y-2">
                    {nonMatchingHorses.map((horse) => (
-                      <TableRow key={horse.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-1.5">
-                            {horse.name}
-                            {isMaxTrained(horse) && (
-                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
-                                MAX
-                              </span>
-                            )}
-                            {getHorseSpecialIcons(horse.traits || []) && (
-                              <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                            )}
-                          </div>
-                        </TableCell>
-                       <TableCell>
-                         <Badge variant="outline">Tier {horse.tier}</Badge>
-                       </TableCell>
-                       <TableCell className="max-w-md">
-                         <TraitsByDisciplineInline 
-                           traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
-                           allTraitNames={horse.traits || []}
-                         />
-                       </TableCell>
-                     </TableRow>
+                     <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
+                       <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                         <span className="font-medium text-sm truncate">{horse.name}</span>
+                         {isMaxTrained(horse) && (
+                           <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30 flex-shrink-0">
+                             MAX
+                           </span>
+                         )}
+                         {getHorseSpecialIcons(horse.traits || []) && (
+                           <span className="text-sm flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                         )}
+                       </div>
+                       <Badge variant="outline" className="text-[10px] flex-shrink-0 ml-2">T{horse.tier}</Badge>
+                     </div>
                    ))}
-                 </TableBody>
-               </Table>
+                 </div>
+               ) : (
+                 <Table>
+                   <TableHeader>
+                     <TableRow>
+                       <TableHead>Horse Name</TableHead>
+                       <TableHead>Tier</TableHead>
+                       <TableHead>Traits</TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                     {nonMatchingHorses.map((horse) => (
+                       <TableRow key={horse.id}>
+                         <TableCell className="font-medium">
+                           <div className="flex items-center gap-1.5">
+                             {horse.name}
+                             {isMaxTrained(horse) && (
+                               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
+                                 MAX
+                               </span>
+                             )}
+                             {getHorseSpecialIcons(horse.traits || []) && (
+                               <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
+                             )}
+                           </div>
+                         </TableCell>
+                         <TableCell>
+                           <Badge variant="outline">Tier {horse.tier}</Badge>
+                         </TableCell>
+                         <TableCell className="max-w-md">
+                           <TraitsByDisciplineInline 
+                             traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
+                             allTraitNames={horse.traits || []}
+                           />
+                         </TableCell>
+                       </TableRow>
+                     ))}
+                   </TableBody>
+                 </Table>
+               )}
              </CardContent>
            </Card>
           )}
