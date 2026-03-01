@@ -6,9 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, X, Save, ChevronsUpDown, Check } from "lucide-react";
-import { useState, useRef, memo, useCallback, type KeyboardEvent, type RefObject } from "react";
+import { useState, useRef, memo, useCallback, useMemo, type KeyboardEvent, type RefObject } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useBreeds } from "@/hooks/useBreeds";
+import { BREEDS } from "@/utils/constants";
 
 export interface BreedSelection {
   breed: string;
@@ -30,6 +31,10 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
   const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
   const [searchValues, setSearchValues] = useState<Record<number, string>>({});
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  const allBreedOptions = useMemo(() => {
+    return Array.from(new Set([...BREEDS, ...breedOptions])).sort((a, b) => a.localeCompare(b));
+  }, [breedOptions]);
 
   const addBreedSelection = useCallback(() => {
     setBreedSelections([...breedSelections, { breed: "", percentage: 0 }]);
@@ -171,7 +176,7 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0 bg-popover z-[70]">
-                  <Command>
+                  <Command shouldFilter={false}>
                     <CommandInput 
                       placeholder="Search breeds..."
                       value={searchValues[index] ?? ""}
@@ -180,28 +185,39 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                       autoFocus
                     />
                     <CommandList className="max-h-60">
-                      <CommandEmpty>{breedsLoading ? "Loading breeds..." : "No breeds found."}</CommandEmpty>
-                      <CommandGroup>
-                        {breedOptions.map((breed) => (
-                          <CommandItem
-                            key={breed}
-                            value={breed}
-                            onSelect={() => {
-                              updateBreedSelection(index, "breed", breed);
-                              setOpenPopoverIndex(null);
-                              setSearchValues((prev) => ({ ...prev, [index]: "" }));
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <Check
-                              className={`mr-2 h-4 w-4 ${
-                                selection.breed === breed ? "opacity-100" : "opacity-0"
-                              }`}
-                            />
-                            {breed}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
+                      {(() => {
+                        const search = (searchValues[index] ?? "").trim().toLowerCase();
+                        const filteredBreeds = allBreedOptions.filter((breed) => breed.toLowerCase().includes(search));
+
+                        return (
+                          <>
+                            <CommandEmpty>
+                              {breedsLoading ? "Loading breeds..." : "No breeds found."}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {filteredBreeds.map((breed) => (
+                                <CommandItem
+                                  key={breed}
+                                  value={breed}
+                                  onSelect={() => {
+                                    updateBreedSelection(index, "breed", breed);
+                                    setOpenPopoverIndex(null);
+                                    setSearchValues((prev) => ({ ...prev, [index]: "" }));
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <Check
+                                    className={`mr-2 h-4 w-4 ${
+                                      selection.breed === breed ? "opacity-100" : "opacity-0"
+                                    }`}
+                                  />
+                                  {breed}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </>
+                        );
+                      })()}
                     </CommandList>
                   </Command>
                 </PopoverContent>
