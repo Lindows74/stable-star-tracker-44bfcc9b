@@ -77,6 +77,7 @@ const TRAIT_BREEDING_REQUIREMENTS = {
   "To The Moon": ["Selle Francais", "Knabstrupper"],
   "Endless Stride": ["Akhal-Teke"],
   "Rolling Current": ["Anglo-Arab"],
+  "Streak Shield": ["French Chaser"],
 };
 
 // Check if a trait should be displayed as Pro based on breeding percentages
