@@ -4,6 +4,20 @@
 
 export const CATEGORIES = ["flat_racing", "steeplechase", "cross_country", "misc"] as const;
 
+export const BREEDS = [
+  "Akhal-Teke",
+  "Anglo-Arab",
+  "Appaloosa",
+  "Arabian",
+  "French Chaser",
+  "Friesian",
+  "Knabstrupper",
+  "Mustang",
+  "Quarter Horse",
+  "Selle Francais",
+  "Thoroughbred"
+] as const;
+
 export const SURFACES = [
   "very_hard",
   "hard", 
