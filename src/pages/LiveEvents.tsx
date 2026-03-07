@@ -559,6 +559,12 @@ const LiveEvents = () => {
                      </div>
                   );
                 })}
+                {visibleCount < raceMatches.length && (
+                  <div ref={loadMoreRef} className="flex justify-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-sm text-muted-foreground">Loading more races...</span>
+                  </div>
+                )}
                </div>
             ) : (
               <div className="text-center py-12">
