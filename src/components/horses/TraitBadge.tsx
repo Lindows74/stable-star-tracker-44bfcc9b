@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { 
   ContextMenu,
@@ -12,6 +13,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { getTraitInfo } from "./TraitInfo";
 import { checkTraitShouldBePro } from "@/utils/horseTraitUtils";
 
@@ -92,7 +98,6 @@ const checkIfTraitStacks = (traitName: string, allTraits: string[] = []): boolea
   
   return STACKING_TRAIT_GROUPS.some(group => {
     const normalizedGroup = group.map(normalize);
-    // Check if current trait is in this group and at least one other trait from the same group exists
     if (normalizedGroup.includes(normalizedTraitName)) {
       const otherTraitsInGroup = normalizedGroup.filter(t => t !== normalizedTraitName);
       return otherTraitsInGroup.some(otherTrait => normalizedAllTraits.has(otherTrait));
@@ -101,106 +106,125 @@ const checkIfTraitStacks = (traitName: string, allTraits: string[] = []): boolea
   });
 };
 
+const TraitInfoContent = ({ traitName, traitInfo, isStacking, isPro, isExotic }: {
+  traitName: string;
+  traitInfo: ReturnType<typeof getTraitInfo>;
+  isStacking: boolean;
+  isPro: boolean;
+  isExotic: boolean;
+}) => (
+  <div className="space-y-1">
+    <div className="flex items-center gap-2 font-medium flex-wrap">
+      {isStacking && <span className="text-red-600 font-bold">🔥 STACKING</span>}
+      {isPro && <span className="text-yellow-600 font-bold">⭐ PRO</span>}
+      {isExotic && <span className="text-amber-600 font-bold">💎 EXOTIC</span>}
+      <span>{traitName}</span>
+    </div>
+    {traitInfo && (
+      <>
+        <div className="text-xs text-muted-foreground">
+          Category: {traitInfo.category}
+        </div>
+        <div className="text-xs">
+          {traitInfo.description}
+        </div>
+        {isStacking && (
+          <div className="text-xs text-red-600 font-medium">
+            This trait stacks with other compatible traits for enhanced effects!
+          </div>
+        )}
+      </>
+    )}
+    {!traitInfo && (
+      <div className="text-xs text-muted-foreground">
+        Unknown trait - no information available
+      </div>
+    )}
+  </div>
+);
+
 export const TraitBadge = ({ traitName, allTraits = [], horseBreeding }: TraitBadgeProps) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const traitInfo = getTraitInfo(traitName);
   const isStacking = checkIfTraitStacks(traitName, allTraits);
   const isExotic = EXOTIC_TRAITS.includes(traitName);
   
-  // Check if trait should be Pro based on breeding percentage
   const shouldBePro = horseBreeding ? checkTraitShouldBePro(traitName, horseBreeding) : false;
   const isPro = traitInfo?.isPro || shouldBePro;
   
   const colorClass = isStacking ? "bg-red-600 text-white border-red-700 font-bold shadow-lg" : 
     (traitInfo ? getTraitCategoryColor(traitInfo.category, isPro, isStacking, isExotic) : "bg-gray-100 text-gray-800 border-gray-200");
 
-  console.log(`TraitBadge for "${traitName}":`, {
-    traitInfo,
-    isPro,
-    shouldBePro,
-    isStacking,
-    allTraits,
-    horseBreeding,
-    colorClass
-  });
+  const badgeElement = (
+    <Badge 
+      variant="secondary"
+      className={`flex items-center gap-1 text-xs border cursor-pointer hover:opacity-80 transition-colors ${colorClass}`}
+    >
+      {isPro && <span className="text-xs font-bold">⭐</span>}
+      {traitName}
+    </Badge>
+  );
 
+  // Mobile: use Popover (tap to open)
+  // Desktop: use Tooltip + ContextMenu
   return (
-    <TooltipProvider delayDuration={300}>
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <Badge 
-                  variant="secondary"
-                  className={`flex items-center gap-1 text-xs border cursor-pointer hover:opacity-80 transition-colors ${colorClass}`}
-                >
-                  {isPro && <span className="text-xs font-bold">⭐</span>}
-                  {traitName}
-                </Badge>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs z-50">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 font-medium">
-                  {isStacking && <span className="text-red-600 font-bold">🔥 STACKING</span>}
-                  {isPro && <span className="text-yellow-600 font-bold">⭐ PRO</span>}
-                  {isExotic && <span className="text-amber-600 font-bold">💎 EXOTIC</span>}
-                  <span>{traitName}</span>
-                </div>
-                {traitInfo && (
-                  <>
-                    <div className="text-xs text-muted-foreground">
-                      Category: {traitInfo.category}
-                    </div>
-                    <div className="text-xs">
-                      {traitInfo.description}
-                    </div>
-                    {isStacking && (
-                      <div className="text-xs text-red-600 font-medium">
-                        This trait stacks with other compatible traits for enhanced effects!
-                      </div>
-                    )}
-                  </>
-                )}
-                {!traitInfo && (
-                  <div className="text-xs text-muted-foreground">
-                    Unknown trait - no information available
+    <>
+      {/* Mobile popover - visible on small screens */}
+      <div className="md:hidden">
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <div>{badgeElement}</div>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="max-w-xs z-50 p-3">
+            <TraitInfoContent
+              traitName={traitName}
+              traitInfo={traitInfo}
+              isStacking={isStacking}
+              isPro={isPro}
+              isExotic={isExotic}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* Desktop tooltip + context menu - hidden on small screens */}
+      <div className="hidden md:block">
+        <TooltipProvider delayDuration={300}>
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>{badgeElement}</div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs z-50">
+                  <TraitInfoContent
+                    traitName={traitName}
+                    traitInfo={traitInfo}
+                    isStacking={isStacking}
+                    isPro={isPro}
+                    isExotic={isExotic}
+                  />
+                  <div className="text-xs text-muted-foreground mt-1 pt-1 border-t">
+                    Right-click for more options
                   </div>
-                )}
-                <div className="text-xs text-muted-foreground mt-1 pt-1 border-t">
-                  Right-click for more options
-                </div>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </ContextMenuTrigger>
-        
-        <ContextMenuContent className="w-64">
-          <ContextMenuItem disabled className="flex-col items-start space-y-1">
-            <div className="flex items-center gap-2 font-medium">
-              {isStacking && <span className="text-red-600 font-bold">🔥 STACKING</span>}
-              {isPro && <span className="text-yellow-600 font-bold">⭐ PRO</span>}
-              {isExotic && <span className="text-amber-600 font-bold">💎 EXOTIC</span>}
-              {traitName}
-            </div>
-            {traitInfo && (
-              <>
-                <div className="text-xs text-muted-foreground">
-                  Category: {traitInfo.category}
-                </div>
-                <div className="text-xs">
-                  {traitInfo.description}
-                </div>
-                {isStacking && (
-                  <div className="text-xs text-red-600 font-medium">
-                    This trait stacks with other compatible traits for enhanced effects!
-                  </div>
-                )}
-              </>
-            )}
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
-    </TooltipProvider>
+                </TooltipContent>
+              </Tooltip>
+            </ContextMenuTrigger>
+            
+            <ContextMenuContent className="w-64">
+              <ContextMenuItem disabled className="flex-col items-start space-y-1">
+                <TraitInfoContent
+                  traitName={traitName}
+                  traitInfo={traitInfo}
+                  isStacking={isStacking}
+                  isPro={isPro}
+                  isExotic={isExotic}
+                />
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
+        </TooltipProvider>
+      </div>
+    </>
   );
 };
