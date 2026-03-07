@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +62,9 @@ interface NonMatchingHorse {
   max_jump?: boolean;
 }
 
+const INITIAL_RACES = 5;
+const LOAD_MORE_COUNT = 5;
+
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
   const [nonMatchingHorses, setNonMatchingHorses] = useState<NonMatchingHorse[]>([]);
@@ -69,8 +72,26 @@ const LiveEvents = () => {
   const [totalHorses, setTotalHorses] = useState(0);
   const [editingRace, setEditingRace] = useState<RaceMatch | null>(null);
   const [deletingRaceId, setDeletingRaceId] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_RACES);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Intersection observer for lazy loading more races
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + LOAD_MORE_COUNT, raceMatches.length));
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [raceMatches.length]);
 
   // Auto-load data when component mounts
   useEffect(() => {
@@ -159,6 +180,7 @@ const LiveEvents = () => {
         const sorted = [...flatsSorted, ...steeplesSorted, ...crossSorted];
         
         setRaceMatches(sorted);
+        setVisibleCount(INITIAL_RACES);
         setTotalHorses(data.totalHorses || 0);
         
         // Get all horses that have matches
@@ -326,7 +348,7 @@ const LiveEvents = () => {
           <CardContent>
             {raceMatches.length > 0 ? (
               <div className="space-y-6">
-                {raceMatches.map((race, index) => {
+                {raceMatches.slice(0, visibleCount).map((race, index) => {
                   const raceNumber = index + 1;
                   let raceType = "";
                   let raceLabel = "";
@@ -537,6 +559,12 @@ const LiveEvents = () => {
                      </div>
                   );
                 })}
+                {visibleCount < raceMatches.length && (
+                  <div ref={loadMoreRef} className="flex justify-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-sm text-muted-foreground">Loading more races...</span>
+                  </div>
+                )}
                </div>
             ) : (
               <div className="text-center py-12">
