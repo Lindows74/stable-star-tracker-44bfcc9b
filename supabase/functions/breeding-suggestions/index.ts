@@ -19,23 +19,10 @@ serve(async (req) => {
   try {
     console.log('Fetching live races and horses data...');
 
-    // Fetch all live races (including inactive ones for display)
-    const { data: liveRaces, error: racesError } = await supabase
-      .from('live_races')
-      .select('*')
-      .order('id');
-
-    if (racesError) {
-      console.error('Error fetching live races:', racesError);
-      throw racesError;
-    }
-
-    console.log('Found live races:', liveRaces?.length);
-
-    // Fetch all horses (no user restriction since RLS is dropped)
-    const { data: horses, error: horsesError } = await supabase
-      .from('horses')
-      .select(`
+    // Fetch races and horses in parallel
+    const [racesResult, horsesResult] = await Promise.all([
+      supabase.from('live_races').select('*').order('id'),
+      supabase.from('horses').select(`
         *,
         horse_traits (trait_name, trait_category, trait_value),
         horse_distances (distance),
@@ -43,56 +30,44 @@ serve(async (req) => {
         horse_positions (position),
         horse_breeding (breed_id, percentage),
         horse_categories (category)
-      `);
+      `)
+    ]);
 
-    if (horsesError) {
-      console.error('Error fetching horses:', horsesError);
-      throw horsesError;
-    }
+    if (racesResult.error) throw racesResult.error;
+    if (horsesResult.error) throw horsesResult.error;
 
-    console.log('Found total horses:', horses?.length);
+    const liveRaces = racesResult.data || [];
+    const horses = horsesResult.data || [];
 
-    // For each live race, find matching horses based on surface and distance
-    const raceMatches = [];
-    
-    for (const race of liveRaces || []) {
-      console.log(`Processing race: ${race.race_name} - Surface: ${race.surface}, Distance: ${race.distance}, Tier: ${race.tier_restriction}`);
-      
-      // Only find matching horses for active races  
-      let matchingHorses = [];
-      // Compute matching horses for this race (active or inactive)
-      matchingHorses = horses?.filter(horse => {
-        // Check if horse has the matching surface preference
-        const hasSurface = horse.horse_surfaces?.some(s => s.surface === race.surface);
-        
-        // Check if horse has the matching distance preference - skip for Cross Country races
-        let hasDistance = true;
-        const isCrossCountry = /cross country/i.test(race.race_name || '');
-        if (!isCrossCountry && race.distance !== '0') {
-          hasDistance = horse.horse_distances?.some(d => d.distance === race.distance);
-        }
-        
-        // Check tier restriction  
-        let tierMatch = false;
-        console.log(`CHECKING TIER: Horse ${horse.name} (tier: ${horse.tier}, type: ${typeof horse.tier}) vs Race ${race.race_name} (restriction: ${race.tier_restriction}, type: ${typeof race.tier_restriction})`);
-        
-        if (race.tier_restriction === 'odd_grades') {
-          tierMatch = horse.tier && [3, 5, 7, 9].includes(horse.tier);
-          console.log(`ODD CHECK: tierMatch = ${tierMatch}, horse.tier = ${horse.tier}, includes result = ${[3, 5, 7, 9].includes(horse.tier)}`);
-        } else if (race.tier_restriction === 'even_grades') {
-          tierMatch = horse.tier && [2, 4, 6, 8].includes(horse.tier);
-          console.log(`EVEN CHECK: tierMatch = ${tierMatch}, horse.tier = ${horse.tier}, includes result = ${[2, 4, 6, 8].includes(horse.tier)}`);
-        } else {
-          // If no tier restriction, allow all tiers
-          tierMatch = true;
-          console.log(`NO RESTRICTION: tierMatch = ${tierMatch}`);
-        }
+    console.log(`Found ${liveRaces.length} races, ${horses.length} horses`);
 
-        const finalMatch = hasSurface && hasDistance && tierMatch;
-        console.log(`FINAL: Horse ${horse.name} - Surface: ${hasSurface}, Distance: ${hasDistance}, Tier: ${tierMatch}, OVERALL: ${finalMatch}`);
-        
-        return finalMatch;
-        }).map(horse => ({
+    // Pre-index horse surfaces/distances into Sets for O(1) lookups
+    const horseLookup = horses.map(horse => ({
+      horse,
+      surfaces: new Set(horse.horse_surfaces?.map(s => s.surface) || []),
+      distances: new Set(horse.horse_distances?.map(d => d.distance) || []),
+    }));
+
+    const oddTiers = new Set([3, 5, 7, 9]);
+    const evenTiers = new Set([2, 4, 6, 8]);
+
+    // For each live race, find matching horses
+    const raceMatches = liveRaces.map(race => {
+      const isCrossCountry = /cross country/i.test(race.race_name || '');
+      const checkDistance = !isCrossCountry && race.distance !== '0';
+
+      const tierSet = race.tier_restriction === 'odd_grades' ? oddTiers
+        : race.tier_restriction === 'even_grades' ? evenTiers
+        : null;
+
+      const matchingHorses = horseLookup
+        .filter(({ horse, surfaces, distances }) => {
+          if (!surfaces.has(race.surface)) return false;
+          if (checkDistance && !distances.has(race.distance)) return false;
+          if (tierSet && (!horse.tier || !tierSet.has(horse.tier))) return false;
+          return true;
+        })
+        .map(({ horse }) => ({
           id: horse.id,
           name: horse.name,
           tier: horse.tier,
@@ -107,28 +82,15 @@ serve(async (req) => {
           max_agility: horse.max_agility,
           max_jump: horse.max_jump,
           traits: horse.horse_traits?.map(t => t.trait_name) || []
-        })) || [];
-
-      console.log(`Found ${matchingHorses.length} matching horses for race ${race.race_name}`);
-
-      raceMatches.push({
-        ...race,
-        matchingHorses: matchingHorses.sort((a, b) => {
-          // Sort by tier first (higher tier first)
+        }))
+        .sort((a, b) => {
           if (a.tier !== b.tier) return (b.tier || 0) - (a.tier || 0);
-          // Then by speed (higher first)
           if (a.speed !== b.speed) return (b.speed || 0) - (a.speed || 0);
-          // Then by sprint energy (higher first)
-          if (a.sprint_energy !== b.sprint_energy) return (b.sprint_energy || 0) - (a.sprint_energy || 0);
-          // Then by acceleration (higher first)
-          if (a.acceleration !== b.acceleration) return (b.acceleration || 0) - (a.acceleration || 0);
-          // Then by agility (higher first)
-          if (a.agility !== b.agility) return (b.agility || 0) - (a.agility || 0);
-          // Finally by jump (higher first)
-          return (b.jump || 0) - (a.jump || 0);
-        })
-      });
-    }
+          return (b.sprint_energy || 0) - (a.sprint_energy || 0);
+        });
+
+      return { ...race, matchingHorses };
+    });
 
     return new Response(JSON.stringify({
       success: true,
