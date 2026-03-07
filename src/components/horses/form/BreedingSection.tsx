@@ -210,8 +210,7 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                         const normalizedBreed = normalizeBreedText(breed);
                         if (normalizedBreed.includes(normalizedSearch)) return true;
 
-                        const aliases = COMMON_BREED_ALIASES[breed] ?? [];
-                        return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
+                        const aliases = getBreedAliases(breed);
                       });
 
                       if (filteredBreeds.length === 0) {
