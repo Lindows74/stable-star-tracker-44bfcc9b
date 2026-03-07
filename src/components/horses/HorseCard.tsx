@@ -168,9 +168,8 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                 variant="outline"
                 size="icon"
                 onClick={handleEdit}
-                className="h-8 w-8 md:h-9 md:w-9"
+                className={`h-8 w-8 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
               >
-                {!isAuthenticated && <Lock className="h-3 w-3" />}
                 <Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </Button>
               <AlertDialog>
@@ -180,9 +179,8 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                     size="icon"
                     onClick={() => !isAuthenticated && handleDelete()}
                     disabled={!isAuthenticated && pendingAction === 'delete'}
-                    className="h-8 w-8 md:h-9 md:w-9"
+                    className={`h-8 w-8 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
                   >
-                    {!isAuthenticated && <Lock className="h-3 w-3" />}
                     <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   </Button>
                 </AlertDialogTrigger>

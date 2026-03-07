@@ -66,9 +66,8 @@ const Navigation = () => {
             <Button 
               onClick={handleAddHorse} 
               size="sm"
-              className="hidden md:flex items-center gap-2"
+              className={`hidden md:flex items-center gap-2 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
             >
-              {!isAuthenticated && <Lock className="h-3 w-3" />}
               <Plus className="h-4 w-4" />
               <span className="hidden lg:inline">Add Horse</span>
             </Button>
