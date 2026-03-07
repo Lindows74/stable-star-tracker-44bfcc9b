@@ -211,7 +211,7 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                         if (normalizedBreed.includes(normalizedSearch)) return true;
 
                         const aliases = getBreedAliases(breed);
-                      });
+                        return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
 
                       if (filteredBreeds.length === 0) {
                         return (
