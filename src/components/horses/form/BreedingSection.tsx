@@ -192,8 +192,17 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                     />
                     <CommandList className="max-h-60">
                       {(() => {
-                        const search = (searchValues[index] ?? "").trim().toLowerCase();
-                        const filteredBreeds = allBreedOptions.filter((breed) => breed.toLowerCase().includes(search));
+                        const search = (searchValues[index] ?? "").trim();
+                        const normalizedSearch = normalizeBreedText(search);
+                        const filteredBreeds = allBreedOptions.filter((breed) => {
+                          if (!normalizedSearch) return true;
+
+                          const normalizedBreed = normalizeBreedText(breed);
+                          if (normalizedBreed.includes(normalizedSearch)) return true;
+
+                          const aliases = COMMON_BREED_ALIASES[breed] ?? [];
+                          return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
+                        });
 
                         return (
                           <>
