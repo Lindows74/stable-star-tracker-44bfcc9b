@@ -348,7 +348,7 @@ const LiveEvents = () => {
           <CardContent>
             {raceMatches.length > 0 ? (
               <div className="space-y-6">
-                {raceMatches.map((race, index) => {
+                {raceMatches.slice(0, visibleCount).map((race, index) => {
                   const raceNumber = index + 1;
                   let raceType = "";
                   let raceLabel = "";
