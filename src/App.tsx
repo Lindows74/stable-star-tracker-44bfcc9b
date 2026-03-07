@@ -14,8 +14,8 @@ console.log('App.tsx: Component loading...');
 
 const queryClient = new QueryClient();
 
-// Configure basename for GitHub Pages
-const basename = import.meta.env.PROD ? '/stable-star-tracker' : '';
+// Use Vite base path so routing always matches the deployed repo path
+const basename = import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const App = () => {
   console.log('App.tsx: App component rendering...');
