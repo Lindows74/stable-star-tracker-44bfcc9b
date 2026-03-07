@@ -24,6 +24,12 @@ interface BreedingSectionProps {
   nextFocusRef?: RefObject<HTMLElement>;
 }
 
+const normalizeBreedText = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "");
+
+const COMMON_BREED_ALIASES: Record<string, string[]> = {
+  Friesian: ["friesier", "frisian", "friesan"],
+};
+
 export const BreedingSection = memo(({ breedSelections, setBreedSelections, gender, setGender, nextFocusRef }: BreedingSectionProps) => {
   const { data: breedOptions = [], isLoading: breedsLoading } = useBreeds();
   const { toast } = useToast();
