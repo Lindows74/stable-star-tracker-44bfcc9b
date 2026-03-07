@@ -62,6 +62,9 @@ interface NonMatchingHorse {
   max_jump?: boolean;
 }
 
+const INITIAL_RACES = 5;
+const LOAD_MORE_COUNT = 5;
+
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
   const [nonMatchingHorses, setNonMatchingHorses] = useState<NonMatchingHorse[]>([]);
@@ -69,8 +72,26 @@ const LiveEvents = () => {
   const [totalHorses, setTotalHorses] = useState(0);
   const [editingRace, setEditingRace] = useState<RaceMatch | null>(null);
   const [deletingRaceId, setDeletingRaceId] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_RACES);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Intersection observer for lazy loading more races
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + LOAD_MORE_COUNT, raceMatches.length));
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [raceMatches.length]);
 
   // Auto-load data when component mounts
   useEffect(() => {
