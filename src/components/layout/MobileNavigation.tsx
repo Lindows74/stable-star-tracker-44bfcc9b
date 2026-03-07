@@ -15,15 +15,11 @@ export const MobileNavigation = ({ onAddHorse }: MobileNavigationProps) => {
     { path: "/breeding", label: "Events", icon: Heart },
   ];
 
-  const secondaryNavItems = [
-    { path: "/pairs", label: "Pairs", icon: Heart },
-  ];
-
-  const allNavItems = [...navItems, ...secondaryNavItems];
+  const allNavItems = navItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden safe-bottom">
-      <div className="grid grid-cols-5 h-16">
+      <div className="grid grid-cols-4 h-16">
         {allNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
