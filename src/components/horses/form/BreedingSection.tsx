@@ -29,6 +29,15 @@ const COMMON_BREED_ALIASES: Record<string, string[]> = {
   Friesian: ["friesier", "frisian", "friesan"],
 };
 
+const getBreedAliases = (breed: string) => {
+  const normalizedBreed = normalizeBreedText(breed);
+  const matchedKey = Object.keys(COMMON_BREED_ALIASES).find(
+    (key) => normalizeBreedText(key) === normalizedBreed,
+  );
+
+  return matchedKey ? COMMON_BREED_ALIASES[matchedKey] : [];
+};
+
 export const BreedingSection = memo(({ breedSelections, setBreedSelections, gender, setGender, nextFocusRef }: BreedingSectionProps) => {
   const { data: breedOptions = [], isLoading: breedsLoading } = useBreeds();
   const { toast } = useToast();
