@@ -428,9 +428,9 @@ export const HorseForm = ({ onSuccess }: HorseFormProps) => {
           </CollapsibleContent>
         </Collapsible>
 
-        <SurfaceSection control={form.control} />
-
         <DistanceSection control={form.control} />
+
+        <SurfaceSection control={form.control} />
 
         <PositionSection control={form.control} />
 
