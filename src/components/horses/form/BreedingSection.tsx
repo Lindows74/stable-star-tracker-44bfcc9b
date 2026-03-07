@@ -24,6 +24,12 @@ interface BreedingSectionProps {
   nextFocusRef?: RefObject<HTMLElement>;
 }
 
+const normalizeBreedText = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "");
+
+const COMMON_BREED_ALIASES: Record<string, string[]> = {
+  Friesian: ["friesier", "frisian", "friesan"],
+};
+
 export const BreedingSection = memo(({ breedSelections, setBreedSelections, gender, setGender, nextFocusRef }: BreedingSectionProps) => {
   const { data: breedOptions = [], isLoading: breedsLoading } = useBreeds();
   const { toast } = useToast();
@@ -186,8 +192,17 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                     />
                     <CommandList className="max-h-60">
                       {(() => {
-                        const search = (searchValues[index] ?? "").trim().toLowerCase();
-                        const filteredBreeds = allBreedOptions.filter((breed) => breed.toLowerCase().includes(search));
+                        const search = (searchValues[index] ?? "").trim();
+                        const normalizedSearch = normalizeBreedText(search);
+                        const filteredBreeds = allBreedOptions.filter((breed) => {
+                          if (!normalizedSearch) return true;
+
+                          const normalizedBreed = normalizeBreedText(breed);
+                          if (normalizedBreed.includes(normalizedSearch)) return true;
+
+                          const aliases = COMMON_BREED_ALIASES[breed] ?? [];
+                          return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
+                        });
 
                         return (
                           <>
