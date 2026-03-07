@@ -1,29 +1,22 @@
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { HorseCard } from "./HorseCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { sortHorses } from "@/utils/horseUtils";
+import { Loader2 } from "lucide-react";
+
+const INITIAL_HORSES = 6;
+const LOAD_MORE_COUNT = 6;
 
 export const HorseList = () => {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_HORSES);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
   const { data: horses, isLoading, error } = useQuery({
     queryKey: ["horses"],
     queryFn: async () => {
-      console.log("HorseList: Starting fetch...");
-      
-      // Check authentication state
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log("HorseList: Current user:", user?.id || "not authenticated");
-      console.log("HorseList: Auth error:", authError);
-      
-      // Try a simple count query first
-      const { count, error: countError } = await supabase
-        .from("horses")
-        .select("*", { count: 'exact', head: true });
-      
-      console.log("HorseList: Total horses count:", count);
-      console.log("HorseList: Count error:", countError);
-      
       const { data, error } = await supabase
         .from("horses")
         .select(`
@@ -44,29 +37,33 @@ export const HorseList = () => {
         `)
         .order("created_at", { ascending: false });
 
-      console.log("HorseList: Query response - data length:", data?.length || 0);
-      console.log("HorseList: Query error:", error);
-      console.log("HorseList: First few horses:", data?.slice(0, 3));
-
-      if (error) {
-        console.error("HorseList: Supabase error:", error);
-        throw error;
-      }
-
-      if (!data) {
-        console.log("HorseList: No data returned");
-        return [];
-      }
+      if (error) throw error;
+      if (!data) return [];
       
-      // Sort horses by tier and stats
-      const sortedHorses = sortHorses(data);
-      console.log("HorseList: Returning sorted horses:", sortedHorses.length);
-      
-      return sortedHorses;
+      return sortHorses(data);
     },
   });
 
-  console.log("HorseList: Component render - isLoading:", isLoading, "error:", error, "horses count:", horses?.length);
+  // Reset visible count when data changes
+  useEffect(() => {
+    setVisibleCount(INITIAL_HORSES);
+  }, [horses?.length]);
+
+  // Intersection observer for lazy loading
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + LOAD_MORE_COUNT, horses?.length || 0));
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [horses?.length]);
 
   if (isLoading) {
     return (
@@ -79,7 +76,6 @@ export const HorseList = () => {
   }
 
   if (error) {
-    console.error("HorseList: Rendering error state:", error);
     return (
       <Alert variant="destructive">
         <AlertDescription>
@@ -92,19 +88,25 @@ export const HorseList = () => {
   if (!horses || horses.length === 0) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No horses yet</h3>
-        <p className="text-gray-600">Add your first horse to get started.</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">No horses yet</h3>
+        <p className="text-muted-foreground">Add your first horse to get started.</p>
       </div>
     );
   }
 
-  console.log("HorseList: About to render", horses.length, "horses");
-  
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-      {horses.map((horse) => (
-        <HorseCard key={horse.id} horse={horse} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        {horses.slice(0, visibleCount).map((horse) => (
+          <HorseCard key={horse.id} horse={horse} />
+        ))}
+      </div>
+      {visibleCount < horses.length && (
+        <div ref={loadMoreRef} className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading more horses...</span>
+        </div>
+      )}
+    </>
   );
 };
