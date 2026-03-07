@@ -66,6 +66,19 @@ const DIET_STATS = [
   { name: "diet_jump", label: "Diet Jump", max: 50 },
 ];
 
+const normalizeBreedText = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "");
+
+const canonicalizeBreedName = (value: string) => {
+  const trimmed = value.trim();
+  const normalized = normalizeBreedText(trimmed);
+
+  if (["friesier", "frisian", "friesan"].includes(normalized)) {
+    return "Friesian";
+  }
+
+  return trimmed;
+};
+
 export const HorseForm = ({ onSuccess }: HorseFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -235,19 +248,21 @@ export const HorseForm = ({ onSuccess }: HorseFormProps) => {
         
         for (const breedSelection of breedSelections) {
           if (breedSelection.breed && breedSelection.percentage > 0) {
+            const canonicalBreed = canonicalizeBreedName(breedSelection.breed);
+
             let { data: existingBreed, error: breedFetchError } = await supabase
               .from("breeds")
               .select("id")
-              .eq("name", breedSelection.breed)
+              .ilike("name", canonicalBreed)
               .maybeSingle();
 
             let breedId: number;
 
             if (!existingBreed) {
-              console.log("Creating new breed:", breedSelection.breed);
+              console.log("Creating new breed:", canonicalBreed);
               const { data: newBreed, error: breedCreateError } = await supabase
                 .from("breeds")
-                .insert({ name: breedSelection.breed })
+                .insert({ name: canonicalBreed })
                 .select("id")
                 .single();
 
