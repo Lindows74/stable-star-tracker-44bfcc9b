@@ -439,64 +439,85 @@ const LiveEvents = () => {
                        {/* Race Content */}
                        <div className="p-2 md:p-6">
                        {race.matchingHorses.length > 0 ? (
-                         isMobile ? (
-                           <div className="divide-y">
-                             {race.matchingHorses.map((horse) => (
-                               <div key={horse.id} className="flex items-center justify-between py-1.5 px-1">
-                                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                                   <span className="font-medium text-xs truncate">{horse.name}</span>
-                                   {isMaxTrained(horse) && (
-                                     <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">
-                                       MAX
-                                     </span>
-                                   )}
-                                   {getHorseSpecialIcons(horse.traits || []) && (
-                                     <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                   )}
-                                 </div>
-                                 <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">T{horse.tier}</span>
-                               </div>
-                             ))}
-                           </div>
-                         ) : (
-                           <Table>
-                             <TableHeader>
-                               <TableRow>
-                                 <TableHead>Horse Name</TableHead>
-                                 <TableHead>Tier</TableHead>
-                                 <TableHead>Traits</TableHead>
-                               </TableRow>
-                             </TableHeader>
-                             <TableBody>
-                               {race.matchingHorses.map((horse) => (
-                                 <TableRow key={horse.id}>
-                                   <TableCell className="font-medium">
-                                     <div className="flex items-center gap-1.5">
-                                       {horse.name}
-                                       {isMaxTrained(horse) && (
-                                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
-                                           MAX
-                                         </span>
-                                       )}
-                                       {getHorseSpecialIcons(horse.traits || []) && (
-                                         <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                       )}
+                         (() => {
+                           // Sort horses by tier descending
+                           const sorted = [...race.matchingHorses].sort((a, b) => b.tier - a.tier);
+                           // Group by tier
+                           const tierGroups: { tier: number; horses: typeof sorted }[] = [];
+                           sorted.forEach((horse) => {
+                             const last = tierGroups[tierGroups.length - 1];
+                             if (last && last.tier === horse.tier) {
+                               last.horses.push(horse);
+                             } else {
+                               tierGroups.push({ tier: horse.tier, horses: [horse] });
+                             }
+                           });
+
+                           return isMobile ? (
+                             <div>
+                               {tierGroups.map((group, gi) => (
+                                 <div key={group.tier}>
+                                   {gi > 0 && <div className="border-t-[3px] border-muted-foreground/30 my-1" />}
+                                   {group.horses.map((horse) => (
+                                     <div key={horse.id} className="flex items-center justify-between py-1.5 px-1 border-b border-border last:border-b-0">
+                                       <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                         <span className="font-medium text-xs truncate">{horse.name}</span>
+                                         {isMaxTrained(horse) && (
+                                           <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
+                                         )}
+                                         {getHorseSpecialIcons(horse.traits || []) && (
+                                           <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                         )}
+                                       </div>
+                                       <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">T{horse.tier}</span>
                                      </div>
-                                   </TableCell>
-                                   <TableCell>
-                                     <Badge variant="outline">Tier {horse.tier}</Badge>
-                                   </TableCell>
-                                   <TableCell className="max-w-md">
-                                     <TraitsByDisciplineInline 
-                                       traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
-                                       allTraitNames={horse.traits || []}
-                                     />
-                                   </TableCell>
-                                 </TableRow>
+                                   ))}
+                                 </div>
                                ))}
-                             </TableBody>
-                           </Table>
-                         )
+                             </div>
+                           ) : (
+                             <Table>
+                               <TableHeader>
+                                 <TableRow>
+                                   <TableHead>Horse Name</TableHead>
+                                   <TableHead>Tier</TableHead>
+                                   <TableHead>Traits</TableHead>
+                                 </TableRow>
+                               </TableHeader>
+                               <TableBody>
+                                 {tierGroups.map((group, gi) => (
+                                   group.horses.map((horse, hi) => (
+                                     <TableRow
+                                       key={horse.id}
+                                       className={gi > 0 && hi === 0 ? "border-t-[3px] border-muted-foreground/30" : ""}
+                                     >
+                                       <TableCell className="font-medium">
+                                         <div className="flex items-center gap-1.5">
+                                           {horse.name}
+                                           {isMaxTrained(horse) && (
+                                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
+                                           )}
+                                           {getHorseSpecialIcons(horse.traits || []) && (
+                                             <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                           )}
+                                         </div>
+                                       </TableCell>
+                                       <TableCell>
+                                         <Badge variant="outline">Tier {horse.tier}</Badge>
+                                       </TableCell>
+                                       <TableCell className="max-w-md">
+                                         <TraitsByDisciplineInline
+                                           traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
+                                           allTraitNames={horse.traits || []}
+                                         />
+                                       </TableCell>
+                                     </TableRow>
+                                   ))
+                                 ))}
+                               </TableBody>
+                             </Table>
+                           );
+                         })()
                        ) : (
                          <p className="text-center py-4 text-xs text-muted-foreground">
                            No horses match this race
