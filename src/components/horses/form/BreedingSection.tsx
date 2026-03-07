@@ -181,59 +181,59 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0 bg-popover z-[70]">
-                  <Command shouldFilter={false}>
-                    <CommandInput 
+                  <div className="border-b px-3 py-2">
+                    <Input
                       placeholder="Search breeds..."
                       value={searchValues[index] ?? ""}
-                      onValueChange={(v) => setSearchValues((prev) => ({ ...prev, [index]: v }))}
+                      onChange={(e) => setSearchValues((prev) => ({ ...prev, [index]: e.target.value }))}
                       ref={(el) => (inputRefs.current[index] = el)}
                       autoFocus
+                      className="h-9 border-0 px-0 shadow-none focus-visible:ring-0"
                     />
-                    <CommandList className="max-h-60">
-                      {(() => {
-                        const search = (searchValues[index] ?? "").trim();
-                        const normalizedSearch = normalizeBreedText(search);
-                        const filteredBreeds = allBreedOptions.filter((breed) => {
-                          if (!normalizedSearch) return true;
+                  </div>
+                  <div className="max-h-60 overflow-y-auto p-1">
+                    {(() => {
+                      const search = (searchValues[index] ?? "").trim();
+                      const normalizedSearch = normalizeBreedText(search);
+                      const filteredBreeds = allBreedOptions.filter((breed) => {
+                        if (!normalizedSearch) return true;
 
-                          const normalizedBreed = normalizeBreedText(breed);
-                          if (normalizedBreed.includes(normalizedSearch)) return true;
+                        const normalizedBreed = normalizeBreedText(breed);
+                        if (normalizedBreed.includes(normalizedSearch)) return true;
 
-                          const aliases = COMMON_BREED_ALIASES[breed] ?? [];
-                          return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
-                        });
+                        const aliases = COMMON_BREED_ALIASES[breed] ?? [];
+                        return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
+                      });
 
+                      if (filteredBreeds.length === 0) {
                         return (
-                          <>
-                            <CommandEmpty>
-                              {breedsLoading ? "Loading breeds..." : "No breeds found."}
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {filteredBreeds.map((breed) => (
-                                <CommandItem
-                                  key={breed}
-                                  value={breed}
-                                  onSelect={() => {
-                                    updateBreedSelection(index, "breed", breed);
-                                    setOpenPopoverIndex(null);
-                                    setSearchValues((prev) => ({ ...prev, [index]: "" }));
-                                  }}
-                                  className="cursor-pointer"
-                                >
-                                  <Check
-                                    className={`mr-2 h-4 w-4 ${
-                                      selection.breed === breed ? "opacity-100" : "opacity-0"
-                                    }`}
-                                  />
-                                  {breed}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </>
+                          <div className="py-6 text-center text-sm text-muted-foreground">
+                            {breedsLoading ? "Loading breeds..." : "No breeds found."}
+                          </div>
                         );
-                      })()}
-                    </CommandList>
-                  </Command>
+                      }
+
+                      return filteredBreeds.map((breed) => (
+                        <button
+                          key={breed}
+                          type="button"
+                          onClick={() => {
+                            updateBreedSelection(index, "breed", breed);
+                            setOpenPopoverIndex(null);
+                            setSearchValues((prev) => ({ ...prev, [index]: "" }));
+                          }}
+                          className="flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              selection.breed === breed ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          {breed}
+                        </button>
+                      ));
+                    })()}
+                  </div>
                 </PopoverContent>
               </Popover>
               
