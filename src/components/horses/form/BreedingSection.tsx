@@ -212,6 +212,7 @@ export const BreedingSection = memo(({ breedSelections, setBreedSelections, gend
 
                         const aliases = getBreedAliases(breed);
                         return aliases.some((alias) => normalizeBreedText(alias).includes(normalizedSearch));
+                      });
 
                       if (filteredBreeds.length === 0) {
                         return (
