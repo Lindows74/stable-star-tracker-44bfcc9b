@@ -150,27 +150,42 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   return (
     <Card className="w-full">
       <CardHeader className="pb-2 md:pb-3 p-3 md:p-6">
-        <div className="flex justify-between items-start gap-2">
-          <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
-            <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} flex-shrink min-w-0`}>
-              <CardTitle className="text-sm md:text-lg flex items-center gap-1">
-                <span className="truncate max-w-[140px] sm:max-w-none">{horse.name}</span>
-                {hasEliteLineage && <Star className="h-3 w-3 md:h-4 md:w-4 fill-purple-500 text-purple-500 flex-shrink-0" />}
-                {hasFullStaminaTrait && <span className="text-sm md:text-lg flex-shrink-0">💯</span>}
-                {hasSpeedStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🔥</span>}
-                {hasJumpingStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🐸</span>}
-              </CardTitle>
-            </div>
+        <div className="space-y-2">
+          {/* Horse name - full width */}
+          <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')}`}>
+            <CardTitle className="text-sm md:text-lg flex items-center gap-1 flex-wrap">
+              <span>{horse.name}</span>
+              {hasEliteLineage && <Star className="h-3 w-3 md:h-4 md:w-4 fill-purple-500 text-purple-500 flex-shrink-0" />}
+              {hasFullStaminaTrait && <span className="text-sm md:text-lg flex-shrink-0">💯</span>}
+              {hasSpeedStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🔥</span>}
+              {hasJumpingStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🐸</span>}
+            </CardTitle>
           </div>
-          <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          {/* Actions + meta row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[9px] md:text-[10px] text-muted-foreground">
+              {horse.tier && (
+                <Badge variant="secondary" className="text-xs">
+                  Tier {horse.tier}
+                </Badge>
+              )}
+              <span>
+                {horse.created_at && horse.updated_at && 
+                 new Date(horse.created_at).toISOString() !== new Date(horse.updated_at).toISOString() ? (
+                  <>Updated: {new Date(horse.updated_at).toLocaleDateString()}</>
+                ) : (
+                  <>Added: {new Date(horse.created_at || horse.updated_at).toLocaleDateString()}</>
+                )}
+              </span>
+            </div>
             <div className="flex gap-1.5 md:gap-2">
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleEdit}
-                className={`h-8 w-8 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
+                className={`h-7 w-7 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
               >
-                <Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <Edit2 className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -179,9 +194,9 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                     size="icon"
                     onClick={() => !isAuthenticated && handleDelete()}
                     disabled={!isAuthenticated && pendingAction === 'delete'}
-                    className={`h-8 w-8 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
+                    className={`h-7 w-7 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
                   >
-                    <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -203,22 +218,6 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </div>
-            {/* Tier and Timestamp */}
-            <div className="flex items-center gap-2 text-[9px] md:text-[10px] text-gray-400">
-              {horse.tier && (
-                <Badge variant="secondary" className="text-xs">
-                  Tier {horse.tier}
-                </Badge>
-              )}
-              <span>
-                {horse.created_at && horse.updated_at && 
-                 new Date(horse.created_at).toISOString() !== new Date(horse.updated_at).toISOString() ? (
-                  <>Updated: {new Date(horse.updated_at).toLocaleDateString()}</>
-                ) : (
-                  <>Added: {new Date(horse.created_at || horse.updated_at).toLocaleDateString()}</>
-                )}
-              </span>
             </div>
           </div>
         </div>
