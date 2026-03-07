@@ -180,6 +180,7 @@ const LiveEvents = () => {
         const sorted = [...flatsSorted, ...steeplesSorted, ...crossSorted];
         
         setRaceMatches(sorted);
+        setVisibleCount(INITIAL_RACES);
         setTotalHorses(data.totalHorses || 0);
         
         // Get all horses that have matches
