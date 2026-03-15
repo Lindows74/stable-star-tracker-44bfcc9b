@@ -15,7 +15,7 @@ const positionOptions = [
 ];
 
 export const PositionSection = ({ control }: PositionSectionProps) => {
-  const { setValue, getValues } = useFormContext();
+  const { setValue, getValues, formState: { errors } } = useFormContext();
   const selectedPositions = useWatch({
     control,
     name: "field_positions",
@@ -27,7 +27,7 @@ export const PositionSection = ({ control }: PositionSectionProps) => {
     const updated = current.includes(position)
       ? current.filter((p: string) => p !== position)
       : [...current, position];
-    setValue("field_positions", updated);
+    setValue("field_positions", updated, { shouldValidate: true });
   };
 
   return (
@@ -47,6 +47,9 @@ export const PositionSection = ({ control }: PositionSectionProps) => {
           </div>
         ))}
       </div>
+      {errors.field_positions && (
+        <p className="text-sm font-medium text-destructive">{errors.field_positions.message as string}</p>
+      )}
     </div>
   );
 };

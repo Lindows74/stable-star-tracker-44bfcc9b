@@ -27,7 +27,7 @@ const distanceOptions = [
 ];
 
 export const DistanceSection = ({ control }: DistanceSectionProps) => {
-  const { setValue, getValues } = useFormContext();
+  const { setValue, getValues, formState: { errors } } = useFormContext();
   const selectedDistances = useWatch({
     control,
     name: "preferred_distances",
@@ -39,7 +39,7 @@ export const DistanceSection = ({ control }: DistanceSectionProps) => {
     const updated = current.includes(distance)
       ? current.filter((d: string) => d !== distance)
       : [...current, distance];
-    setValue("preferred_distances", updated);
+    setValue("preferred_distances", updated, { shouldValidate: true });
   };
 
   return (
@@ -59,6 +59,9 @@ export const DistanceSection = ({ control }: DistanceSectionProps) => {
           </div>
         ))}
       </div>
+      {errors.preferred_distances && (
+        <p className="text-sm font-medium text-destructive">{errors.preferred_distances.message as string}</p>
+      )}
     </div>
   );
 };

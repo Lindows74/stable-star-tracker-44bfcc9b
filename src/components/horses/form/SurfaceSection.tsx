@@ -18,7 +18,7 @@ const surfaceOptions = [
 ];
 
 export const SurfaceSection = ({ control }: SurfaceSectionProps) => {
-  const { setValue, getValues } = useFormContext();
+  const { setValue, getValues, formState: { errors } } = useFormContext();
   const selectedSurfaces = useWatch({
     control,
     name: "preferred_surfaces",
@@ -30,7 +30,7 @@ export const SurfaceSection = ({ control }: SurfaceSectionProps) => {
     const updated = current.includes(surface)
       ? current.filter((s: string) => s !== surface)
       : [...current, surface];
-    setValue("preferred_surfaces", updated);
+    setValue("preferred_surfaces", updated, { shouldValidate: true });
   };
 
   return (
@@ -50,6 +50,9 @@ export const SurfaceSection = ({ control }: SurfaceSectionProps) => {
           </div>
         ))}
       </div>
+      {errors.preferred_surfaces && (
+        <p className="text-sm font-medium text-destructive">{errors.preferred_surfaces.message as string}</p>
+      )}
     </div>
   );
 };
