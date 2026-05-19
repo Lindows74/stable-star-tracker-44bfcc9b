@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface MatchingHorse {
   id: number;
@@ -32,6 +33,15 @@ interface MatchingHorse {
   tier: number;
   traits: string[];
   speed?: number;
+  sprint_energy?: number;
+  acceleration?: number;
+  agility?: number;
+  jump?: number;
+  diet_speed?: number;
+  diet_sprint_energy?: number;
+  diet_acceleration?: number;
+  diet_agility?: number;
+  diet_jump?: number;
   max_speed?: boolean;
   max_sprint_energy?: boolean;
   max_acceleration?: boolean;
