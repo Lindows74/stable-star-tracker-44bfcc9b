@@ -512,8 +512,35 @@ const LiveEvents = () => {
                        <div className="p-2 md:p-6">
                        {race.matchingHorses.length > 0 ? (
                          (() => {
-                           // Sort horses by tier descending
-                           const sorted = [...race.matchingHorses].sort((a, b) => b.tier - a.tier);
+                            // For Cross Country races, prioritize horses that have cross-country traits
+                            // when their speed is otherwise equal.
+                            const CROSS_COUNTRY_TRAITS = new Set([
+                              "River Rider",
+                              "Fast Draw",
+                              "Revitalizing Surge",
+                              "Meadowstride",
+                              // multi-discipline traits that boost cross country
+                              "Rolling Current",
+                              "Rolling Current Pro",
+                            ]);
+                            const isCC = raceType === "Cross Country";
+                            const hasCCTrait = (h: any) =>
+                              (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
+                            // Sort horses by tier desc, then (for CC) CC-traited first when speed ties, then speed desc
+                            const sorted = [...race.matchingHorses].sort((a, b) => {
+                              if (b.tier !== a.tier) return b.tier - a.tier;
+                              if (isCC) {
+                                const speedA = a.speed ?? 0;
+                                const speedB = b.speed ?? 0;
+                                if (speedA === speedB) {
+                                  const ccA = hasCCTrait(a) ? 1 : 0;
+                                  const ccB = hasCCTrait(b) ? 1 : 0;
+                                  if (ccA !== ccB) return ccB - ccA;
+                                }
+                                return speedB - speedA;
+                              }
+                              return 0;
+                            });
                            // Group by tier
                            const tierGroups: { tier: number; horses: typeof sorted }[] = [];
                            sorted.forEach((horse) => {
