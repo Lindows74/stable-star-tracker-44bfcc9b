@@ -573,9 +573,9 @@ const LiveEvents = () => {
                                      <div key={horse.id} className="py-1.5 px-1 border-b border-border last:border-b-0">
                                        <div className="flex items-center justify-between">
                                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                                            <HorseStatsPopover horse={horse} name={horse.name}>
-                                              <span className="font-medium text-xs truncate">{horse.name}</span>
-                                            </HorseStatsPopover>
+                                             <HorseStatsPopover horse={horse} name={horse.name}>
+                                               <span className={`font-medium text-xs truncate inline-block ${isMaxTrained(horse) ? "border-2 border-foreground rounded px-1" : ""}`}>{horse.name}</span>
+                                             </HorseStatsPopover>
                                            {isMaxTrained(horse) && (
                                              <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
                                            )}
@@ -616,9 +616,9 @@ const LiveEvents = () => {
                                      >
                                        <TableCell className="font-medium">
                                          <div className="flex items-center gap-1.5">
-                                            <HorseStatsPopover horse={horse} name={horse.name}>
-                                              <span>{horse.name}</span>
-                                            </HorseStatsPopover>
+                                             <HorseStatsPopover horse={horse} name={horse.name}>
+                                               <span className={isMaxTrained(horse) ? "inline-block border-2 border-foreground rounded px-1.5 py-0.5" : ""}>{horse.name}</span>
+                                             </HorseStatsPopover>
                                            {isMaxTrained(horse) && (
                                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
                                            )}
