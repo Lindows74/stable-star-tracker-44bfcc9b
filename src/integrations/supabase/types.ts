@@ -348,6 +348,33 @@ export type Database = {
         }
         Relationships: []
       }
+      race_tier_notes: {
+        Row: {
+          created_at: string
+          id: number
+          note: string
+          race_id: number
+          tier: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          note?: string
+          race_id: number
+          tier: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          note?: string
+          race_id?: number
+          tier?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
