@@ -430,13 +430,21 @@ const LiveEvents = () => {
                                        return (
                                          <span key={tier}>
                                            {index > 0 && ','}
-                                           <span className={
-                                             !hasMatch 
-                                               ? 'text-destructive font-semibold' 
-                                               : hasMaxTrained 
-                                                 ? 'text-cyan-400 font-semibold' 
-                                                 : ''
-                                           }>{tier}</span>
+                                            <RaceTierNote
+                                              raceId={race.id}
+                                              tier={tier}
+                                              note={tierNotes[`${race.id}:${tier}`] || ''}
+                                              onSave={saveTierNote}
+                                              triggerClassName={
+                                                !hasMatch
+                                                  ? 'text-destructive font-semibold'
+                                                  : hasMaxTrained
+                                                    ? 'text-cyan-400 font-semibold'
+                                                    : ''
+                                              }
+                                            >
+                                              {tier}
+                                            </RaceTierNote>
                                          </span>
                                        );
                                      })}
@@ -450,13 +458,21 @@ const LiveEvents = () => {
                                        return (
                                          <span key={tier}>
                                            {index > 0 && ','}
-                                           <span className={
-                                             !hasMatch 
-                                               ? 'text-destructive font-semibold' 
-                                               : hasMaxTrained 
-                                                 ? 'text-cyan-400 font-semibold' 
-                                                 : ''
-                                           }>{tier}</span>
+                                            <RaceTierNote
+                                              raceId={race.id}
+                                              tier={tier}
+                                              note={tierNotes[`${race.id}:${tier}`] || ''}
+                                              onSave={saveTierNote}
+                                              triggerClassName={
+                                                !hasMatch
+                                                  ? 'text-destructive font-semibold'
+                                                  : hasMaxTrained
+                                                    ? 'text-cyan-400 font-semibold'
+                                                    : ''
+                                              }
+                                            >
+                                              {tier}
+                                            </RaceTierNote>
                                          </span>
                                        );
                                      })}
