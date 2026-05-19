@@ -153,7 +153,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
       <CardHeader className="pb-2 md:pb-3 p-3 md:p-6">
         <div className="space-y-2">
           {/* Horse name - full width */}
-          <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} ${fullyMaxTrained ? 'border-4 border-black dark:border-white' : ''}`}>
+          <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} ${fullyMaxTrained ? `border-[5px] ${horse.gender === 'stallion' ? 'border-blue-600' : horse.gender === 'mare' ? 'border-pink-600' : 'border-gray-600'}` : ''}`}>
             <CardTitle className="text-sm md:text-lg flex items-center gap-1 flex-wrap">
               <span>{horse.name}</span>
               {hasEliteLineage && <Star className="h-3 w-3 md:h-4 md:w-4 fill-purple-500 text-purple-500 flex-shrink-0" />}
