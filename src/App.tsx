@@ -12,7 +12,19 @@ import NotFound from "./pages/NotFound";
 
 console.log('App.tsx: Component loading...');
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache horse data so returning to the app (e.g. after switching apps on mobile)
+      // shows results instantly instead of refetching from scratch.
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 // Use Vite base path so routing always matches the deployed repo path
 const basename = import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL.replace(/\/$/, "");
