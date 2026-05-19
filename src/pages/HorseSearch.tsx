@@ -18,6 +18,8 @@ import { CheckboxListFilter } from "@/components/filters/CheckboxListFilter";
 import { SelectWithBadges } from "@/components/filters/SelectWithBadges";
 import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
 import { DateSortFilter } from "@/components/filters/DateSortFilter";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const HorseSearch = () => {
   const filters = useHorseFilters();
@@ -119,6 +121,17 @@ const HorseSearch = () => {
         open={breedsOpen}
         onOpenChange={setBreedsOpen}
       />
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="pure-breed-only"
+          checked={filters.pureBreedOnly}
+          onCheckedChange={(checked) => filters.setPureBreedOnly(checked === true)}
+        />
+        <Label htmlFor="pure-breed-only" className="text-sm cursor-pointer">
+          Pure breed only (100%)
+        </Label>
+      </div>
 
       <DateSortFilter
         selectedSort={filters.selectedDateSort}
