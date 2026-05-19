@@ -14,6 +14,7 @@ export interface HorseFilters {
   minTierInput: string;
   maxTierInput: string;
   selectedDateSort: DateSortType;
+  pureBreedOnly: boolean;
 }
 
 export const useHorseFilters = () => {
@@ -37,6 +38,7 @@ export const useHorseFilters = () => {
   const [minTierInput, setMinTierInput] = useState<string>(initial.minTierInput ?? "");
   const [maxTierInput, setMaxTierInput] = useState<string>(initial.maxTierInput ?? "");
   const [selectedDateSort, setSelectedDateSort] = useState<DateSortType>(initial.selectedDateSort ?? null);
+  const [pureBreedOnly, setPureBreedOnly] = useState<boolean>(initial.pureBreedOnly ?? false);
 
   // Persist filters so backgrounding the app (mobile) doesn't reset them.
   useEffect(() => {
@@ -54,6 +56,7 @@ export const useHorseFilters = () => {
           minTierInput,
           maxTierInput,
           selectedDateSort,
+          pureBreedOnly,
         })
       );
     } catch {
@@ -70,6 +73,7 @@ export const useHorseFilters = () => {
     minTierInput,
     maxTierInput,
     selectedDateSort,
+    pureBreedOnly,
   ]);
 
   const clearAllFilters = () => {
@@ -83,6 +87,7 @@ export const useHorseFilters = () => {
     setMinTierInput("");
     setMaxTierInput("");
     setSelectedDateSort(null);
+    setPureBreedOnly(false);
   };
 
   const toggleCategory = (value: string) => 
@@ -115,6 +120,7 @@ export const useHorseFilters = () => {
     minTierInput,
     maxTierInput,
     selectedDateSort,
+    pureBreedOnly,
     
     // Setters
     setSearchTerm,
@@ -127,6 +133,7 @@ export const useHorseFilters = () => {
     setMinTierInput,
     setMaxTierInput,
     setSelectedDateSort,
+    setPureBreedOnly,
     
     // Helper functions
     clearAllFilters,

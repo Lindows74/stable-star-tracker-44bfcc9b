@@ -15,6 +15,7 @@ interface UseHorseSearchParams {
   minTierInput: string;
   maxTierInput: string;
   selectedDateSort: DateSortType;
+  pureBreedOnly: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export const useHorseSearch = (params: UseHorseSearchParams) => {
     minTierInput,
     maxTierInput,
     selectedDateSort,
+    pureBreedOnly,
   } = params;
 
   // Validate tier inputs
@@ -53,6 +55,7 @@ export const useHorseSearch = (params: UseHorseSearchParams) => {
       minTierNum,
       maxTierNum,
       selectedDateSort,
+      pureBreedOnly,
     ],
     placeholderData: keepPreviousData,
     queryFn: async () => {
@@ -145,8 +148,18 @@ export const useHorseSearch = (params: UseHorseSearchParams) => {
       }
 
       if (selectedBreeds.length > 0) {
-        filteredData = filteredData.filter(horse => 
-          horse.horse_breeding?.some(breeding => selectedBreeds.includes(breeding.breeds.name))
+        filteredData = filteredData.filter(horse =>
+          horse.horse_breeding?.some(breeding => {
+            if (!selectedBreeds.includes(breeding.breeds.name)) return false;
+            if (pureBreedOnly) {
+              return Number(breeding.percentage) === 100 && horse.horse_breeding.length === 1;
+            }
+            return true;
+          })
+        );
+      } else if (pureBreedOnly) {
+        filteredData = filteredData.filter(horse =>
+          horse.horse_breeding?.length === 1 && Number(horse.horse_breeding[0].percentage) === 100
         );
       }
 
