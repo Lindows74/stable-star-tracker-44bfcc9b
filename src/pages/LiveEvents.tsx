@@ -31,6 +31,7 @@ interface MatchingHorse {
   name: string;
   tier: number;
   traits: string[];
+  speed?: number;
   max_speed?: boolean;
   max_sprint_energy?: boolean;
   max_acceleration?: boolean;
