@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import AddRaceForm from "@/components/races/AddRaceForm";
 import EditRaceForm from "@/components/races/EditRaceForm";
+import { RaceTierNote } from "@/components/races/RaceTierNote";
 import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDisciplineInline";
 import { getHorseSpecialIcons, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits, checkHorseHasFullStaminaTrait } from "@/utils/horseTraitUtils";
 import { formatSurface, formatDateTime } from "@/utils/formatUtils";
@@ -73,6 +74,7 @@ const LiveEvents = () => {
   const [editingRace, setEditingRace] = useState<RaceMatch | null>(null);
   const [deletingRaceId, setDeletingRaceId] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_RACES);
+  const [tierNotes, setTierNotes] = useState<Record<string, string>>({});
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -96,7 +98,39 @@ const LiveEvents = () => {
   // Auto-load data when component mounts
   useEffect(() => {
     fetchLiveRaces();
+    fetchTierNotes();
   }, []);
+
+  const fetchTierNotes = async () => {
+    const { data, error } = await supabase
+      .from('race_tier_notes')
+      .select('race_id, tier, note');
+    if (error) {
+      console.error('Error fetching tier notes:', error);
+      return;
+    }
+    const map: Record<string, string> = {};
+    (data || []).forEach((r: any) => {
+      map[`${r.race_id}:${r.tier}`] = r.note ?? '';
+    });
+    setTierNotes(map);
+  };
+
+  const saveTierNote = async (raceId: number, tier: number, note: string) => {
+    const { error } = await supabase
+      .from('race_tier_notes')
+      .upsert(
+        { race_id: raceId, tier, note },
+        { onConflict: 'race_id,tier' },
+      );
+    if (error) {
+      console.error('Error saving tier note:', error);
+      toast({ title: 'Error', description: 'Failed to save note.', variant: 'destructive' });
+      return;
+    }
+    setTierNotes((prev) => ({ ...prev, [`${raceId}:${tier}`]: note }));
+    toast({ title: 'Saved', description: `Tier ${tier} note saved.` });
+  };
 
   const fetchLiveRaces = async () => {
     setLoading(true);
