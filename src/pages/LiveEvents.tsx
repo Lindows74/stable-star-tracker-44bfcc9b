@@ -574,7 +574,7 @@ const LiveEvents = () => {
                                        <div className="flex items-center justify-between">
                                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                              <HorseStatsPopover horse={horse} name={horse.name}>
-                                               <span className={`font-medium text-xs truncate inline-block ${isMaxTrained(horse) ? "border-2 border-foreground rounded px-1" : ""}`}>{horse.name}</span>
+                                               <span className={`font-medium text-xs truncate inline-block ${isMaxTrained(horse) ? "border-[3px] border-black dark:border-white rounded px-1.5" : ""}`}>{horse.name}</span>
                                              </HorseStatsPopover>
                                            {isMaxTrained(horse) && (
                                              <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
@@ -617,7 +617,7 @@ const LiveEvents = () => {
                                        <TableCell className="font-medium">
                                          <div className="flex items-center gap-1.5">
                                              <HorseStatsPopover horse={horse} name={horse.name}>
-                                               <span className={isMaxTrained(horse) ? "inline-block border-2 border-foreground rounded px-1.5 py-0.5" : ""}>{horse.name}</span>
+                                               <span className={isMaxTrained(horse) ? "inline-block border-[3px] border-black dark:border-white rounded px-2 py-0.5" : ""}>{horse.name}</span>
                                              </HorseStatsPopover>
                                            {isMaxTrained(horse) && (
                                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
