@@ -34,10 +34,10 @@ const TRAIT_CATEGORIES = {
     "River Rider",
     "Fast Draw",
     "Revitalizing Surge",
-    "Meadowstride"
+    "Meadowstride",
+    "Rolling Current", "Rolling Current Pro"
   ],
   multiDiscipline: [
-    "Rolling Current", "Rolling Current Pro"
   ],
   surfacePreference: [
     "Granite Gallop",
