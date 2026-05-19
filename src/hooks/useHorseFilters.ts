@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toggleArrayValue } from "@/utils/filterUtils";
 
 export type DateSortType = "created_desc" | "created_asc" | "updated_desc" | "updated_asc" | null;
@@ -17,16 +17,60 @@ export interface HorseFilters {
 }
 
 export const useHorseFilters = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedSurfaces, setSelectedSurfaces] = useState<string[]>([]);
-  const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
-  const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
-  const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
-  const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
-  const [minTierInput, setMinTierInput] = useState<string>("");
-  const [maxTierInput, setMaxTierInput] = useState<string>("");
-  const [selectedDateSort, setSelectedDateSort] = useState<DateSortType>(null);
+  const STORAGE_KEY = "horseSearchFilters";
+  const initial: Partial<HorseFilters> = (() => {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  const [searchTerm, setSearchTerm] = useState(initial.searchTerm ?? "");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initial.selectedCategories ?? []);
+  const [selectedSurfaces, setSelectedSurfaces] = useState<string[]>(initial.selectedSurfaces ?? []);
+  const [selectedDistances, setSelectedDistances] = useState<string[]>(initial.selectedDistances ?? []);
+  const [selectedPositions, setSelectedPositions] = useState<string[]>(initial.selectedPositions ?? []);
+  const [selectedTraits, setSelectedTraits] = useState<string[]>(initial.selectedTraits ?? []);
+  const [selectedBreeds, setSelectedBreeds] = useState<string[]>(initial.selectedBreeds ?? []);
+  const [minTierInput, setMinTierInput] = useState<string>(initial.minTierInput ?? "");
+  const [maxTierInput, setMaxTierInput] = useState<string>(initial.maxTierInput ?? "");
+  const [selectedDateSort, setSelectedDateSort] = useState<DateSortType>(initial.selectedDateSort ?? null);
+
+  // Persist filters so backgrounding the app (mobile) doesn't reset them.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          searchTerm,
+          selectedCategories,
+          selectedSurfaces,
+          selectedDistances,
+          selectedPositions,
+          selectedTraits,
+          selectedBreeds,
+          minTierInput,
+          maxTierInput,
+          selectedDateSort,
+        })
+      );
+    } catch {
+      // ignore quota / privacy errors
+    }
+  }, [
+    searchTerm,
+    selectedCategories,
+    selectedSurfaces,
+    selectedDistances,
+    selectedPositions,
+    selectedTraits,
+    selectedBreeds,
+    minTierInput,
+    maxTierInput,
+    selectedDateSort,
+  ]);
 
   const clearAllFilters = () => {
     setSearchTerm("");
