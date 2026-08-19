@@ -20,9 +20,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
     distance: "",
     surface: "",
     tierRestriction: "",
-    trackName: "",
-    startDate: "",
-    startTime: ""
+    trackName: ""
   });
   const { toast } = useToast();
 
@@ -48,7 +46,8 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.raceType || !formData.distance || !formData.surface || !formData.tierRestriction || !formData.startDate || !formData.startTime) {
+    const isCrossCountry = formData.raceType === "cross_country";
+    if (!formData.raceType || (!isCrossCountry && !formData.distance) || !formData.surface || !formData.tierRestriction) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -59,14 +58,19 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
 
     setLoading(true);
     try {
-      const startDateTime = `${formData.startDate} ${formData.startTime}:00+00`;
+      const startDateTime = new Date().toISOString();
+      const distanceValue = isCrossCountry ? "0" : formData.distance;
+      const gradesLabel = formData.tierRestriction === 'odd_grades' ? 'Odd Grades' : 'Even Grades';
+      const raceName = isCrossCountry
+        ? `Cross Country ${formatSurface(formData.surface)} (${gradesLabel})`
+        : `${formData.distance}m ${formData.surface} (${gradesLabel})`;
 
       const { error } = await supabase
         .from('live_races')
         .insert([{
-          race_name: `${formData.distance}m ${formData.surface} (${formData.tierRestriction === 'odd_grades' ? 'Odd Grades' : 'Even Grades'})`,
+          race_name: raceName,
           surface: formData.surface,
-          distance: formData.distance,
+          distance: distanceValue,
           tier_restriction: formData.tierRestriction,
           start_time: startDateTime,
           track_name: formData.trackName || null,
@@ -95,9 +99,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
         distance: "",
         surface: "",
         tierRestriction: "",
-        trackName: "",
-        startDate: "",
-        startTime: ""
+        trackName: ""
       });
       setIsOpen(false);
       onRaceAdded();
@@ -152,7 +154,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
               <Label htmlFor="raceType">Race Type *</Label>
               <Select 
                 value={formData.raceType} 
-                onValueChange={(value) => setFormData({...formData, raceType: value})}
+                onValueChange={(value) => setFormData({...formData, raceType: value, distance: value === 'cross_country' ? "" : formData.distance})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select race type" />
@@ -167,6 +169,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
               </Select>
             </div>
 
+            {formData.raceType !== 'cross_country' && (
             <div>
               <Label htmlFor="distance">Distance (meters) *</Label>
               <Select 
@@ -185,6 +188,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
                 </SelectContent>
               </Select>
             </div>
+            )}
 
             <div>
               <Label htmlFor="surface">Surface *</Label>
@@ -228,27 +232,6 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
                 value={formData.trackName}
                 onChange={(e) => setFormData({...formData, trackName: e.target.value})}
                 placeholder="Enter track name"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="startDate">Start Date *</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="startTime">Start Time *</Label>
-              <Input
-                id="startTime"
-                type="time"
-                value={formData.startTime}
-                onChange={(e) => setFormData({...formData, startTime: e.target.value})}
               />
             </div>
 
