@@ -20,14 +20,14 @@ export const StatField = ({ control, name, label, min = 0, max = 300 }: StatFiel
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          <FormLabel className="text-xs truncate block">{label}</FormLabel>
           <FormControl>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 w-full">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 shrink-0"
+                className="h-9 w-9 shrink-0"
                 onClick={() => {
                   const current = typeof field.value === 'number' ? field.value : 0;
                   field.onChange(Math.max(min, current - 1));
@@ -41,7 +41,7 @@ export const StatField = ({ control, name, label, min = 0, max = 300 }: StatFiel
                 pattern="[0-9]*"
                 min={min}
                 max={max}
-                className="text-center"
+                className="text-center flex-1 w-0 h-9 px-1"
                 value={typeof field.value === 'number' ? field.value.toString() : ""}
                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
               />
@@ -49,7 +49,7 @@ export const StatField = ({ control, name, label, min = 0, max = 300 }: StatFiel
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 shrink-0"
+                className="h-9 w-9 shrink-0"
                 onClick={() => {
                   const current = typeof field.value === 'number' ? field.value : 0;
                   field.onChange(Math.min(max, current + 1));
@@ -59,6 +59,7 @@ export const StatField = ({ control, name, label, min = 0, max = 300 }: StatFiel
               </Button>
             </div>
           </FormControl>
+
           <FormMessage />
         </FormItem>
       )}
