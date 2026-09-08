@@ -803,9 +803,9 @@ const LiveEvents = () => {
 
         {/* Sticky back-to-top link */}
         <Button
-          variant="secondary"
+          variant="default"
           size="icon"
-          className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg"
+          className="fixed bottom-32 right-4 z-[110] rounded-full shadow-xl"
           aria-label="Back to top"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
