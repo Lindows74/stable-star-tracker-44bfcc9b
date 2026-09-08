@@ -1,5 +1,7 @@
 import Layout from "@/components/layout/Layout";
 import { HorseList } from "@/components/horses/HorseList";
+import { Button } from "@/components/ui/button";
+import { ArrowUp } from "lucide-react";
 
 const Index = () => {
   return (
@@ -16,6 +18,16 @@ const Index = () => {
           <HorseList />
         </div>
       </div>
+
+      <Button
+        variant="default"
+        size="icon"
+        className="fixed bottom-32 right-4 z-[110] rounded-full shadow-xl"
+        aria-label="Back to top"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        <ArrowUp className="h-5 w-5" />
+      </Button>
     </Layout>
   );
 };
