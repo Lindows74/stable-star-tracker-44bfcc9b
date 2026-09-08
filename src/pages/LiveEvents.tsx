@@ -350,9 +350,9 @@ const LiveEvents = () => {
           const steepleCount = raceMatches.filter((_, i) => i + 1 > 17 && i + 1 <= 20).length;
           const crossCount = raceMatches.filter((_, i) => i + 1 > 20).length;
           const anchors = [
-            { id: 'flat-races', label: 'Flat', count: flatCount, icon: Circle, color: 'text-blue-500' },
-            { id: 'steeplechase-races', label: 'Steeple', count: steepleCount, icon: Triangle, color: 'text-yellow-500' },
-            { id: 'cross-country-races', label: 'Cross', count: crossCount, icon: Mountain, color: 'text-green-500' },
+            { id: 'flat-races', label: 'Flat Race', count: flatCount, icon: Circle, color: 'text-blue-500' },
+            { id: 'steeplechase-races', label: 'Steeple Chase', count: steepleCount, icon: Triangle, color: 'text-yellow-500' },
+            { id: 'cross-country-races', label: 'Cross Country', count: crossCount, icon: Mountain, color: 'text-green-500' },
           ];
           const scrollTo = (id: string) => {
             const doScroll = () => {
@@ -407,8 +407,8 @@ const LiveEvents = () => {
                 {raceMatches.slice(0, visibleCount).map((race, index) => {
                    const raceNumber = index + 1;
                    const getRaceType = (n: number) => {
-                     if (n <= 17) return "Flat Racing";
-                     if (n <= 20) return "Steeplechase";
+                     if (n <= 17) return "Flat Race";
+                     if (n <= 20) return "Steeple Chase";
                      return "Cross Country";
                    };
                    const raceType = getRaceType(raceNumber);
@@ -425,9 +425,9 @@ const LiveEvents = () => {
                      raceLabel = `Race ${raceNumber} - ${raceType} (Surface preference only)`;
                    }
                    
-                   const sectionId = raceType === "Flat Racing"
+                   const sectionId = raceType === "Flat Race"
                      ? "flat-races"
-                     : raceType === "Steeplechase"
+                     : raceType === "Steeple Chase"
                        ? "steeplechase-races"
                        : "cross-country-races";
                    const prevType = index > 0 ? getRaceType(index) : null;
