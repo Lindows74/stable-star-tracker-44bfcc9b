@@ -664,10 +664,11 @@ const LiveEvents = () => {
                            No horses match this race
                          </p>
                        )}
-                       </div>
-                     </div>
-                  );
-                })}
+                        </div>
+                      </div>
+                    </div>
+                   );
+                 })}
                 {visibleCount < raceMatches.length && (
                   <div ref={loadMoreRef} className="flex justify-center py-4">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
