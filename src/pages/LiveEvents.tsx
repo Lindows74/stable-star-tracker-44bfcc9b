@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2 } from "lucide-react";
+import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
@@ -344,44 +344,45 @@ const LiveEvents = () => {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
-          <Card>
-            <CardContent className="p-3 md:p-6">
-              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
-                <Calendar className="h-5 w-5 md:h-8 md:w-8 text-blue-500" />
-                <div className="text-center md:text-left">
-                  <div className="text-lg md:text-2xl font-bold">{raceMatches.length}</div>
-                  <div className="text-[10px] md:text-sm text-muted-foreground">Events</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-6">
-              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
-                <Trophy className="h-5 w-5 md:h-8 md:w-8 text-yellow-500" />
-                <div className="text-center md:text-left">
-                  <div className="text-lg md:text-2xl font-bold">{totalHorses}</div>
-                  <div className="text-[10px] md:text-sm text-muted-foreground">Horses</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-6">
-              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
-                <Trophy className="h-5 w-5 md:h-8 md:w-8 text-green-500" />
-                <div className="text-center md:text-left">
-                  <div className="text-lg md:text-2xl font-bold">
-                    {raceMatches.reduce((sum, race) => sum + race.matchingHorses.length, 0)}
-                  </div>
-                  <div className="text-[10px] md:text-sm text-muted-foreground">Matches</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Section anchors */}
+        {(() => {
+          const flatCount = raceMatches.filter((_, i) => i + 1 <= 17).length;
+          const steepleCount = raceMatches.filter((_, i) => i + 1 > 17 && i + 1 <= 20).length;
+          const crossCount = raceMatches.filter((_, i) => i + 1 > 20).length;
+          const anchors = [
+            { id: 'flat-races', label: 'Flat', count: flatCount, icon: Circle, color: 'text-blue-500' },
+            { id: 'steeplechase-races', label: 'Steeple', count: steepleCount, icon: Triangle, color: 'text-yellow-500' },
+            { id: 'cross-country-races', label: 'Cross', count: crossCount, icon: Mountain, color: 'text-green-500' },
+          ];
+          const scrollTo = (id: string) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
+          return (
+            <div className="grid grid-cols-3 gap-2 md:gap-4">
+              {anchors.map((a) => {
+                const Icon = a.icon;
+                return (
+                  <Card
+                    key={a.id}
+                    className="cursor-pointer hover:bg-muted/60 transition-colors"
+                    onClick={() => scrollTo(a.id)}
+                  >
+                    <CardContent className="p-3 md:p-6">
+                      <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
+                        <Icon className={`h-5 w-5 md:h-8 md:w-8 ${a.color}`} aria-hidden="true" />
+                        <div className="text-center md:text-left">
+                          <div className={`text-lg md:text-2xl font-bold ${a.color}`}>{a.count}</div>
+                          <div className="text-[10px] md:text-sm text-muted-foreground font-medium">{a.label}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Add Race Form */}
         <AddRaceForm onRaceAdded={fetchLiveRaces} />
@@ -395,29 +396,47 @@ const LiveEvents = () => {
             {raceMatches.length > 0 ? (
               <div className="space-y-6">
                 {raceMatches.slice(0, visibleCount).map((race, index) => {
-                  const raceNumber = index + 1;
-                  let raceType = "";
-                  let raceLabel = "";
-                  
-                  if (raceNumber <= 17) {
-                    raceType = "Flat Racing";
-                    raceLabel = `Race ${raceNumber} - ${raceType}`;
-                  } else if (raceNumber <= 20) {
-                    raceType = "Steeplechase";
-                    raceLabel = `Race ${raceNumber} - ${raceType}`;
-                    if (race.race_name?.includes('Under Repair')) {
-                      raceLabel += ' (Under Repair)';
-                    }
-                  } else {
-                    raceType = "Cross Country";
-                    raceLabel = `Race ${raceNumber} - ${raceType} (Surface preference only)`;
-                  }
-                  
-                  const allTiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                  const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
-                  
-                  return (
-                     <div key={race.id} className="border rounded-lg overflow-hidden">
+                   const raceNumber = index + 1;
+                   const getRaceType = (n: number) => {
+                     if (n <= 17) return "Flat Racing";
+                     if (n <= 20) return "Steeplechase";
+                     return "Cross Country";
+                   };
+                   const raceType = getRaceType(raceNumber);
+                   let raceLabel = "";
+                   
+                   if (raceNumber <= 17) {
+                     raceLabel = `Race ${raceNumber} - ${raceType}`;
+                   } else if (raceNumber <= 20) {
+                     raceLabel = `Race ${raceNumber} - ${raceType}`;
+                     if (race.race_name?.includes('Under Repair')) {
+                       raceLabel += ' (Under Repair)';
+                     }
+                   } else {
+                     raceLabel = `Race ${raceNumber} - ${raceType} (Surface preference only)`;
+                   }
+                   
+                   const sectionId = raceType === "Flat Racing"
+                     ? "flat-races"
+                     : raceType === "Steeplechase"
+                       ? "steeplechase-races"
+                       : "cross-country-races";
+                   const prevType = index > 0 ? getRaceType(index) : null;
+                   const isFirstOfType = raceType !== prevType;
+                   
+                   const allTiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                   const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
+                   
+                   return (
+                     <div key={race.id}>
+                       {isFirstOfType && (
+                         <div id={sectionId} className="scroll-mt-20 md:scroll-mt-24 -mx-2 md:-mx-6 pt-2 pb-1">
+                           <h3 className="text-base md:text-xl font-bold text-foreground bg-muted/60 px-3 md:px-6 py-2 rounded-md border-y">
+                             {raceType}
+                           </h3>
+                         </div>
+                       )}
+                      <div className="border rounded-lg overflow-hidden">
                        {/* Race Header */}
                        <div className="bg-muted/40 px-3 py-2 md:px-6 md:py-3 flex justify-between items-center border-b">
                          <div className="min-w-0 flex-1">
@@ -648,10 +667,11 @@ const LiveEvents = () => {
                            No horses match this race
                          </p>
                        )}
-                       </div>
-                     </div>
-                  );
-                })}
+                        </div>
+                      </div>
+                    </div>
+                   );
+                 })}
                 {visibleCount < raceMatches.length && (
                   <div ref={loadMoreRef} className="flex justify-center py-4">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
