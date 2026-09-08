@@ -393,29 +393,47 @@ const LiveEvents = () => {
             {raceMatches.length > 0 ? (
               <div className="space-y-6">
                 {raceMatches.slice(0, visibleCount).map((race, index) => {
-                  const raceNumber = index + 1;
-                  let raceType = "";
-                  let raceLabel = "";
-                  
-                  if (raceNumber <= 17) {
-                    raceType = "Flat Racing";
-                    raceLabel = `Race ${raceNumber} - ${raceType}`;
-                  } else if (raceNumber <= 20) {
-                    raceType = "Steeplechase";
-                    raceLabel = `Race ${raceNumber} - ${raceType}`;
-                    if (race.race_name?.includes('Under Repair')) {
-                      raceLabel += ' (Under Repair)';
-                    }
-                  } else {
-                    raceType = "Cross Country";
-                    raceLabel = `Race ${raceNumber} - ${raceType} (Surface preference only)`;
-                  }
-                  
-                  const allTiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                  const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
-                  
-                  return (
-                     <div key={race.id} className="border rounded-lg overflow-hidden">
+                   const raceNumber = index + 1;
+                   const getRaceType = (n: number) => {
+                     if (n <= 17) return "Flat Racing";
+                     if (n <= 20) return "Steeplechase";
+                     return "Cross Country";
+                   };
+                   const raceType = getRaceType(raceNumber);
+                   let raceLabel = "";
+                   
+                   if (raceNumber <= 17) {
+                     raceLabel = `Race ${raceNumber} - ${raceType}`;
+                   } else if (raceNumber <= 20) {
+                     raceLabel = `Race ${raceNumber} - ${raceType}`;
+                     if (race.race_name?.includes('Under Repair')) {
+                       raceLabel += ' (Under Repair)';
+                     }
+                   } else {
+                     raceLabel = `Race ${raceNumber} - ${raceType} (Surface preference only)`;
+                   }
+                   
+                   const sectionId = raceType === "Flat Racing"
+                     ? "flat-races"
+                     : raceType === "Steeplechase"
+                       ? "steeplechase-races"
+                       : "cross-country-races";
+                   const prevType = index > 0 ? getRaceType(index) : null;
+                   const isFirstOfType = raceType !== prevType;
+                   
+                   const allTiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                   const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
+                   
+                   return (
+                     <div key={race.id}>
+                       {isFirstOfType && (
+                         <div id={sectionId} className="scroll-mt-20 md:scroll-mt-24 -mx-2 md:-mx-6 pt-2 pb-1">
+                           <h3 className="text-base md:text-xl font-bold text-foreground bg-muted/60 px-3 md:px-6 py-2 rounded-md border-y">
+                             {raceType}
+                           </h3>
+                         </div>
+                       )}
+                      <div className="border rounded-lg overflow-hidden">
                        {/* Race Header */}
                        <div className="bg-muted/40 px-3 py-2 md:px-6 md:py-3 flex justify-between items-center border-b">
                          <div className="min-w-0 flex-1">
