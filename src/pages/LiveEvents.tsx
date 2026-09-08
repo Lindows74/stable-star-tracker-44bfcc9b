@@ -355,8 +355,17 @@ const LiveEvents = () => {
             { id: 'cross-country-races', label: 'Cross', count: crossCount, icon: Mountain, color: 'text-green-500' },
           ];
           const scrollTo = (id: string) => {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const doScroll = () => {
+              const el = document.getElementById(id);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            if (document.getElementById(id)) {
+              doScroll();
+            } else {
+              // Section not rendered yet due to lazy loading — load all races first
+              setVisibleCount(raceMatches.length);
+              setTimeout(doScroll, 150);
+            }
           };
           return (
             <div className="grid grid-cols-3 gap-2 md:gap-4">
