@@ -344,44 +344,42 @@ const LiveEvents = () => {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
-          <Card>
-            <CardContent className="p-3 md:p-6">
-              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
-                <Calendar className="h-5 w-5 md:h-8 md:w-8 text-blue-500" />
-                <div className="text-center md:text-left">
-                  <div className="text-lg md:text-2xl font-bold">{raceMatches.length}</div>
-                  <div className="text-[10px] md:text-sm text-muted-foreground">Events</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-6">
-              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
-                <Trophy className="h-5 w-5 md:h-8 md:w-8 text-yellow-500" />
-                <div className="text-center md:text-left">
-                  <div className="text-lg md:text-2xl font-bold">{totalHorses}</div>
-                  <div className="text-[10px] md:text-sm text-muted-foreground">Horses</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-6">
-              <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
-                <Trophy className="h-5 w-5 md:h-8 md:w-8 text-green-500" />
-                <div className="text-center md:text-left">
-                  <div className="text-lg md:text-2xl font-bold">
-                    {raceMatches.reduce((sum, race) => sum + race.matchingHorses.length, 0)}
-                  </div>
-                  <div className="text-[10px] md:text-sm text-muted-foreground">Matches</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Section anchors */}
+        {(() => {
+          const flatCount = raceMatches.filter((_, i) => i + 1 <= 17).length;
+          const steepleCount = raceMatches.filter((_, i) => i + 1 > 17 && i + 1 <= 20).length;
+          const crossCount = raceMatches.filter((_, i) => i + 1 > 20).length;
+          const anchors = [
+            { id: 'flat-races', label: 'Flat', count: flatCount, icon: '🏇', color: 'text-blue-500' },
+            { id: 'steeplechase-races', label: 'Steeple', count: steepleCount, icon: '🏇', color: 'text-yellow-500' },
+            { id: 'cross-country-races', label: 'Cross', count: crossCount, icon: '🏇', color: 'text-green-500' },
+          ];
+          const scrollTo = (id: string) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
+          return (
+            <div className="grid grid-cols-3 gap-2 md:gap-4">
+              {anchors.map((a) => (
+                <Card
+                  key={a.id}
+                  className="cursor-pointer hover:bg-muted/60 transition-colors"
+                  onClick={() => scrollTo(a.id)}
+                >
+                  <CardContent className="p-3 md:p-6">
+                    <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3">
+                      <span className="text-xl md:text-3xl" aria-hidden="true">{a.icon}</span>
+                      <div className="text-center md:text-left">
+                        <div className={`text-lg md:text-2xl font-bold ${a.color}`}>{a.count}</div>
+                        <div className="text-[10px] md:text-sm text-muted-foreground font-medium">{a.label}</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Add Race Form */}
         <AddRaceForm onRaceAdded={fetchLiveRaces} />
