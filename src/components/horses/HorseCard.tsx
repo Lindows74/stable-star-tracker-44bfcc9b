@@ -46,6 +46,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const { bestTimes } = useBestTimesForHorse(horse.id);
 
   const deleteMutation = useMutation({
     mutationFn: async (horseId: number) => {
