@@ -80,18 +80,28 @@ const RacesMade = () => {
     },
   });
 
-  // Group results by race, best time first
+  // Group results by race, best time first, and track best time per tier
   const grouped = useMemo(() => {
     const byRace = new Map<number, RaceResultRow[]>();
     (results || []).forEach((row) => {
       if (!byRace.has(row.race_id)) byRace.set(row.race_id, []);
       byRace.get(row.race_id)!.push(row);
     });
-    return Array.from(byRace.entries()).map(([id, rows]) => ({
-      raceId: id,
-      race: rows[0].live_races,
-      rows: [...rows].sort((a, b) => a.time_ms - b.time_ms),
-    }));
+    return Array.from(byRace.entries()).map(([id, rows]) => {
+      const sorted = [...rows].sort((a, b) => a.time_ms - b.time_ms);
+      const bestByTier = new Map<number, number>();
+      sorted.forEach((row) => {
+        const tier = row.horses?.tier ?? 0;
+        const current = bestByTier.get(tier);
+        if (current == null || row.time_ms < current) bestByTier.set(tier, row.time_ms);
+      });
+      return {
+        raceId: id,
+        race: rows[0].live_races,
+        rows: sorted,
+        bestByTier,
+      };
+    });
   }, [results]);
 
   return (
@@ -188,7 +198,9 @@ const RacesMade = () => {
                       className="flex items-center justify-between gap-2 rounded-md border p-2 text-xs md:text-sm"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        {idx === 0 && <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0" />}
+                        {group.bestByTier.get(row.horses?.tier ?? 0) === row.time_ms && (
+                          <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                        )}
                         <span className="font-medium truncate">{row.horses?.name || "Unknown horse"}</span>
                         {row.horses?.tier != null && (
                           <Badge variant="secondary" className="text-[10px]">Tier {row.horses.tier}</Badge>
