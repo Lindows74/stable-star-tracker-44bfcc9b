@@ -20,6 +20,8 @@ export type Database = {
           id: number
           mare_id: number | null
           note: string
+          outcome: string
+          project_id: number | null
           stallion_id: number | null
           title: string
           updated_at: string
@@ -29,6 +31,8 @@ export type Database = {
           id?: number
           mare_id?: number | null
           note?: string
+          outcome?: string
+          project_id?: number | null
           stallion_id?: number | null
           title?: string
           updated_at?: string
@@ -38,6 +42,8 @@ export type Database = {
           id?: number
           mare_id?: number | null
           note?: string
+          outcome?: string
+          project_id?: number | null
           stallion_id?: number | null
           title?: string
           updated_at?: string
@@ -51,6 +57,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "breeding_notes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "breeding_projects"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "breeding_notes_stallion_id_fkey"
             columns: ["stallion_id"]
             isOneToOne: false
@@ -58,6 +71,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      breeding_projects: {
+        Row: {
+          created_at: string
+          id: number
+          notes: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          notes?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          notes?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       breeds: {
         Row: {
