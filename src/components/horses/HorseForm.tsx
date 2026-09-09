@@ -33,11 +33,11 @@ const formSchema = z.object({
   acceleration: z.number().min(0).max(300).optional(),
   agility: z.number().min(0).max(300).optional(),
   jump: z.number().min(0).max(300).optional(),
-  diet_speed: z.number().min(0).max(50).optional(),
-  diet_sprint_energy: z.number().min(0).max(50).optional(),
-  diet_acceleration: z.number().min(0).max(50).optional(),
-  diet_agility: z.number().min(0).max(50).optional(),
-  diet_jump: z.number().min(0).max(50).optional(),
+  diet_speed: z.number().min(1).max(5).optional(),
+  diet_sprint_energy: z.number().min(1).max(5).optional(),
+  diet_acceleration: z.number().min(1).max(5).optional(),
+  diet_agility: z.number().min(1).max(5).optional(),
+  diet_jump: z.number().min(1).max(5).optional(),
   max_speed: z.boolean().default(false),
   max_sprint_energy: z.boolean().default(false),
   max_acceleration: z.boolean().default(false),
@@ -59,11 +59,11 @@ const RACING_STATS = [
 ];
 
 const DIET_STATS = [
-  { name: "diet_speed", label: "Diet Speed", max: 50 },
-  { name: "diet_sprint_energy", label: "Diet Sprint Energy", max: 50 },
-  { name: "diet_acceleration", label: "Diet Acceleration", max: 50 },
-  { name: "diet_agility", label: "Diet Agility", max: 50 },
-  { name: "diet_jump", label: "Diet Jump", max: 50 },
+  { name: "diet_speed", label: "Diet Speed", max: 5 },
+  { name: "diet_sprint_energy", label: "Diet Sprint Energy", max: 5 },
+  { name: "diet_acceleration", label: "Diet Acceleration", max: 5 },
+  { name: "diet_agility", label: "Diet Agility", max: 5 },
+  { name: "diet_jump", label: "Diet Jump", max: 5 },
 ];
 
 const normalizeBreedText = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "");
