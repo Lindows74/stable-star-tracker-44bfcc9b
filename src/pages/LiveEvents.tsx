@@ -482,16 +482,30 @@ const LiveEvents = () => {
                        {/* Race Header */}
                        <div className="bg-muted/40 px-3 py-2 md:px-6 md:py-3 flex justify-between items-center border-b">
                          <div className="min-w-0 flex-1">
-                           <h3 className="text-xs md:text-lg font-semibold truncate">{raceLabel}</h3>
-                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                             {race.distance !== '0' && (
-                               <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
-                                 {race.distance}m
-                               </span>
-                             )}
-                             <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
-                               {formatSurface(race.surface)}
-                             </span>
+                            <h3 className="text-xs md:text-lg font-semibold truncate">{raceLabel}</h3>
+                            {race.race_name && (
+                              <p className="text-[11px] md:text-sm text-muted-foreground truncate">{race.race_name}</p>
+                            )}
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              {race.distance !== '0' && (
+                                <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                                  {race.distance}m
+                                </span>
+                              )}
+                              <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                                {formatSurface(race.surface)}
+                              </span>
+                              {race.track_name && (
+                                <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                                  📍 {race.track_name}
+                                </span>
+                              )}
+                              {race.prize_money ? (
+                                <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                                  🏆 {race.prize_money.toLocaleString()}
+                                </span>
+                              ) : null}
+
                              {race.tier_restriction && (
                                <span className="text-[10px] md:text-xs font-medium bg-background px-1.5 py-0.5 rounded border">
                                  {race.tier_restriction === 'odd_grades' ? (
