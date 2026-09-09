@@ -93,7 +93,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
           </div>
         </div>
 
-        <ScrollArea className="flex-1 min-h-0 mt-3 pr-3">
+        <ScrollArea className="mt-3 pr-3 h-[55vh]">
           <div className="space-y-2 pb-2">
             {isLoading && <p className="text-sm text-muted-foreground">Loading horses...</p>}
             {!isLoading && filtered.length === 0 && (
