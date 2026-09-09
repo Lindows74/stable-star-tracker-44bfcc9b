@@ -93,18 +93,36 @@ const LiveEvents = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { data: raceResults } = useRaceResults();
+  const [raceKeyById, setRaceKeyById] = useState<Record<number, string>>({});
 
-  // Best (fastest) logged time per race, per horse
-  const bestTimesByRace = useMemo(() => {
-    const map = new Map<number, Map<number, number>>();
+  // Best (fastest) logged time per race "kind" (distance + surface), per horse.
+  // Keyed by distance|surface so duplicate races of the same type share times.
+  const bestTimesByKey = useMemo(() => {
+    const map = new Map<string, Map<number, number>>();
     (raceResults || []).forEach((row) => {
-      if (!map.has(row.race_id)) map.set(row.race_id, new Map());
-      const byHorse = map.get(row.race_id)!;
+      const key = raceKeyById[row.race_id];
+      if (!key) return;
+      if (!map.has(key)) map.set(key, new Map());
+      const byHorse = map.get(key)!;
       const current = byHorse.get(row.horse_id);
       if (current == null || row.time_ms < current) byHorse.set(row.horse_id, row.time_ms);
     });
     return map;
-  }, [raceResults]);
+  }, [raceResults, raceKeyById]);
+
+  const raceKey = (race: any) => `${race.distance}|${race.surface}`;
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('live_races').select('id, distance, surface');
+      if (data) {
+        const map: Record<number, string> = {};
+        data.forEach((r: any) => { map[r.id] = `${r.distance}|${r.surface}`; });
+        setRaceKeyById(map);
+      }
+    })();
+  }, []);
+
 
   // Intersection observer for lazy loading more races
   useEffect(() => {
