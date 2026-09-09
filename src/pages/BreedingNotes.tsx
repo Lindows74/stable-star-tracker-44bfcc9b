@@ -353,7 +353,7 @@ const BreedingNotes = () => {
           </div>
 
           {/* Side panel: races I'm breeding for */}
-          <div className="lg:col-span-1 order-first lg:order-none space-y-2">
+          <div className="lg:col-span-1 order-first lg:order-none space-y-2 lg:sticky lg:top-4 lg:self-start">
             <h2 className="text-lg md:text-xl font-semibold">Races I'm breeding for</h2>
             <BreedingProjects
               projects={(projects as any) || []}
