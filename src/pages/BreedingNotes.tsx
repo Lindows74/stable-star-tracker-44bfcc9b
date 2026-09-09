@@ -241,14 +241,22 @@ const BreedingNotes = () => {
           </CardContent>
         </Card>
 
-        {/* Saved notes */}
+        {/* Unassigned pairings */}
         <div className="space-y-2">
-          <h2 className="text-lg md:text-xl font-semibold">Saved notes</h2>
-          {(!notes || notes.length === 0) && (
-            <p className="text-sm text-muted-foreground">No saved notes yet.</p>
+          <h2 className="text-lg md:text-xl font-semibold">Unassigned pairings</h2>
+          <p className="text-xs text-muted-foreground">
+            Drag a pairing onto a race in the side panel, or pick a race below.
+          </p>
+          {unassigned.length === 0 && (
+            <p className="text-sm text-muted-foreground">No unassigned pairings.</p>
           )}
-          {notes?.map((n: any) => (
-            <Card key={n.id}>
+          {unassigned.map((n: any) => (
+            <Card
+              key={n.id}
+              draggable
+              onDragStart={(e) => e.dataTransfer.setData("text/plain", String(n.id))}
+              className="cursor-grab active:cursor-grabbing"
+            >
               <CardContent className="p-3 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -268,12 +276,45 @@ const BreedingNotes = () => {
                   </Button>
                 </div>
                 <p className="text-sm whitespace-pre-wrap break-words">{n.note}</p>
+                {projects && projects.length > 0 && (
+                  <Select
+                    onValueChange={(v) => assignPairing.mutate({ id: n.id, projectId: Number(v) })}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Move to race..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects.map((p: any) => (
+                        <SelectItem key={p.id} value={String(p.id)}>
+                          {p.title || "Untitled race"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <p className="text-xs text-muted-foreground">
                   {new Date(n.updated_at).toLocaleString()}
                 </p>
               </CardContent>
             </Card>
           ))}
+        </div>
+          </div>
+
+          {/* Side panel: races I'm breeding for */}
+          <div className="lg:col-span-1 order-first lg:order-none space-y-2">
+            <h2 className="text-lg md:text-xl font-semibold">Races I'm breeding for</h2>
+            <BreedingProjects
+              projects={(projects as any) || []}
+              pairingsByProject={pairingsByProject}
+              onCreate={(title, notes) => createProject.mutate({ title, notes })}
+              onUpdate={(id, values) => updateProject.mutate({ id, values })}
+              onDelete={(id) => deleteProject.mutate(id)}
+              onDropPairing={(pairingId, projectId) => assignPairing.mutate({ id: pairingId, projectId })}
+              onUpdateOutcome={(id, outcome) => updateOutcome.mutate({ id, outcome })}
+              onRemovePairing={(id) => assignPairing.mutate({ id, projectId: null })}
+            />
+          </div>
         </div>
 
         <Button
