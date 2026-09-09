@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Home, Search, Heart, Plus, Lock, Sparkles } from "lucide-react";
+import { Home, Search, Heart, Plus, Lock, Sparkles, Timer } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { HorseForm } from "@/components/horses/HorseForm";
@@ -29,6 +29,7 @@ const Navigation = () => {
     { path: "/search", label: "Search Horses", icon: Search },
     { path: "/breeding", label: "Live Events", icon: Heart },
     { path: "/breeding-notes", label: "Breeding", icon: Sparkles },
+    { path: "/races-made", label: "Races Made", icon: Timer },
   ];
 
   return (
