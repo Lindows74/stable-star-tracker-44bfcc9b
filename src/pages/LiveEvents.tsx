@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
+import { useRaceResults } from "@/hooks/useRaceResults";
+import { formatRaceTime } from "@/utils/raceTimeUtils";
 
 interface MatchingHorse {
   id: number;
@@ -90,6 +92,19 @@ const LiveEvents = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { data: raceResults } = useRaceResults();
+
+  // Best (fastest) logged time per race, per horse
+  const bestTimesByRace = useMemo(() => {
+    const map = new Map<number, Map<number, number>>();
+    (raceResults || []).forEach((row) => {
+      if (!map.has(row.race_id)) map.set(row.race_id, new Map());
+      const byHorse = map.get(row.race_id)!;
+      const current = byHorse.get(row.horse_id);
+      if (current == null || row.time_ms < current) byHorse.set(row.horse_id, row.time_ms);
+    });
+    return map;
+  }, [raceResults]);
 
   // Intersection observer for lazy loading more races
   useEffect(() => {
@@ -550,37 +565,59 @@ const LiveEvents = () => {
 
                        {/* Race Content */}
                        <div className="p-2 md:p-6">
-                       {race.matchingHorses.length > 0 ? (
-                         (() => {
-                            // For Cross Country races, prioritize horses that have cross-country traits
-                            // when their speed is otherwise equal.
-                            const CROSS_COUNTRY_TRAITS = new Set([
-                              "River Rider",
-                              "Fast Draw",
-                              "Revitalizing Surge",
-                              "Meadowstride",
-                              // multi-discipline traits that boost cross country
-                              "Rolling Current",
-                              "Rolling Current Pro",
-                            ]);
-                            const isCC = raceType === "Cross Country";
-                            const hasCCTrait = (h: any) =>
-                              (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
-                            // Sort horses by tier desc, then (for CC) CC-traited first when speed ties, then speed desc
-                            const sorted = [...race.matchingHorses].sort((a, b) => {
-                              if (b.tier !== a.tier) return b.tier - a.tier;
-                              if (isCC) {
-                                const speedA = a.speed ?? 0;
-                                const speedB = b.speed ?? 0;
-                                if (speedA === speedB) {
-                                  const ccA = hasCCTrait(a) ? 1 : 0;
-                                  const ccB = hasCCTrait(b) ? 1 : 0;
-                                  if (ccA !== ccB) return ccB - ccA;
-                                }
-                                return speedB - speedA;
-                              }
-                              return 0;
-                            });
+                        {(() => {
+                          const timesForRace = bestTimesByRace.get(race.id);
+                          const timedNonMatching = timesForRace
+                            ? nonMatchingHorses.filter((h) => timesForRace.has(h.id))
+                            : [];
+                          return race.matchingHorses.length + timedNonMatching.length > 0;
+                        })() ? (
+                          (() => {
+                             // For Cross Country races, prioritize horses that have cross-country traits
+                             // when their speed is otherwise equal.
+                             const CROSS_COUNTRY_TRAITS = new Set([
+                               "River Rider",
+                               "Fast Draw",
+                               "Revitalizing Surge",
+                               "Meadowstride",
+                               // multi-discipline traits that boost cross country
+                               "Rolling Current",
+                               "Rolling Current Pro",
+                             ]);
+                             const isCC = raceType === "Cross Country";
+                             const hasCCTrait = (h: any) =>
+                               (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
+
+                             // Logged best times for this race (horse id -> ms)
+                             const timesForRace = bestTimesByRace.get(race.id) || new Map<number, number>();
+                             const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
+                             // Horses that ran this race but don't match its requirements
+                             const timedNonMatching = nonMatchingHorses
+                               .filter((h) => timesForRace.has(h.id) && !matchedIds.has(h.id))
+                               .map((h) => ({ ...h, isNonMatching: true } as any));
+
+                             const allForRace: any[] = [...race.matchingHorses, ...timedNonMatching];
+
+                             // Sort: tier desc, then fastest logged time first, then existing logic
+                             const sorted = allForRace.sort((a, b) => {
+                               if (b.tier !== a.tier) return b.tier - a.tier;
+                               const tA = timesForRace.get(a.id);
+                               const tB = timesForRace.get(b.id);
+                               if (tA != null && tB != null && tA !== tB) return tA - tB;
+                               if (tA != null && tB == null) return -1;
+                               if (tA == null && tB != null) return 1;
+                               if (isCC) {
+                                 const speedA = a.speed ?? 0;
+                                 const speedB = b.speed ?? 0;
+                                 if (speedA === speedB) {
+                                   const ccA = hasCCTrait(a) ? 1 : 0;
+                                   const ccB = hasCCTrait(b) ? 1 : 0;
+                                   if (ccA !== ccB) return ccB - ccA;
+                                 }
+                                 return speedB - speedA;
+                               }
+                               return 0;
+                             });
                            // Group by tier
                            const tierGroups: { tier: number; horses: typeof sorted }[] = [];
                            sorted.forEach((horse) => {
@@ -591,6 +628,7 @@ const LiveEvents = () => {
                                tierGroups.push({ tier: horse.tier, horses: [horse] });
                              }
                            });
+
 
                            return isMobile ? (
                              <div>
@@ -607,11 +645,21 @@ const LiveEvents = () => {
                                            {isMaxTrained(horse) && (
                                              <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
                                            )}
-                                           {getHorseSpecialIcons(horse.traits || []) && (
-                                             <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                           )}
-                                         </div>
-                                         <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">T{horse.tier}</span>
+                                            {getHorseSpecialIcons(horse.traits || []) && (
+                                              <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                            )}
+                                            {(horse as any).isNonMatching && (
+                                              <span className="text-[9px] px-1 py-px rounded bg-muted text-muted-foreground flex-shrink-0">no match</span>
+                                            )}
+                                          </div>
+                                          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                                            {timesForRace.get(horse.id) != null && (
+                                              <span className="text-[10px] font-mono font-semibold px-1 py-px rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                                ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
+                                              </span>
+                                            )}
+                                            <span className="text-[10px] text-muted-foreground">T{horse.tier}</span>
+                                          </div>
                                        </div>
                                        {horse.traits && horse.traits.length > 0 && (
                                          <div className="mt-1">
@@ -650,10 +698,18 @@ const LiveEvents = () => {
                                            {isMaxTrained(horse) && (
                                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
                                            )}
-                                           {getHorseSpecialIcons(horse.traits || []) && (
-                                             <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                           )}
-                                         </div>
+                                            {getHorseSpecialIcons(horse.traits || []) && (
+                                              <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                            )}
+                                            {timesForRace.get(horse.id) != null && (
+                                              <span className="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                                ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
+                                              </span>
+                                            )}
+                                            {(horse as any).isNonMatching && (
+                                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">no match</span>
+                                            )}
+                                          </div>
                                        </TableCell>
                                        <TableCell>
                                          <Badge variant="outline">Tier {horse.tier}</Badge>
