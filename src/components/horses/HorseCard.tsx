@@ -209,6 +209,18 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
           </div>
         </div>
 
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogContent className="w-screen max-w-none h-[100dvh] max-h-none rounded-none p-4 md:p-8 overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit {horse.name}</DialogTitle>
+            </DialogHeader>
+            <HorseEditForm
+              horse={horse}
+              onCancel={() => setIsEditing(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
         <MasterKeyDialog
           isOpen={showMasterKeyDialog}
           onClose={() => {
