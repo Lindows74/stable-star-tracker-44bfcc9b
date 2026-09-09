@@ -283,6 +283,9 @@ const BreedingNotes = () => {
                     <div className="flex flex-wrap gap-1 mt-1">
                       {n.stallion?.name && <Badge variant="secondary">♂ {n.stallion.name}</Badge>}
                       {n.mare?.name && <Badge variant="secondary">♀ {n.mare.name}</Badge>}
+                      {n.target_tier != null && (
+                        <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {n.target_tier}</Badge>
+                      )}
                     </div>
                   </div>
                   <Button
