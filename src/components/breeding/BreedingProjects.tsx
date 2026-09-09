@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X, Pencil } from "lucide-react";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 
 export type BreedingProject = {
@@ -221,17 +221,72 @@ export const BreedingProjects = ({
           >
             <CardContent className="p-3 space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <button
-                  className="flex items-center gap-1 text-left min-w-0"
-                  onClick={() => setOpen((o) => ({ ...o, [p.id]: !isOpen }))}
-                >
-                  {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
-                  <span className="font-semibold break-words">{p.title || "Untitled race"}</span>
-                  <Badge variant="outline" className="ml-1">{list.length}</Badge>
-                </button>
-                <Button variant="ghost" size="icon" aria-label="Delete race" onClick={() => onDelete(p.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {edit ? (
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <Input
+                      value={edit.title}
+                      onChange={(e) =>
+                        setEditing((s) => ({ ...s, [p.id]: { ...edit, title: e.target.value } }))
+                      }
+                      placeholder="Race / goal"
+                      className="h-8 text-sm font-semibold"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={edit.title === p.title && edit.notes === p.notes}
+                        onClick={() => {
+                          onUpdate(p.id, { title: edit.title.trim(), notes: edit.notes });
+                          setEditing((s) => {
+                            const n = { ...s };
+                            delete n[p.id];
+                            return n;
+                          });
+                        }}
+                      >
+                        <Save className="h-3.5 w-3.5 mr-1" /> Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          setEditing((s) => {
+                            const n = { ...s };
+                            delete n[p.id];
+                            return n;
+                          })
+                        }
+                      >
+                        <X className="h-3.5 w-3.5 mr-1" /> Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    className="flex items-center gap-1 text-left min-w-0"
+                    onClick={() => setOpen((o) => ({ ...o, [p.id]: !isOpen }))}
+                  >
+                    {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                    <span className="font-semibold break-words">{p.title || "Untitled race"}</span>
+                    <Badge variant="outline" className="ml-1">{list.length}</Badge>
+                  </button>
+                )}
+                <div className="flex items-center shrink-0">
+                  {!edit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Edit race label"
+                      onClick={() => setEditing((s) => ({ ...s, [p.id]: { title: p.title, notes: p.notes } }))}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" aria-label="Delete race" onClick={() => onDelete(p.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               {isOpen && (
@@ -241,11 +296,11 @@ export const BreedingProjects = ({
                     className="text-xs"
                     value={edit ? edit.notes : p.notes}
                     onChange={(e) =>
-                      setEditing((s) => ({ ...s, [p.id]: { title: p.title, notes: e.target.value } }))
+                      setEditing((s) => ({ ...s, [p.id]: { title: edit ? edit.title : p.title, notes: e.target.value } }))
                     }
                     placeholder="Race notes"
                   />
-                  {edit && edit.notes !== p.notes && (
+                  {edit && edit.notes !== p.notes && edit.title === p.title && (
                     <Button
                       size="sm"
                       variant="secondary"
