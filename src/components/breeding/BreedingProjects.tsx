@@ -78,7 +78,6 @@ export const BreedingProjects = ({
   onDelete,
   onDropPairing,
   onUpdateOutcome,
-  onUpdateOutcome: _u,
   onRemovePairing,
 }: Props) => {
   const [newTitle, setNewTitle] = useState("");
