@@ -449,6 +449,51 @@ export type Database = {
         }
         Relationships: []
       }
+      race_results: {
+        Row: {
+          created_at: string
+          horse_id: number
+          id: number
+          race_id: number
+          raced_at: string
+          time_ms: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          horse_id: number
+          id?: number
+          race_id: number
+          raced_at?: string
+          time_ms: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          horse_id?: number
+          id?: number
+          race_id?: number
+          raced_at?: string
+          time_ms?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "race_results_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "race_results_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "live_races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       race_tier_notes: {
         Row: {
           created_at: string
