@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      breeding_notes: {
+        Row: {
+          created_at: string
+          id: number
+          mare_id: number | null
+          note: string
+          stallion_id: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          mare_id?: number | null
+          note?: string
+          stallion_id?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          mare_id?: number | null
+          note?: string
+          stallion_id?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "breeding_notes_mare_id_fkey"
+            columns: ["mare_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "breeding_notes_stallion_id_fkey"
+            columns: ["stallion_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       breeds: {
         Row: {
           created_at: string
