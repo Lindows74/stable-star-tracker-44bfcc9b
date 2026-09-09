@@ -405,7 +405,12 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                   key={bt.raceId}
                   className="flex items-center justify-between gap-2 text-[10px] md:text-xs rounded-md border px-2 py-1"
                 >
-                  <span className="truncate">{formatRaceLabel(bt.race)}</span>
+                  <span className="truncate flex items-center gap-1">
+                    {formatRaceLabel(bt.race)}
+                    {isTierBest(bt) && (
+                      <Trophy className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                    )}
+                  </span>
                   <span className="font-mono font-medium flex-shrink-0">
                     {formatRaceTime(bt.timeMs)}
                     {bt.runs > 1 && (
