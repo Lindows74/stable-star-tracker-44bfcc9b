@@ -59,7 +59,6 @@ interface RaceMatch {
   distance: string;
   start_time: string;
   track_name: string;
-  prize_money: number;
   tier_restriction: string | null;
   is_active?: boolean;
   matchingHorses: MatchingHorse[];
@@ -500,11 +499,6 @@ const LiveEvents = () => {
                                   📍 {race.track_name}
                                 </span>
                               )}
-                              {race.prize_money ? (
-                                <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
-                                  🏆 {race.prize_money.toLocaleString()}
-                                </span>
-                              ) : null}
 
                              {race.tier_restriction && (
                                <span className="text-[10px] md:text-xs font-medium bg-background px-1.5 py-0.5 rounded border">
