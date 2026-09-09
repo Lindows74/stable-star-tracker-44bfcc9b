@@ -47,6 +47,9 @@ const PairingRow = ({
           <div className="flex flex-wrap gap-1 mt-1">
             {pairing.stallion?.name && <Badge variant="secondary">♂ {pairing.stallion.name}</Badge>}
             {pairing.mare?.name && <Badge variant="secondary">♀ {pairing.mare.name}</Badge>}
+            {pairing.target_tier != null && (
+              <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {pairing.target_tier}</Badge>
+            )}
           </div>
         </div>
         <Button variant="ghost" size="icon" aria-label="Remove pairing" onClick={() => onRemove(pairing.id)}>
