@@ -26,6 +26,7 @@ const RacesMade = () => {
   const [horse, setHorse] = useState<any | null>(null);
   const [raceId, setRaceId] = useState<string>("");
   const [timeInput, setTimeInput] = useState("");
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   const { data: races } = useQuery({
     queryKey: ["live_races_for_results"],
