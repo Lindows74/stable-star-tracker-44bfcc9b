@@ -86,3 +86,21 @@ export const useBestTimesForHorse = (horseId: number) => {
   const best = buildBestTimesByHorse(data || []).get(horseId) || [];
   return { bestTimes: best, isLoading };
 };
+
+// Fastest recorded time per race type + horse tier (key: "surface|distance|tier")
+export const buildTierBestTimes = (rows: RaceResultRow[] = []) => {
+  const map = new Map<string, number>();
+  rows.forEach((row) => {
+    const tier = row.horses?.tier;
+    if (tier == null) return;
+    const key = `${raceTypeKey(row.live_races) || `race-${row.race_id}`}|${tier}`;
+    const existing = map.get(key);
+    if (existing == null || row.time_ms < existing) map.set(key, row.time_ms);
+  });
+  return map;
+};
+
+export const useTierBestTimes = () => {
+  const { data } = useRaceResults();
+  return buildTierBestTimes(data || []);
+};
