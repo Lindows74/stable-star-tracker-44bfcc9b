@@ -168,6 +168,8 @@ const BreedingNotes = () => {
           </p>
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-3 space-y-4 md:space-y-6">
         {/* Pair selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <div className="space-y-2">
