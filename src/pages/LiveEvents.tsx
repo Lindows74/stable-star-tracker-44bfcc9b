@@ -92,6 +92,19 @@ const LiveEvents = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { data: raceResults } = useRaceResults();
+
+  // Best (fastest) logged time per race, per horse
+  const bestTimesByRace = useMemo(() => {
+    const map = new Map<number, Map<number, number>>();
+    (raceResults || []).forEach((row) => {
+      if (!map.has(row.race_id)) map.set(row.race_id, new Map());
+      const byHorse = map.get(row.race_id)!;
+      const current = byHorse.get(row.horse_id);
+      if (current == null || row.time_ms < current) byHorse.set(row.horse_id, row.time_ms);
+    });
+    return map;
+  }, [raceResults]);
 
   // Intersection observer for lazy loading more races
   useEffect(() => {
