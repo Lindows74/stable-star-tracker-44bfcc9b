@@ -584,7 +584,7 @@ const LiveEvents = () => {
                        {/* Race Content */}
                        <div className="p-2 md:p-6">
                         {(() => {
-                          const timesForRace = bestTimesByRace.get(race.id);
+                          const timesForRace = bestTimesByKey.get(raceKey(race));
                           const timedNonMatching = timesForRace
                             ? nonMatchingHorses.filter((h) => timesForRace.has(h.id))
                             : [];
@@ -607,7 +607,7 @@ const LiveEvents = () => {
                                (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
 
                              // Logged best times for this race (horse id -> ms)
-                             const timesForRace = bestTimesByRace.get(race.id) || new Map<number, number>();
+                             const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
                              const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
                              // Horses that ran this race but don't match its requirements
                              const timedNonMatching = nonMatchingHorses
