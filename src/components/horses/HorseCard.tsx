@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Lock, Star } from "lucide-react";
+import { Edit2, Trash2, Lock, Star, Trophy } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -15,7 +15,7 @@ import { checkHorseLiveRaceMatches, formatSurfaceName, type HorseRaceMatch } fro
 import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullStaminaTrait, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits } from "@/utils/horseTraitUtils";
 import { calculateAllStats, getMaxTrainedStats, isMaxTrained } from "@/utils/horseUtils";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
-import { useBestTimesForHorse } from "@/hooks/useRaceResults";
+import { useBestTimesForHorse, useTierBestTimes, raceTypeKey } from "@/hooks/useRaceResults";
 import { formatRaceLabel, formatRaceTime } from "@/utils/raceTimeUtils";
 import {
   AlertDialog,
@@ -47,6 +47,16 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { bestTimes } = useBestTimesForHorse(horse.id);
+  const tierBestTimes = useTierBestTimes();
+
+  // True when this horse's best time for the race equals the fastest time
+  // recorded by any horse in the same tier for that race
+  const isTierBest = (bt: { timeMs: number; race: any; raceId: number }) => {
+    if (horse.tier == null) return false;
+    const key = `${raceTypeKey(bt.race) || `race-${bt.raceId}`}|${horse.tier}`;
+    const best = tierBestTimes.get(key);
+    return best != null && bt.timeMs <= best;
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (horseId: number) => {
@@ -395,7 +405,12 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                   key={bt.raceId}
                   className="flex items-center justify-between gap-2 text-[10px] md:text-xs rounded-md border px-2 py-1"
                 >
-                  <span className="truncate">{formatRaceLabel(bt.race)}</span>
+                  <span className="truncate flex items-center gap-1">
+                    {formatRaceLabel(bt.race)}
+                    {isTierBest(bt) && (
+                      <Trophy className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                    )}
+                  </span>
                   <span className="font-mono font-medium flex-shrink-0">
                     {formatRaceTime(bt.timeMs)}
                     {bt.runs > 1 && (
