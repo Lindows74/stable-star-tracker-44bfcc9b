@@ -28,6 +28,7 @@ const BreedingNotes = () => {
   const [mare, setMare] = useState<any | null>(null);
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
+  const [targetTier, setTargetTier] = useState<string>("");
 
   const { data: notes } = useQuery({
     queryKey: ["breeding_notes"],
@@ -48,6 +49,7 @@ const BreedingNotes = () => {
         mare_id: mare?.id ?? null,
         title: title.trim(),
         note: note.trim(),
+        target_tier: targetTier ? Number(targetTier) : null,
       });
       if (error) throw error;
     },
@@ -55,6 +57,7 @@ const BreedingNotes = () => {
       queryClient.invalidateQueries({ queryKey: ["breeding_notes"] });
       setTitle("");
       setNote("");
+      setTargetTier("");
       toast({ title: "Saved", description: "Your breeding note was saved." });
     },
     onError: () =>
@@ -230,6 +233,20 @@ const BreedingNotes = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            <div className="w-full sm:w-48">
+              <Select value={targetTier} onValueChange={setTargetTier}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Wanted foal tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((t) => (
+                    <SelectItem key={t} value={String(t)}>
+                      Tier {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Textarea
               placeholder="What are you hoping for from this pairing? Traits, breeds, stats..."
               value={note}
@@ -266,6 +283,9 @@ const BreedingNotes = () => {
                     <div className="flex flex-wrap gap-1 mt-1">
                       {n.stallion?.name && <Badge variant="secondary">♂ {n.stallion.name}</Badge>}
                       {n.mare?.name && <Badge variant="secondary">♀ {n.mare.name}</Badge>}
+                      {n.target_tier != null && (
+                        <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {n.target_tier}</Badge>
+                      )}
                     </div>
                   </div>
                   <Button
