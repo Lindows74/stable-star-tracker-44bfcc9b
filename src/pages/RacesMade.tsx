@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowUp, Save, Timer, Trash2, Trophy, X } from "lucide-react";
+import { ArrowUp, ChevronDown, ChevronUp, Save, Timer, Trash2, Trophy, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
