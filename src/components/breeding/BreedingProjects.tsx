@@ -64,6 +64,33 @@ const PairingRow = ({
         </Button>
       </div>
       {pairing.note && <p className="text-xs whitespace-pre-wrap break-words text-muted-foreground">{pairing.note}</p>}
+
+      {/* Tries counter */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">Tries:</span>
+        <div className="flex items-center rounded-md border">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            aria-label="Decrease tries"
+            disabled={(pairing.tries ?? 0) <= 0}
+            onClick={() => onSetTries(pairing.id, Math.max(0, (pairing.tries ?? 0) - 1))}
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </Button>
+          <span className="w-8 text-center text-sm font-semibold tabular-nums">{pairing.tries ?? 0}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            aria-label="Increase tries"
+            onClick={() => onSetTries(pairing.id, (pairing.tries ?? 0) + 1)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
       <Textarea
         placeholder="Outcome log (foal stats, traits, result...)"
         value={outcome}
@@ -133,6 +160,7 @@ export const BreedingProjects = ({
   onUpdateOutcome,
   onRemovePairing,
   onSetFoal,
+  onSetTries,
 }: Props) => {
   const [newTitle, setNewTitle] = useState("");
   const [newNotes, setNewNotes] = useState("");
@@ -247,6 +275,7 @@ export const BreedingProjects = ({
                           onUpdateOutcome={onUpdateOutcome}
                           onRemove={onRemovePairing}
                           onSetFoal={onSetFoal}
+                          onSetTries={onSetTries}
                         />
                       ))
                     )}
