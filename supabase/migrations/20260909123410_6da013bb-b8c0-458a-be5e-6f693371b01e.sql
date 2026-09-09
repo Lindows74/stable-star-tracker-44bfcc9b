@@ -1,0 +1,1 @@
+ALTER TABLE public.breeding_notes ADD COLUMN IF NOT EXISTS target_tier integer;

@@ -23,6 +23,7 @@ export type Database = {
           outcome: string
           project_id: number | null
           stallion_id: number | null
+          target_tier: number | null
           title: string
           updated_at: string
         }
@@ -34,6 +35,7 @@ export type Database = {
           outcome?: string
           project_id?: number | null
           stallion_id?: number | null
+          target_tier?: number | null
           title?: string
           updated_at?: string
         }
@@ -45,6 +47,7 @@ export type Database = {
           outcome?: string
           project_id?: number | null
           stallion_id?: number | null
+          target_tier?: number | null
           title?: string
           updated_at?: string
         }
