@@ -698,10 +698,18 @@ const LiveEvents = () => {
                                            {isMaxTrained(horse) && (
                                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
                                            )}
-                                           {getHorseSpecialIcons(horse.traits || []) && (
-                                             <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                           )}
-                                         </div>
+                                            {getHorseSpecialIcons(horse.traits || []) && (
+                                              <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                            )}
+                                            {timesForRace.get(horse.id) != null && (
+                                              <span className="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                                ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
+                                              </span>
+                                            )}
+                                            {(horse as any).isNonMatching && (
+                                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">no match</span>
+                                            )}
+                                          </div>
                                        </TableCell>
                                        <TableCell>
                                          <Badge variant="outline">Tier {horse.tier}</Badge>
