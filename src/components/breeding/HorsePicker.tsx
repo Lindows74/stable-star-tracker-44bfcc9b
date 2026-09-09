@@ -43,7 +43,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
   });
 
   const filtered = useMemo(
-    () => (horses || []).filter((h: any) => h.gender === gender),
+    () => (horses || []).filter((h: any) => gender === "any" || h.gender === gender),
     [horses, gender]
   );
 
