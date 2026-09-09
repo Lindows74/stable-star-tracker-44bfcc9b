@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Plus, Trash2, Save } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Trash2, Save, X } from "lucide-react";
+import { HorsePicker } from "@/components/breeding/HorsePicker";
 
 export type BreedingProject = {
   id: number;
@@ -21,16 +22,19 @@ type Props = {
   onDropPairing: (pairingId: number, projectId: number | null) => void;
   onUpdateOutcome: (pairingId: number, outcome: string) => void;
   onRemovePairing: (pairingId: number) => void;
+  onSetFoal: (pairingId: number, foalId: number | null) => void;
 };
 
 const PairingRow = ({
   pairing,
   onUpdateOutcome,
   onRemove,
+  onSetFoal,
 }: {
   pairing: any;
   onUpdateOutcome: (id: number, outcome: string) => void;
   onRemove: (id: number) => void;
+  onSetFoal: (id: number, foalId: number | null) => void;
 }) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
   const dirty = outcome !== (pairing.outcome || "");
@@ -69,6 +73,49 @@ const PairingRow = ({
           <Save className="h-3.5 w-3.5 mr-1" /> Save outcome
         </Button>
       )}
+
+      {/* Foal */}
+      {pairing.foal ? (
+        <div className="rounded-md border bg-muted/40 p-2 space-y-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-1">
+              <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
+                🐴 {pairing.foal.name}
+              </Badge>
+              {pairing.foal.tier != null && <Badge variant="outline">Tier {pairing.foal.tier}</Badge>}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              aria-label="Remove foal"
+              onClick={() => onSetFoal(pairing.id, null)}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          {pairing.foal.horse_traits?.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {pairing.foal.horse_traits.map((t: any, i: number) => (
+                <Badge key={i} variant="secondary" className="text-[10px]">
+                  {t.trait_name}
+                  {t.trait_value ? ` ${t.trait_value}` : ""}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>
+          )}
+        </div>
+      ) : (
+        <HorsePicker
+          gender="any"
+          label="Foal"
+          size="sm"
+          triggerLabel="Add foal"
+          onSelect={(h) => onSetFoal(pairing.id, h.id)}
+        />
+      )}
     </div>
   );
 };
@@ -82,6 +129,7 @@ export const BreedingProjects = ({
   onDropPairing,
   onUpdateOutcome,
   onRemovePairing,
+  onSetFoal,
 }: Props) => {
   const [newTitle, setNewTitle] = useState("");
   const [newNotes, setNewNotes] = useState("");
@@ -195,6 +243,7 @@ export const BreedingProjects = ({
                           pairing={pair}
                           onUpdateOutcome={onUpdateOutcome}
                           onRemove={onRemovePairing}
+                          onSetFoal={onSetFoal}
                         />
                       ))
                     )}

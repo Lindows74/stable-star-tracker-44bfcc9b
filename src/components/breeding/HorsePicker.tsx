@@ -11,13 +11,14 @@ import { TRAITS } from "@/utils/constants";
 import { Search } from "lucide-react";
 
 interface HorsePickerProps {
-  gender: "stallion" | "mare";
+  gender: "stallion" | "mare" | "any";
   label: string;
   onSelect: (horse: any) => void;
   triggerLabel?: string;
+  size?: "default" | "sm";
 }
 
-export const HorsePicker = ({ gender, label, onSelect, triggerLabel }: HorsePickerProps) => {
+export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "default" }: HorsePickerProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
@@ -42,7 +43,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel }: HorsePick
   });
 
   const filtered = useMemo(
-    () => (horses || []).filter((h: any) => h.gender === gender),
+    () => (horses || []).filter((h: any) => gender === "any" || h.gender === gender),
     [horses, gender]
   );
 
@@ -52,7 +53,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel }: HorsePick
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" size={size} className="w-full">
           <Search className="h-4 w-4 mr-2" />
           {triggerLabel || `Choose ${label}`}
         </Button>

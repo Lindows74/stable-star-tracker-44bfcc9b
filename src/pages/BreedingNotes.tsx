@@ -35,7 +35,9 @@ const BreedingNotes = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("breeding_notes")
-        .select("*, stallion:stallion_id(id, name), mare:mare_id(id, name)")
+        .select(
+          "*, stallion:stallion_id(id, name), mare:mare_id(id, name), foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))"
+        )
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -135,6 +137,21 @@ const BreedingNotes = () => {
       invalidateAll();
       toast({ title: "Saved", description: "Outcome log updated." });
     },
+  });
+
+  const setFoal = useMutation({
+    mutationFn: async ({ id, foalId }: { id: number; foalId: number | null }) => {
+      const { error } = await (supabase.from("breeding_notes") as any)
+        .update({ foal_id: foalId })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: "Saved", description: "Foal updated." });
+    },
+    onError: () =>
+      toast({ title: "Error", description: "Could not save the foal.", variant: "destructive" }),
   });
 
   const pairingsByProject = useMemo(() => {
@@ -335,6 +352,7 @@ const BreedingNotes = () => {
               onDropPairing={(pairingId, projectId) => assignPairing.mutate({ id: pairingId, projectId })}
               onUpdateOutcome={(id, outcome) => updateOutcome.mutate({ id, outcome })}
               onRemovePairing={(id) => assignPairing.mutate({ id, projectId: null })}
+              onSetFoal={(id, foalId) => setFoal.mutate({ id, foalId })}
             />
           </div>
         </div>
