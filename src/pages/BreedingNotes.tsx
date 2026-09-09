@@ -57,6 +57,7 @@ const BreedingNotes = () => {
       queryClient.invalidateQueries({ queryKey: ["breeding_notes"] });
       setTitle("");
       setNote("");
+      setTargetTier("");
       toast({ title: "Saved", description: "Your breeding note was saved." });
     },
     onError: () =>
