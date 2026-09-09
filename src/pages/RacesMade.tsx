@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowUp, Save, Timer, Trash2, Trophy, X } from "lucide-react";
+import { ArrowUp, ChevronDown, ChevronUp, Save, Timer, Trash2, Trophy, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,7 @@ const RacesMade = () => {
   const [horse, setHorse] = useState<any | null>(null);
   const [raceId, setRaceId] = useState<string>("");
   const [timeInput, setTimeInput] = useState("");
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   const { data: races } = useQuery({
     queryKey: ["live_races_for_results"],
@@ -186,42 +187,63 @@ const RacesMade = () => {
           <p className="text-sm text-muted-foreground">No race results yet.</p>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
-            {grouped.map((group) => (
-              <Card key={group.raceId}>
-                <CardHeader className="p-3 md:p-4 pb-2">
-                  <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race)}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 md:p-4 pt-0 space-y-1.5">
-                  {group.rows.map((row, idx) => (
-                    <div
-                      key={row.id}
-                      className="flex items-center justify-between gap-2 rounded-md border p-2 text-xs md:text-sm"
+            {grouped.map((group) => {
+              const isOpen = expanded.has(group.raceId);
+              return (
+                <Card key={group.raceId}>
+                  <CardHeader className="p-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = new Set(expanded);
+                        if (next.has(group.raceId)) next.delete(group.raceId);
+                        else next.add(group.raceId);
+                        setExpanded(next);
+                      }}
+                      className="w-full flex items-center justify-between gap-2 p-3 md:p-4 text-left"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        {group.bestByTier.get(row.horses?.tier ?? 0) === row.time_ms && (
-                          <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                        )}
-                        <span className="font-medium truncate">{row.horses?.name || "Unknown horse"}</span>
-                        {row.horses?.tier != null && (
-                          <Badge variant="secondary" className="text-[10px]">Tier {row.horses.tier}</Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="font-mono">{formatRaceTime(row.time_ms)}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => deleteMutation.mutate(row.id)}
+                      <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race)}</CardTitle>
+                      {isOpen ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      )}
+                    </button>
+                  </CardHeader>
+                  {isOpen && (
+                    <CardContent className="p-3 md:p-4 pt-0 space-y-1.5">
+                      {group.rows.map((row, idx) => (
+                        <div
+                          key={row.id}
+                          className="flex items-center justify-between gap-2 rounded-md border p-2 text-xs md:text-sm"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+                          <div className="flex items-center gap-2 min-w-0">
+                            {group.bestByTier.get(row.horses?.tier ?? 0) === row.time_ms && (
+                              <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                            )}
+                            <span className="font-medium truncate">{row.horses?.name || "Unknown horse"}</span>
+                            {row.horses?.tier != null && (
+                              <Badge variant="secondary" className="text-[10px]">Tier {row.horses.tier}</Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="font-mono">{formatRaceTime(row.time_ms)}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => deleteMutation.mutate(row.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
