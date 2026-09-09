@@ -53,7 +53,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" size={size} className="w-full">
           <Search className="h-4 w-4 mr-2" />
           {triggerLabel || `Choose ${label}`}
         </Button>
