@@ -18,8 +18,8 @@ export const StatField = ({ control, name, label, min = 0, max = 300 }: StatFiel
       name={name}
       render={({ field }) => (
         <FormItem className="space-y-0">
-          <div className="flex items-center gap-2 rounded-md border bg-card px-2 py-1.5">
-            <FormLabel className="text-xs font-medium flex-1 truncate mb-0">{label}</FormLabel>
+          <div className="rounded-md border bg-card px-2 py-1.5">
+            <FormLabel className="block text-xs font-medium text-muted-foreground mb-1">{label}</FormLabel>
             <FormControl>
               <Input
                 type="number"
@@ -27,7 +27,7 @@ export const StatField = ({ control, name, label, min = 0, max = 300 }: StatFiel
                 pattern="[0-9]*"
                 min={min}
                 max={max}
-                className="h-9 min-w-0 flex-1 px-2 text-right text-base font-semibold"
+                className="h-9 w-full px-2 text-base font-semibold"
                 value={typeof field.value === 'number' ? field.value.toString() : ""}
                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
               />
