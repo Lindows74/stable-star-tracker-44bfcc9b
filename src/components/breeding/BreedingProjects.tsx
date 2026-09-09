@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Plus, Trash2, Save, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X } from "lucide-react";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 
 export type BreedingProject = {
@@ -23,6 +23,7 @@ type Props = {
   onUpdateOutcome: (pairingId: number, outcome: string) => void;
   onRemovePairing: (pairingId: number) => void;
   onSetFoal: (pairingId: number, foalId: number | null) => void;
+  onSetTries: (pairingId: number, tries: number) => void;
 };
 
 const PairingRow = ({
@@ -30,11 +31,13 @@ const PairingRow = ({
   onUpdateOutcome,
   onRemove,
   onSetFoal,
+  onSetTries,
 }: {
   pairing: any;
   onUpdateOutcome: (id: number, outcome: string) => void;
   onRemove: (id: number) => void;
   onSetFoal: (id: number, foalId: number | null) => void;
+  onSetTries: (id: number, tries: number) => void;
 }) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
   const dirty = outcome !== (pairing.outcome || "");
