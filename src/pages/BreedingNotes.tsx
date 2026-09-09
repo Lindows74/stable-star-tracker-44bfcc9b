@@ -139,6 +139,21 @@ const BreedingNotes = () => {
     },
   });
 
+  const setFoal = useMutation({
+    mutationFn: async ({ id, foalId }: { id: number; foalId: number | null }) => {
+      const { error } = await (supabase.from("breeding_notes") as any)
+        .update({ foal_id: foalId })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: "Saved", description: "Foal updated." });
+    },
+    onError: () =>
+      toast({ title: "Error", description: "Could not save the foal.", variant: "destructive" }),
+  });
+
   const pairingsByProject = useMemo(() => {
     const map: Record<number, any[]> = {};
     (notes || []).forEach((n: any) => {
