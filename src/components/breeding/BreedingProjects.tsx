@@ -22,16 +22,19 @@ type Props = {
   onDropPairing: (pairingId: number, projectId: number | null) => void;
   onUpdateOutcome: (pairingId: number, outcome: string) => void;
   onRemovePairing: (pairingId: number) => void;
+  onSetFoal: (pairingId: number, foalId: number | null) => void;
 };
 
 const PairingRow = ({
   pairing,
   onUpdateOutcome,
   onRemove,
+  onSetFoal,
 }: {
   pairing: any;
   onUpdateOutcome: (id: number, outcome: string) => void;
   onRemove: (id: number) => void;
+  onSetFoal: (id: number, foalId: number | null) => void;
 }) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
   const dirty = outcome !== (pairing.outcome || "");
