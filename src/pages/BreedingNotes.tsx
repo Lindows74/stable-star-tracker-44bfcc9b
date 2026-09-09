@@ -35,7 +35,9 @@ const BreedingNotes = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("breeding_notes")
-        .select("*, stallion:stallion_id(id, name), mare:mare_id(id, name)")
+        .select(
+          "*, stallion:stallion_id(id, name), mare:mare_id(id, name), foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))"
+        )
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data || [];
