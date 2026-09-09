@@ -69,6 +69,87 @@ const BreedingNotes = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["breeding_notes"] }),
   });
 
+  const { data: projects } = useQuery({
+    queryKey: ["breeding_projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("breeding_projects")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["breeding_projects"] });
+    queryClient.invalidateQueries({ queryKey: ["breeding_notes"] });
+  };
+
+  const createProject = useMutation({
+    mutationFn: async ({ title, notes }: { title: string; notes: string }) => {
+      const { error } = await supabase.from("breeding_projects").insert({ title, notes });
+      if (error) throw error;
+    },
+    onSuccess: invalidateAll,
+    onError: () =>
+      toast({ title: "Error", description: "Could not add the race.", variant: "destructive" }),
+  });
+
+  const updateProject = useMutation({
+    mutationFn: async ({ id, values }: { id: number; values: { title: string; notes: string } }) => {
+      const { error } = await supabase.from("breeding_projects").update(values).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidateAll,
+  });
+
+  const deleteProject = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase.from("breeding_projects").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidateAll,
+  });
+
+  const assignPairing = useMutation({
+    mutationFn: async ({ id, projectId }: { id: number; projectId: number | null }) => {
+      const { error } = await supabase
+        .from("breeding_notes")
+        .update({ project_id: projectId })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidateAll,
+  });
+
+  const updateOutcome = useMutation({
+    mutationFn: async ({ id, outcome }: { id: number; outcome: string }) => {
+      const { error } = await supabase.from("breeding_notes").update({ outcome }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: "Saved", description: "Outcome log updated." });
+    },
+  });
+
+  const pairingsByProject = useMemo(() => {
+    const map: Record<number, any[]> = {};
+    (notes || []).forEach((n: any) => {
+      if (n.project_id) {
+        map[n.project_id] = map[n.project_id] || [];
+        map[n.project_id].push(n);
+      }
+    });
+    return map;
+  }, [notes]);
+
+  const unassigned = useMemo(
+    () => (notes || []).filter((n: any) => !n.project_id),
+    [notes]
+  );
+
   const handleSave = () => {
     if (!note.trim()) {
       toast({ title: "Nothing to save", description: "Write a note first.", variant: "destructive" });
