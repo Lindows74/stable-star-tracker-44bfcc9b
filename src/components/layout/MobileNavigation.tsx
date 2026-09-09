@@ -31,7 +31,7 @@ export const MobileNavigation = ({ onAddHorse }: MobileNavigationProps) => {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 text-xs transition-colors",
+                "flex flex-col items-center justify-center gap-1 text-[10px] transition-colors",
                 isActive 
                   ? "text-primary font-medium" 
                   : "text-muted-foreground hover:text-foreground"
@@ -44,7 +44,7 @@ export const MobileNavigation = ({ onAddHorse }: MobileNavigationProps) => {
         })}
         <button
           onClick={onAddHorse}
-          className="flex flex-col items-center justify-center gap-1 text-xs text-primary font-medium hover:bg-accent transition-colors"
+          className="flex flex-col items-center justify-center gap-1 text-[10px] text-primary font-medium hover:bg-accent transition-colors"
         >
           <Plus className="h-5 w-5" />
           <span>Add</span>

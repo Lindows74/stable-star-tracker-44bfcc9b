@@ -15,6 +15,8 @@ import { checkHorseLiveRaceMatches, formatSurfaceName, type HorseRaceMatch } fro
 import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullStaminaTrait, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits } from "@/utils/horseTraitUtils";
 import { calculateAllStats, getMaxTrainedStats, isMaxTrained } from "@/utils/horseUtils";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
+import { useBestTimesForHorse } from "@/hooks/useRaceResults";
+import { formatRaceLabel, formatRaceTime } from "@/utils/raceTimeUtils";
 import {
   AlertDialog,
   AlertDialogAction,
