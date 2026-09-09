@@ -11,13 +11,14 @@ import { TRAITS } from "@/utils/constants";
 import { Search } from "lucide-react";
 
 interface HorsePickerProps {
-  gender: "stallion" | "mare";
+  gender: "stallion" | "mare" | "any";
   label: string;
   onSelect: (horse: any) => void;
   triggerLabel?: string;
+  size?: "default" | "sm";
 }
 
-export const HorsePicker = ({ gender, label, onSelect, triggerLabel }: HorsePickerProps) => {
+export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "default" }: HorsePickerProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
