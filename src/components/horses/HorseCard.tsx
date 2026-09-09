@@ -26,6 +26,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface HorseCardProps {
   horse: any;
@@ -73,26 +79,6 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     },
   });
 
-  if (isEditing) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Edit {horse.name}</h3>
-          <Button 
-            variant="outline" 
-            onClick={() => setIsEditing(false)}
-            size="sm"
-          >
-            Cancel
-          </Button>
-        </div>
-        <HorseEditForm 
-          horse={horse} 
-          onCancel={() => setIsEditing(false)} 
-        />
-      </div>
-    );
-  }
 
   const { totalSpeed, totalSprintEnergy, totalAcceleration, totalAgility, totalJump } = 
     calculateAllStats(horse);
