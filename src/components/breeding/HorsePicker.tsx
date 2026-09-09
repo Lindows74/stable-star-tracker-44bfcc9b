@@ -23,8 +23,10 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
+  const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [traitsOpen, setTraitsOpen] = useState(false);
   const [breedsOpen, setBreedsOpen] = useState(false);
+  const [tiersOpen, setTiersOpen] = useState(false);
 
   const { data: availableBreeds } = useBreeds();
 
@@ -43,8 +45,13 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
   });
 
   const filtered = useMemo(
-    () => (horses || []).filter((h: any) => gender === "any" || h.gender === gender),
-    [horses, gender]
+    () =>
+      (horses || []).filter(
+        (h: any) =>
+          (gender === "any" || h.gender === gender) &&
+          (selectedTiers.length === 0 || selectedTiers.includes(String(h.tier)))
+      ),
+    [horses, gender, selectedTiers]
   );
 
   const toggle = (list: string[], set: (v: string[]) => void, value: string) =>
@@ -89,6 +96,16 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
               onToggle={(v) => toggle(selectedBreeds, setSelectedBreeds, v)}
               open={breedsOpen}
               onOpenChange={setBreedsOpen}
+            />
+            <MultiSelectDropdown
+              label="Tier"
+              placeholder="Select tiers..."
+              searchPlaceholder="Search tiers..."
+              options={["1","2","3","4","5","6","7","8","9","10"]}
+              selectedValues={selectedTiers}
+              onToggle={(v) => toggle(selectedTiers, setSelectedTiers, v)}
+              open={tiersOpen}
+              onOpenChange={setTiersOpen}
             />
           </div>
         </div>
