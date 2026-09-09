@@ -26,6 +26,7 @@ export type Database = {
           stallion_id: number | null
           target_tier: number | null
           title: string
+          tries: number
           updated_at: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           stallion_id?: number | null
           target_tier?: number | null
           title?: string
+          tries?: number
           updated_at?: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           stallion_id?: number | null
           target_tier?: number | null
           title?: string
+          tries?: number
           updated_at?: string
         }
         Relationships: [

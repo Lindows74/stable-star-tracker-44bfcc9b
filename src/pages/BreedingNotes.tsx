@@ -154,6 +154,18 @@ const BreedingNotes = () => {
       toast({ title: "Error", description: "Could not save the foal.", variant: "destructive" }),
   });
 
+  const setTries = useMutation({
+    mutationFn: async ({ id, tries }: { id: number; tries: number }) => {
+      const { error } = await (supabase.from("breeding_notes") as any)
+        .update({ tries })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidateAll,
+    onError: () =>
+      toast({ title: "Error", description: "Could not save the tries counter.", variant: "destructive" }),
+  });
+
   const pairingsByProject = useMemo(() => {
     const map: Record<number, any[]> = {};
     (notes || []).forEach((n: any) => {
@@ -353,6 +365,7 @@ const BreedingNotes = () => {
               onUpdateOutcome={(id, outcome) => updateOutcome.mutate({ id, outcome })}
               onRemovePairing={(id) => assignPairing.mutate({ id, projectId: null })}
               onSetFoal={(id, foalId) => setFoal.mutate({ id, foalId })}
+              onSetTries={(id, tries) => setTries.mutate({ id, tries })}
             />
           </div>
         </div>
