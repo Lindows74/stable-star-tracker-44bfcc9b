@@ -43,16 +43,22 @@ export interface BestTime {
   runs: number;
 }
 
-// Best (lowest) time per race, grouped by horse id
+// Key for a race "type": surface + distance (matches Live Events grouping,
+// so duplicate race entries of the same type share best times)
+export const raceTypeKey = (race: RaceResultRow["live_races"]) =>
+  race ? `${race.surface}|${race.distance}` : "";
+
+// Best (lowest) time per race type, grouped by horse id
 export const buildBestTimesByHorse = (rows: RaceResultRow[] = []) => {
-  const map = new Map<number, Map<number, BestTime>>();
+  const map = new Map<number, Map<string, BestTime>>();
 
   rows.forEach((row) => {
     if (!map.has(row.horse_id)) map.set(row.horse_id, new Map());
     const byRace = map.get(row.horse_id)!;
-    const existing = byRace.get(row.race_id);
+    const key = raceTypeKey(row.live_races) || `race-${row.race_id}`;
+    const existing = byRace.get(key);
     if (!existing) {
-      byRace.set(row.race_id, {
+      byRace.set(key, {
         raceId: row.race_id,
         race: row.live_races,
         timeMs: row.time_ms,
@@ -60,7 +66,11 @@ export const buildBestTimesByHorse = (rows: RaceResultRow[] = []) => {
       });
     } else {
       existing.runs += 1;
-      if (row.time_ms < existing.timeMs) existing.timeMs = row.time_ms;
+      if (row.time_ms < existing.timeMs) {
+        existing.timeMs = row.time_ms;
+        existing.raceId = row.race_id;
+        existing.race = row.live_races;
+      }
     }
   });
 
