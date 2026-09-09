@@ -28,6 +28,7 @@ const BreedingNotes = () => {
   const [mare, setMare] = useState<any | null>(null);
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
+  const [targetTier, setTargetTier] = useState<string>("");
 
   const { data: notes } = useQuery({
     queryKey: ["breeding_notes"],
@@ -48,6 +49,7 @@ const BreedingNotes = () => {
         mare_id: mare?.id ?? null,
         title: title.trim(),
         note: note.trim(),
+        target_tier: targetTier ? Number(targetTier) : null,
       });
       if (error) throw error;
     },
