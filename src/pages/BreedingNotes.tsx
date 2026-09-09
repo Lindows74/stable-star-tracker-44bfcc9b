@@ -233,6 +233,20 @@ const BreedingNotes = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            <div className="w-full sm:w-48">
+              <Select value={targetTier} onValueChange={setTargetTier}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Wanted foal tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((t) => (
+                    <SelectItem key={t} value={String(t)}>
+                      Tier {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Textarea
               placeholder="What are you hoping for from this pairing? Traits, breeds, stats..."
               value={note}
