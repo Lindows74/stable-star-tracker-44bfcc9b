@@ -645,11 +645,21 @@ const LiveEvents = () => {
                                            {isMaxTrained(horse) && (
                                              <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
                                            )}
-                                           {getHorseSpecialIcons(horse.traits || []) && (
-                                             <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                           )}
-                                         </div>
-                                         <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">T{horse.tier}</span>
+                                            {getHorseSpecialIcons(horse.traits || []) && (
+                                              <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                            )}
+                                            {(horse as any).isNonMatching && (
+                                              <span className="text-[9px] px-1 py-px rounded bg-muted text-muted-foreground flex-shrink-0">no match</span>
+                                            )}
+                                          </div>
+                                          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                                            {timesForRace.get(horse.id) != null && (
+                                              <span className="text-[10px] font-mono font-semibold px-1 py-px rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                                ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
+                                              </span>
+                                            )}
+                                            <span className="text-[10px] text-muted-foreground">T{horse.tier}</span>
+                                          </div>
                                        </div>
                                        {horse.traits && horse.traits.length > 0 && (
                                          <div className="mt-1">
