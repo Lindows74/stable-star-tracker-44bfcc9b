@@ -1,0 +1,1 @@
+ALTER TABLE public.breeding_notes ADD COLUMN IF NOT EXISTS foal_id integer REFERENCES public.horses(id) ON DELETE SET NULL;

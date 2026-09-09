@@ -17,6 +17,7 @@ export type Database = {
       breeding_notes: {
         Row: {
           created_at: string
+          foal_id: number | null
           id: number
           mare_id: number | null
           note: string
@@ -29,6 +30,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          foal_id?: number | null
           id?: number
           mare_id?: number | null
           note?: string
@@ -41,6 +43,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          foal_id?: number | null
           id?: number
           mare_id?: number | null
           note?: string
@@ -52,6 +55,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "breeding_notes_foal_id_fkey"
+            columns: ["foal_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "breeding_notes_mare_id_fkey"
             columns: ["mare_id"]
