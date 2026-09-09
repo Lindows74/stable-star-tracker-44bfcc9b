@@ -385,6 +385,29 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
           </div>
         )}
 
+        {/* Best race times */}
+        {bestTimes.length > 0 && (
+          <div>
+            <h4 className="text-xs md:text-sm font-medium mb-1.5 md:mb-2">Best Times</h4>
+            <div className="space-y-1">
+              {bestTimes.map((bt) => (
+                <div
+                  key={bt.raceId}
+                  className="flex items-center justify-between gap-2 text-[10px] md:text-xs rounded-md border px-2 py-1"
+                >
+                  <span className="truncate">{formatRaceLabel(bt.race)}</span>
+                  <span className="font-mono font-medium flex-shrink-0">
+                    {formatRaceTime(bt.timeMs)}
+                    {bt.runs > 1 && (
+                      <span className="text-muted-foreground font-sans"> ({bt.runs} runs)</span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Traits */}
         {horse.horse_traits && horse.horse_traits.length > 0 && (
           <div>
