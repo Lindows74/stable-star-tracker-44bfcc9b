@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import HorseSearch from "./pages/HorseSearch";
 import LiveEvents from "./pages/LiveEvents";
 import BreedingSuggestions from "./pages/BreedingSuggestions";
+import BreedingNotes from "./pages/BreedingNotes";
 import NotFound from "./pages/NotFound";
 
 console.log('App.tsx: Component loading...');
@@ -44,6 +45,7 @@ const App = () => {
               <Route path="/search" element={<HorseSearch />} />
               <Route path="/breeding" element={<LiveEvents />} />
               <Route path="/pairs" element={<BreedingSuggestions />} />
+              <Route path="/breeding-notes" element={<BreedingNotes />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
