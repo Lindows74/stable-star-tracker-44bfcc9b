@@ -15,7 +15,7 @@ import { checkHorseLiveRaceMatches, formatSurfaceName, type HorseRaceMatch } fro
 import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullStaminaTrait, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits } from "@/utils/horseTraitUtils";
 import { calculateAllStats, getMaxTrainedStats, isMaxTrained } from "@/utils/horseUtils";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
-import { useBestTimesForHorse } from "@/hooks/useRaceResults";
+import { useBestTimesForHorse, useTierBestTimes, raceTypeKey } from "@/hooks/useRaceResults";
 import { formatRaceLabel, formatRaceTime } from "@/utils/raceTimeUtils";
 import {
   AlertDialog,
@@ -47,6 +47,16 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { bestTimes } = useBestTimesForHorse(horse.id);
+  const tierBestTimes = useTierBestTimes();
+
+  // True when this horse's best time for the race equals the fastest time
+  // recorded by any horse in the same tier for that race
+  const isTierBest = (bt: { timeMs: number; race: any; raceId: number }) => {
+    if (horse.tier == null) return false;
+    const key = `${raceTypeKey(bt.race) || `race-${bt.raceId}`}|${horse.tier}`;
+    const best = tierBestTimes.get(key);
+    return best != null && bt.timeMs <= best;
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (horseId: number) => {
