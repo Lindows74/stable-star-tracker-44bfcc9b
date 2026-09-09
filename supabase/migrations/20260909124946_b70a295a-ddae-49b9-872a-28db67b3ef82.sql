@@ -1,0 +1,1 @@
+ALTER TABLE public.breeding_notes ADD COLUMN IF NOT EXISTS tries integer NOT NULL DEFAULT 0;
