@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Plus, Trash2, Save } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Trash2, Save, X } from "lucide-react";
+import { HorsePicker } from "@/components/breeding/HorsePicker";
 
 export type BreedingProject = {
   id: number;
