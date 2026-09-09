@@ -174,14 +174,16 @@ const EditRaceForm = ({ race, open, onOpenChange, onRaceUpdated }: EditRaceFormP
           <div className="space-y-2">
             <Label htmlFor="tier_restriction">Tier Restriction</Label>
             <Select
-              value={formData.tier_restriction}
-              onValueChange={(value) => setFormData({ ...formData, tier_restriction: value })}
+              value={formData.tier_restriction || "none"}
+              onValueChange={(value) =>
+                setFormData({ ...formData, tier_restriction: value === "none" ? "" : value })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="No restriction" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No restriction</SelectItem>
+                <SelectItem value="none">No restriction</SelectItem>
                 <SelectItem value="odd_grades">Odd Grades (3, 5, 7, 9)</SelectItem>
                 <SelectItem value="even_grades">Even Grades (2, 4, 6, 8)</SelectItem>
               </SelectContent>
