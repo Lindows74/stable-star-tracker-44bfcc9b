@@ -31,13 +31,15 @@ const PairingRow = ({
   pairing,
   onUpdateOutcome,
   onRemove,
-  onSetFoal,
+  onAddFoal,
+  onRemoveFoal,
   onSetTries,
 }: {
   pairing: any;
   onUpdateOutcome: (id: number, outcome: string) => void;
   onRemove: (id: number) => void;
-  onSetFoal: (id: number, foalId: number | null) => void;
+  onAddFoal: (id: number, foalId: number) => void;
+  onRemoveFoal: (id: number, foalId: number) => void;
   onSetTries: (id: number, tries: number) => void;
 }) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
