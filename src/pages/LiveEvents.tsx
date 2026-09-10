@@ -82,6 +82,8 @@ const LOAD_MORE_COUNT = 5;
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
   const [nonMatchingHorses, setNonMatchingHorses] = useState<NonMatchingHorse[]>([]);
+  // All horses (used to show logged times even for horses that match other races)
+  const [allHorsesPool, setAllHorsesPool] = useState<NonMatchingHorse[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalHorses, setTotalHorses] = useState(0);
   const [editingRace, setEditingRace] = useState<RaceMatch | null>(null);
@@ -285,6 +287,18 @@ const LiveEvents = () => {
           `);
 
         if (allHorses) {
+          const mapHorse = (horse: any) => ({
+            id: horse.id,
+            name: horse.name,
+            tier: horse.tier,
+            traits: horse.horse_traits?.map((ht: any) => ht.trait_name) || [],
+            max_speed: horse.max_speed,
+            max_sprint_energy: horse.max_sprint_energy,
+            max_acceleration: horse.max_acceleration,
+            max_agility: horse.max_agility,
+            max_jump: horse.max_jump,
+          });
+          setAllHorsesPool(allHorses.map(mapHorse));
           const nonMatching = allHorses
             .filter((horse: any) => !matchedHorseIds.has(horse.id))
             .map((horse: any) => ({
@@ -594,7 +608,7 @@ const LiveEvents = () => {
                         {(() => {
                           const timesForRace = bestTimesByKey.get(raceKey(race));
                           const timedNonMatching = timesForRace
-                            ? nonMatchingHorses.filter((h) => timesForRace.has(h.id))
+                            ? allHorsesPool.filter((h) => timesForRace.has(h.id))
                             : [];
                           return race.matchingHorses.length + timedNonMatching.length > 0;
                         })() ? (
@@ -618,7 +632,7 @@ const LiveEvents = () => {
                              const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
                              const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
                              // Horses that ran this race but don't match its requirements
-                             const timedNonMatching = nonMatchingHorses
+                             const timedNonMatching = allHorsesPool
                                .filter((h) => timesForRace.has(h.id) && !matchedIds.has(h.id))
                                .map((h) => ({ ...h, isNonMatching: true } as any));
 
