@@ -393,7 +393,8 @@ const BreedingNotes = () => {
               onDropPairing={(pairingId, projectId) => assignPairing.mutate({ id: pairingId, projectId })}
               onUpdateOutcome={(id, outcome) => updateOutcome.mutate({ id, outcome })}
               onRemovePairing={(id) => assignPairing.mutate({ id, projectId: null })}
-              onSetFoal={(id, foalId) => setFoal.mutate({ id, foalId })}
+              onAddFoal={(id, foalId) => addFoal.mutate({ id, foalId })}
+              onRemoveFoal={(id, foalId) => removeFoal.mutate({ noteId: id, foalId })}
               onSetTries={(id, tries) => setTries.mutate({ id, tries })}
             />
           </div>
