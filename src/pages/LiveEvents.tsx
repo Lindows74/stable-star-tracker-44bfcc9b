@@ -631,8 +631,16 @@ const LiveEvents = () => {
                               .map((h) => ({ ...h, isNonMatching: !matchedIds.has(h.id) } as any))
                               .sort((a, b) => (timesForRace.get(a.id) ?? Infinity) - (timesForRace.get(b.id) ?? Infinity));
 
-                            // Top 3 fastest recorded times for this race
-                            const topTimedIds = new Set(allTimed.slice(0, 3).map((h) => h.id));
+                            // Top 3 fastest recorded times PER TIER for this race
+                            const topTimedIds = new Set<number>();
+                            const perTierCount = new Map<number, number>();
+                            allTimed.forEach((h) => {
+                              const count = perTierCount.get(h.tier) ?? 0;
+                              if (count < 3) {
+                                topTimedIds.add(h.id);
+                                perTierCount.set(h.tier, count + 1);
+                              }
+                            });
 
                             // Full display list: all matching horses + all timed non-matching horses
                             const displayHorses = race.matchingHorses
@@ -643,15 +651,16 @@ const LiveEvents = () => {
                                   .map((h) => ({ ...h, isTopTimed: topTimedIds.has(h.id) } as any))
                               );
 
-                            // Sort: top timed first (by fastest time), then matching horses by tier desc, etc.
+                            // Sort: tier desc first, then within each tier: top-3 timed horses
+                            // (fastest first), then the rest of the matching horses.
                             const sorted = displayHorses.sort((a, b) => {
+                              if (b.tier !== a.tier) return b.tier - a.tier;
                               if (a.isTopTimed !== b.isTopTimed) return a.isTopTimed ? -1 : 1;
                               if (a.isTopTimed && b.isTopTimed) {
                                 const tA = timesForRace.get(a.id) ?? Infinity;
                                 const tB = timesForRace.get(b.id) ?? Infinity;
                                 return tA - tB;
                               }
-                              if (b.tier !== a.tier) return b.tier - a.tier;
                               const tA = timesForRace.get(a.id);
                               const tB = timesForRace.get(b.id);
                               if (tA != null && tB != null && tA !== tB) return tA - tB;
