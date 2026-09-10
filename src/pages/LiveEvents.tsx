@@ -603,60 +603,65 @@ const LiveEvents = () => {
                          </div>
                        </div>
 
-                       {/* Race Content */}
-                       <div className="p-2 md:p-6">
-                         {(() => {
-                           const timesForRace = bestTimesByKey.get(raceKey(race));
-                           const timedCount = timesForRace
-                             ? allHorsesPool.filter((h) => timesForRace.has(h.id)).length
-                             : 0;
-                           return timedCount > 0;
-                         })() ? (
-                          (() => {
-                             // For Cross Country races, prioritize horses that have cross-country traits
-                             // when their speed is otherwise equal.
-                             const CROSS_COUNTRY_TRAITS = new Set([
-                               "River Rider",
-                               "Fast Draw",
-                               "Revitalizing Surge",
-                               "Meadowstride",
-                               // multi-discipline traits that boost cross country
-                               "Rolling Current",
-                               "Rolling Current Pro",
-                             ]);
-                             const isCC = raceType === "Cross Country";
-                             const hasCCTrait = (h: any) =>
-                               (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
+                        {/* Race Content */}
+                        <div className="p-2 md:p-6">
+                          {(() => {
+                            // For Cross Country races, prioritize horses that have cross-country traits
+                            // when their speed is otherwise equal.
+                            const CROSS_COUNTRY_TRAITS = new Set([
+                              "River Rider",
+                              "Fast Draw",
+                              "Revitalizing Surge",
+                              "Meadowstride",
+                              // multi-discipline traits that boost cross country
+                              "Rolling Current",
+                              "Rolling Current Pro",
+                            ]);
+                            const isCC = raceType === "Cross Country";
+                            const hasCCTrait = (h: any) =>
+                              (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
 
-                              // Logged best times for this race (horse id -> ms)
-                              const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
-                              const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
+                            // Logged best times for this race (horse id -> ms)
+                            const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
+                            const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
 
-                              // Only horses with recorded times for this race; keep top 3 fastest
-                              const timedHorses = allHorsesPool
-                                .filter((h) => timesForRace.has(h.id))
-                                .map((h) => ({ ...h, isNonMatching: !matchedIds.has(h.id) } as any))
-                                .sort((a, b) => (timesForRace.get(a.id) ?? Infinity) - (timesForRace.get(b.id) ?? Infinity))
-                                .slice(0, 3);
+                            // All timed horses sorted by fastest time
+                            const allTimed = allHorsesPool
+                              .filter((h) => timesForRace.has(h.id))
+                              .map((h) => ({ ...h, isNonMatching: !matchedIds.has(h.id) } as any))
+                              .sort((a, b) => (timesForRace.get(a.id) ?? Infinity) - (timesForRace.get(b.id) ?? Infinity));
 
-                              // Sort: tier desc, then fastest logged time first, then existing logic
-                              const sorted = timedHorses.sort((a, b) => {
-                                if (b.tier !== a.tier) return b.tier - a.tier;
-                                const tA = timesForRace.get(a.id);
-                                const tB = timesForRace.get(b.id);
-                                if (tA != null && tB != null && tA !== tB) return tA - tB;
-                                if (isCC) {
-                                  const speedA = a.speed ?? 0;
-                                  const speedB = b.speed ?? 0;
-                                  if (speedA === speedB) {
-                                    const ccA = hasCCTrait(a) ? 1 : 0;
-                                    const ccB = hasCCTrait(b) ? 1 : 0;
-                                    if (ccA !== ccB) return ccB - ccA;
-                                  }
-                                  return speedB - speedA;
+                            // Top 3 fastest recorded times for this race
+                            const topTimedIds = new Set(allTimed.slice(0, 3).map((h) => h.id));
+
+                            // Full display list: all matching horses + all timed non-matching horses
+                            const displayHorses = race.matchingHorses
+                              .map((h) => ({ ...h, isNonMatching: false, isTopTimed: topTimedIds.has(h.id) } as any))
+                              .concat(
+                                allTimed
+                                  .filter((h) => !matchedIds.has(h.id))
+                                  .map((h) => ({ ...h, isTopTimed: topTimedIds.has(h.id) } as any))
+                              );
+
+                            // Sort: top timed first, then tier desc, then fastest time, then existing logic
+                            const sorted = displayHorses.sort((a, b) => {
+                              if (a.isTopTimed !== b.isTopTimed) return a.isTopTimed ? -1 : 1;
+                              if (b.tier !== a.tier) return b.tier - a.tier;
+                              const tA = timesForRace.get(a.id);
+                              const tB = timesForRace.get(b.id);
+                              if (tA != null && tB != null && tA !== tB) return tA - tB;
+                              if (isCC) {
+                                const speedA = a.speed ?? 0;
+                                const speedB = b.speed ?? 0;
+                                if (speedA === speedB) {
+                                  const ccA = hasCCTrait(a) ? 1 : 0;
+                                  const ccB = hasCCTrait(b) ? 1 : 0;
+                                  if (ccA !== ccB) return ccB - ccA;
                                 }
-                                return 0;
-                              });
+                                return speedB - speedA;
+                              }
+                              return 0;
+                            });
 
                             // Group by tier
                             const tierGroups: { tier: number; horses: typeof sorted }[] = [];
@@ -669,110 +674,114 @@ const LiveEvents = () => {
                               }
                             });
 
+                            if (tierGroups.length === 0) {
+                              return (
+                                <p className="text-center py-4 text-xs text-muted-foreground">
+                                  No matching horses for this race
+                                </p>
+                              );
+                            }
 
-                           return isMobile ? (
-                             <div>
-                               {tierGroups.map((group, gi) => (
-                                 <div key={group.tier}>
-                                   {gi > 0 && <div className="border-t-[3px] border-muted-foreground/30 my-1" />}
-                                   {group.horses.map((horse) => (
-                                     <div key={horse.id} className="py-1.5 px-1 border-b border-border last:border-b-0">
-                                       <div className="flex items-center justify-between">
-                                         <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                                             <HorseStatsPopover horse={horse} name={horse.name}>
-                                               <span className={`font-medium text-xs truncate inline-block ${isMaxTrained(horse) ? "border-[3px] border-black dark:border-white rounded px-1.5" : ""}`}>{horse.name}</span>
-                                             </HorseStatsPopover>
-                                           {isMaxTrained(horse) && (
-                                             <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
-                                           )}
-                                            {getHorseSpecialIcons(horse.traits || []) && (
-                                              <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                            return isMobile ? (
+                              <div>
+                                {tierGroups.map((group, gi) => (
+                                  <div key={group.tier}>
+                                    {gi > 0 && <div className="border-t-[3px] border-muted-foreground/30 my-1" />}
+                                    {group.horses.map((horse) => (
+                                      <div key={horse.id} className="py-1.5 px-1 border-b border-border last:border-b-0">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                              <HorseStatsPopover horse={horse} name={horse.name}>
+                                                <span className={`font-medium text-xs truncate inline-block ${isMaxTrained(horse) ? "border-[3px] border-black dark:border-white rounded px-1.5" : ""}`}>{horse.name}</span>
+                                              </HorseStatsPopover>
+                                            {isMaxTrained(horse) && (
+                                              <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
                                             )}
-                                            {(horse as any).isNonMatching && (
-                                              <span className="text-[9px] px-1 py-px rounded bg-muted text-muted-foreground flex-shrink-0">no match</span>
-                                            )}
+                                             {getHorseSpecialIcons(horse.traits || []) && (
+                                               <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                             )}
+                                             {(horse as any).isNonMatching && (
+                                               <span className="text-[9px] px-1 py-px rounded bg-muted text-muted-foreground flex-shrink-0">no match</span>
+                                             )}
+                                           </div>
+                                           <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                                             {timesForRace.get(horse.id) != null && (
+                                               <span className={`text-[10px] font-mono font-semibold px-1 py-px rounded ${(horse as any).isTopTimed ? "bg-amber-500/30 text-amber-700 dark:text-amber-300" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"}`}>
+                                                 {(horse as any).isTopTimed && <Trophy className="h-2.5 w-2.5 inline -mt-0.5 mr-0.5" />}
+                                                 ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
+                                               </span>
+                                             )}
+                                             <span className="text-[10px] text-muted-foreground">T{horse.tier}</span>
+                                           </div>
+                                        </div>
+                                        {horse.traits && horse.traits.length > 0 && (
+                                          <div className="mt-1">
+                                            <TraitsByDisciplineInline
+                                              traits={horse.traits.map(t => ({ trait_name: t }))}
+                                              allTraitNames={horse.traits}
+                                            />
                                           </div>
-                                          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                                            {timesForRace.get(horse.id) != null && (
-                                              <span className="text-[10px] font-mono font-semibold px-1 py-px rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                                                ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
-                                              </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Horse Name</TableHead>
+                                    <TableHead>Tier</TableHead>
+                                    <TableHead>Traits</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {tierGroups.map((group, gi) => (
+                                    group.horses.map((horse, hi) => (
+                                      <TableRow
+                                        key={horse.id}
+                                        className={gi > 0 && hi === 0 ? "border-t-[3px] border-muted-foreground/30" : ""}
+                                      >
+                                        <TableCell className="font-medium">
+                                          <div className="flex items-center gap-1.5">
+                                              <HorseStatsPopover horse={horse} name={horse.name}>
+                                                <span className={isMaxTrained(horse) ? "inline-block border-[3px] border-black dark:border-white rounded px-2 py-0.5" : ""}>{horse.name}</span>
+                                              </HorseStatsPopover>
+                                            {isMaxTrained(horse) && (
+                                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
                                             )}
-                                            <span className="text-[10px] text-muted-foreground">T{horse.tier}</span>
-                                          </div>
-                                       </div>
-                                       {horse.traits && horse.traits.length > 0 && (
-                                         <div className="mt-1">
-                                           <TraitsByDisciplineInline
-                                             traits={horse.traits.map(t => ({ trait_name: t }))}
-                                             allTraitNames={horse.traits}
-                                           />
-                                         </div>
-                                       )}
-                                     </div>
-                                   ))}
-                                 </div>
-                               ))}
-                             </div>
-                           ) : (
-                             <Table>
-                               <TableHeader>
-                                 <TableRow>
-                                   <TableHead>Horse Name</TableHead>
-                                   <TableHead>Tier</TableHead>
-                                   <TableHead>Traits</TableHead>
-                                 </TableRow>
-                               </TableHeader>
-                               <TableBody>
-                                 {tierGroups.map((group, gi) => (
-                                   group.horses.map((horse, hi) => (
-                                     <TableRow
-                                       key={horse.id}
-                                       className={gi > 0 && hi === 0 ? "border-t-[3px] border-muted-foreground/30" : ""}
-                                     >
-                                       <TableCell className="font-medium">
-                                         <div className="flex items-center gap-1.5">
-                                             <HorseStatsPopover horse={horse} name={horse.name}>
-                                               <span className={isMaxTrained(horse) ? "inline-block border-[3px] border-black dark:border-white rounded px-2 py-0.5" : ""}>{horse.name}</span>
-                                             </HorseStatsPopover>
-                                           {isMaxTrained(horse) && (
-                                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
-                                           )}
-                                            {getHorseSpecialIcons(horse.traits || []) && (
-                                              <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                            )}
-                                            {timesForRace.get(horse.id) != null && (
-                                              <span className="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                                                ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
-                                              </span>
-                                            )}
-                                            {(horse as any).isNonMatching && (
-                                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">no match</span>
-                                            )}
-                                          </div>
-                                       </TableCell>
-                                       <TableCell>
-                                         <Badge variant="outline">Tier {horse.tier}</Badge>
-                                       </TableCell>
-                                       <TableCell className="max-w-md">
-                                         <TraitsByDisciplineInline
-                                           traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
-                                           allTraitNames={horse.traits || []}
-                                         />
-                                       </TableCell>
-                                     </TableRow>
-                                   ))
-                                 ))}
-                               </TableBody>
-                             </Table>
-                           );
-                         })()
-                        ) : (
-                          <p className="text-center py-4 text-xs text-muted-foreground">
-                            No recorded times for this race
-                          </p>
-                        )}
-                        </div>
+                                             {getHorseSpecialIcons(horse.traits || []) && (
+                                               <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
+                                             )}
+                                             {timesForRace.get(horse.id) != null && (
+                                               <span className={`text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded ${(horse as any).isTopTimed ? "bg-amber-500/30 text-amber-700 dark:text-amber-300" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"}`}>
+                                                 {(horse as any).isTopTimed && <Trophy className="h-3 w-3 inline -mt-0.5 mr-0.5" />}
+                                                 ⏱ {formatRaceTime(timesForRace.get(horse.id)!)}
+                                               </span>
+                                             )}
+                                             {(horse as any).isNonMatching && (
+                                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">no match</span>
+                                             )}
+                                           </div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge variant="outline">Tier {horse.tier}</Badge>
+                                        </TableCell>
+                                        <TableCell className="max-w-md">
+                                          <TraitsByDisciplineInline
+                                            traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
+                                            allTraitNames={horse.traits || []}
+                                          />
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            );
+                          })()}
+                         </div>
                       </div>
                     </div>
                    );
