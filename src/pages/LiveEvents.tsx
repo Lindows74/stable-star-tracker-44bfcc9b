@@ -608,7 +608,7 @@ const LiveEvents = () => {
                         {(() => {
                           const timesForRace = bestTimesByKey.get(raceKey(race));
                           const timedNonMatching = timesForRace
-                            ? nonMatchingHorses.filter((h) => timesForRace.has(h.id))
+                            ? allHorsesPool.filter((h) => timesForRace.has(h.id))
                             : [];
                           return race.matchingHorses.length + timedNonMatching.length > 0;
                         })() ? (
