@@ -82,6 +82,8 @@ const LOAD_MORE_COUNT = 5;
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
   const [nonMatchingHorses, setNonMatchingHorses] = useState<NonMatchingHorse[]>([]);
+  // All horses (used to show logged times even for horses that match other races)
+  const [allHorsesPool, setAllHorsesPool] = useState<NonMatchingHorse[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalHorses, setTotalHorses] = useState(0);
   const [editingRace, setEditingRace] = useState<RaceMatch | null>(null);
