@@ -646,9 +646,9 @@ const LiveEvents = () => {
                             const displayHorses = race.matchingHorses
                               .map((h) => ({ ...h, isNonMatching: false, isTopTimed: topTimedIds.has(h.id) } as any))
                               .concat(
-                                allTimed
-                                  .filter((h) => !matchedIds.has(h.id))
-                                  .map((h) => ({ ...h, isTopTimed: topTimedIds.has(h.id) } as any))
+                              allTimed
+                                  .filter((h) => !matchedIds.has(h.id) && topTimedIds.has(h.id))
+                                  .map((h) => ({ ...h, isTopTimed: true } as any))
                               );
 
                             // Sort: tier desc first, then within each tier: top-3 timed horses
