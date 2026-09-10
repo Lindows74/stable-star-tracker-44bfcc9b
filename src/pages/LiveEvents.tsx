@@ -285,6 +285,18 @@ const LiveEvents = () => {
           `);
 
         if (allHorses) {
+          const mapHorse = (horse: any) => ({
+            id: horse.id,
+            name: horse.name,
+            tier: horse.tier,
+            traits: horse.horse_traits?.map((ht: any) => ht.trait_name) || [],
+            max_speed: horse.max_speed,
+            max_sprint_energy: horse.max_sprint_energy,
+            max_acceleration: horse.max_acceleration,
+            max_agility: horse.max_agility,
+            max_jump: horse.max_jump,
+          });
+          setAllHorsesPool(allHorses.map(mapHorse));
           const nonMatching = allHorses
             .filter((horse: any) => !matchedHorseIds.has(horse.id))
             .map((horse: any) => ({
