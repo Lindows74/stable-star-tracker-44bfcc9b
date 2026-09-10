@@ -605,13 +605,13 @@ const LiveEvents = () => {
 
                        {/* Race Content */}
                        <div className="p-2 md:p-6">
-                        {(() => {
-                          const timesForRace = bestTimesByKey.get(raceKey(race));
-                          const timedNonMatching = timesForRace
-                            ? allHorsesPool.filter((h) => timesForRace.has(h.id))
-                            : [];
-                          return race.matchingHorses.length + timedNonMatching.length > 0;
-                        })() ? (
+                         {(() => {
+                           const timesForRace = bestTimesByKey.get(raceKey(race));
+                           const timedCount = timesForRace
+                             ? allHorsesPool.filter((h) => timesForRace.has(h.id)).length
+                             : 0;
+                           return timedCount > 0;
+                         })() ? (
                           (() => {
                              // For Cross Country races, prioritize horses that have cross-country traits
                              // when their speed is otherwise equal.
@@ -628,46 +628,46 @@ const LiveEvents = () => {
                              const hasCCTrait = (h: any) =>
                                (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
 
-                             // Logged best times for this race (horse id -> ms)
-                             const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
-                             const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
-                             // Horses that ran this race but don't match its requirements
-                             const timedNonMatching = allHorsesPool
-                               .filter((h) => timesForRace.has(h.id) && !matchedIds.has(h.id))
-                               .map((h) => ({ ...h, isNonMatching: true } as any));
+                              // Logged best times for this race (horse id -> ms)
+                              const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
+                              const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
 
-                             const allForRace: any[] = [...race.matchingHorses, ...timedNonMatching];
+                              // Only horses with recorded times for this race; keep top 3 fastest
+                              const timedHorses = allHorsesPool
+                                .filter((h) => timesForRace.has(h.id))
+                                .map((h) => ({ ...h, isNonMatching: !matchedIds.has(h.id) } as any))
+                                .sort((a, b) => (timesForRace.get(a.id) ?? Infinity) - (timesForRace.get(b.id) ?? Infinity))
+                                .slice(0, 3);
 
-                             // Sort: tier desc, then fastest logged time first, then existing logic
-                             const sorted = allForRace.sort((a, b) => {
-                               if (b.tier !== a.tier) return b.tier - a.tier;
-                               const tA = timesForRace.get(a.id);
-                               const tB = timesForRace.get(b.id);
-                               if (tA != null && tB != null && tA !== tB) return tA - tB;
-                               if (tA != null && tB == null) return -1;
-                               if (tA == null && tB != null) return 1;
-                               if (isCC) {
-                                 const speedA = a.speed ?? 0;
-                                 const speedB = b.speed ?? 0;
-                                 if (speedA === speedB) {
-                                   const ccA = hasCCTrait(a) ? 1 : 0;
-                                   const ccB = hasCCTrait(b) ? 1 : 0;
-                                   if (ccA !== ccB) return ccB - ccA;
-                                 }
-                                 return speedB - speedA;
-                               }
-                               return 0;
-                             });
-                           // Group by tier
-                           const tierGroups: { tier: number; horses: typeof sorted }[] = [];
-                           sorted.forEach((horse) => {
-                             const last = tierGroups[tierGroups.length - 1];
-                             if (last && last.tier === horse.tier) {
-                               last.horses.push(horse);
-                             } else {
-                               tierGroups.push({ tier: horse.tier, horses: [horse] });
-                             }
-                           });
+                              // Sort: tier desc, then fastest logged time first, then existing logic
+                              const sorted = timedHorses.sort((a, b) => {
+                                if (b.tier !== a.tier) return b.tier - a.tier;
+                                const tA = timesForRace.get(a.id);
+                                const tB = timesForRace.get(b.id);
+                                if (tA != null && tB != null && tA !== tB) return tA - tB;
+                                if (isCC) {
+                                  const speedA = a.speed ?? 0;
+                                  const speedB = b.speed ?? 0;
+                                  if (speedA === speedB) {
+                                    const ccA = hasCCTrait(a) ? 1 : 0;
+                                    const ccB = hasCCTrait(b) ? 1 : 0;
+                                    if (ccA !== ccB) return ccB - ccA;
+                                  }
+                                  return speedB - speedA;
+                                }
+                                return 0;
+                              });
+
+                            // Group by tier
+                            const tierGroups: { tier: number; horses: typeof sorted }[] = [];
+                            sorted.forEach((horse) => {
+                              const last = tierGroups[tierGroups.length - 1];
+                              if (last && last.tier === horse.tier) {
+                                last.horses.push(horse);
+                              } else {
+                                tierGroups.push({ tier: horse.tier, horses: [horse] });
+                              }
+                            });
 
 
                            return isMobile ? (
@@ -767,11 +767,11 @@ const LiveEvents = () => {
                              </Table>
                            );
                          })()
-                       ) : (
-                         <p className="text-center py-4 text-xs text-muted-foreground">
-                           No horses match this race
-                         </p>
-                       )}
+                        ) : (
+                          <p className="text-center py-4 text-xs text-muted-foreground">
+                            No recorded times for this race
+                          </p>
+                        )}
                         </div>
                       </div>
                     </div>
