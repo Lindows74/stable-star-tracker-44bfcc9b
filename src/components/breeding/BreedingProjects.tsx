@@ -336,7 +336,8 @@ export const BreedingProjects = ({
                           pairing={pair}
                           onUpdateOutcome={onUpdateOutcome}
                           onRemove={onRemovePairing}
-                          onSetFoal={onSetFoal}
+                          onAddFoal={onAddFoal}
+                          onRemoveFoal={onRemoveFoal}
                           onSetTries={onSetTries}
                         />
                       ))
