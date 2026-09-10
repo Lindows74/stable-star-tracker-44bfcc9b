@@ -632,7 +632,7 @@ const LiveEvents = () => {
                              const timesForRace = bestTimesByKey.get(raceKey(race)) || new Map<number, number>();
                              const matchedIds = new Set(race.matchingHorses.map((h) => h.id));
                              // Horses that ran this race but don't match its requirements
-                             const timedNonMatching = nonMatchingHorses
+                             const timedNonMatching = allHorsesPool
                                .filter((h) => timesForRace.has(h.id) && !matchedIds.has(h.id))
                                .map((h) => ({ ...h, isNonMatching: true } as any));
 
