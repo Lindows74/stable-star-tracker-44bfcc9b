@@ -22,7 +22,8 @@ type Props = {
   onDropPairing: (pairingId: number, projectId: number | null) => void;
   onUpdateOutcome: (pairingId: number, outcome: string) => void;
   onRemovePairing: (pairingId: number) => void;
-  onSetFoal: (pairingId: number, foalId: number | null) => void;
+  onAddFoal: (pairingId: number, foalId: number) => void;
+  onRemoveFoal: (pairingId: number, foalId: number) => void;
   onSetTries: (pairingId: number, tries: number) => void;
 };
 
@@ -30,13 +31,15 @@ const PairingRow = ({
   pairing,
   onUpdateOutcome,
   onRemove,
-  onSetFoal,
+  onAddFoal,
+  onRemoveFoal,
   onSetTries,
 }: {
   pairing: any;
   onUpdateOutcome: (id: number, outcome: string) => void;
   onRemove: (id: number) => void;
-  onSetFoal: (id: number, foalId: number | null) => void;
+  onAddFoal: (id: number, foalId: number) => void;
+  onRemoveFoal: (id: number, foalId: number) => void;
   onSetTries: (id: number, tries: number) => void;
 }) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
@@ -104,48 +107,51 @@ const PairingRow = ({
         </Button>
       )}
 
-      {/* Foal */}
-      {pairing.foal ? (
-        <div className="rounded-md border bg-muted/40 p-2 space-y-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-1">
-              <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
-                🐴 {pairing.foal.name}
-              </Badge>
-              {pairing.foal.tier != null && <Badge variant="outline">Tier {pairing.foal.tier}</Badge>}
+      {/* Foals */}
+      {(pairing.foals || []).length > 0 && (
+        <div className="space-y-2">
+          {(pairing.foals || []).map((foal: any, idx: number) => (
+            <div key={`${foal.id}-${idx}`} className="rounded-md border bg-muted/40 p-2 space-y-1">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-1">
+                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
+                    🐴 {foal.name}
+                  </Badge>
+                  {foal.tier != null && <Badge variant="outline">Tier {foal.tier}</Badge>}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  aria-label="Remove foal"
+                  onClick={() => onRemoveFoal(pairing.id, foal.id)}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              {foal.horse_traits?.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {foal.horse_traits.map((t: any, i: number) => (
+                    <Badge key={i} variant="secondary" className="text-[10px]">
+                      {t.trait_name}
+                      {t.trait_value ? ` ${t.trait_value}` : ""}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>
+              )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              aria-label="Remove foal"
-              onClick={() => onSetFoal(pairing.id, null)}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-          {pairing.foal.horse_traits?.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {pairing.foal.horse_traits.map((t: any, i: number) => (
-                <Badge key={i} variant="secondary" className="text-[10px]">
-                  {t.trait_name}
-                  {t.trait_value ? ` ${t.trait_value}` : ""}
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>
-          )}
+          ))}
         </div>
-      ) : (
-        <HorsePicker
-          gender="any"
-          label="Foal"
-          size="sm"
-          triggerLabel="Add foal"
-          onSelect={(h) => onSetFoal(pairing.id, h.id)}
-        />
       )}
+      <HorsePicker
+        gender="any"
+        label="Foal"
+        size="sm"
+        triggerLabel="Add foal"
+        onSelect={(h) => onAddFoal(pairing.id, h.id)}
+      />
     </div>
   );
 };
@@ -159,7 +165,8 @@ export const BreedingProjects = ({
   onDropPairing,
   onUpdateOutcome,
   onRemovePairing,
-  onSetFoal,
+  onAddFoal,
+  onRemoveFoal,
   onSetTries,
 }: Props) => {
   const [newTitle, setNewTitle] = useState("");
@@ -329,7 +336,8 @@ export const BreedingProjects = ({
                           pairing={pair}
                           onUpdateOutcome={onUpdateOutcome}
                           onRemove={onRemovePairing}
-                          onSetFoal={onSetFoal}
+                          onAddFoal={onAddFoal}
+                          onRemoveFoal={onRemoveFoal}
                           onSetTries={onSetTries}
                         />
                       ))
