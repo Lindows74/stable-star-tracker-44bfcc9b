@@ -605,13 +605,13 @@ const LiveEvents = () => {
 
                        {/* Race Content */}
                        <div className="p-2 md:p-6">
-                        {(() => {
-                          const timesForRace = bestTimesByKey.get(raceKey(race));
-                          const timedNonMatching = timesForRace
-                            ? allHorsesPool.filter((h) => timesForRace.has(h.id))
-                            : [];
-                          return race.matchingHorses.length + timedNonMatching.length > 0;
-                        })() ? (
+                         {(() => {
+                           const timesForRace = bestTimesByKey.get(raceKey(race));
+                           const timedCount = timesForRace
+                             ? allHorsesPool.filter((h) => timesForRace.has(h.id)).length
+                             : 0;
+                           return timedCount > 0;
+                         })() ? (
                           (() => {
                              // For Cross Country races, prioritize horses that have cross-country traits
                              // when their speed is otherwise equal.
