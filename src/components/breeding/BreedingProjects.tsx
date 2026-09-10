@@ -22,7 +22,8 @@ type Props = {
   onDropPairing: (pairingId: number, projectId: number | null) => void;
   onUpdateOutcome: (pairingId: number, outcome: string) => void;
   onRemovePairing: (pairingId: number) => void;
-  onSetFoal: (pairingId: number, foalId: number | null) => void;
+  onAddFoal: (pairingId: number, foalId: number) => void;
+  onRemoveFoal: (pairingId: number, foalId: number) => void;
   onSetTries: (pairingId: number, tries: number) => void;
 };
 
