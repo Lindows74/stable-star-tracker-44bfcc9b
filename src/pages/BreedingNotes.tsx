@@ -151,19 +151,36 @@ const BreedingNotes = () => {
     },
   });
 
-  const setFoal = useMutation({
-    mutationFn: async ({ id, foalId }: { id: number; foalId: number | null }) => {
-      const { error } = await (supabase.from("breeding_notes") as any)
-        .update({ foal_id: foalId })
-        .eq("id", id);
+  const addFoal = useMutation({
+    mutationFn: async ({ id, foalId }: { id: number; foalId: number }) => {
+      const { error } = await (supabase.from("breeding_note_foals") as any).insert({
+        breeding_note_id: id,
+        foal_id: foalId,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
       invalidateAll();
-      toast({ title: "Saved", description: "Foal updated." });
+      toast({ title: "Saved", description: "Foal added." });
     },
     onError: () =>
       toast({ title: "Error", description: "Could not save the foal.", variant: "destructive" }),
+  });
+
+  const removeFoal = useMutation({
+    mutationFn: async ({ noteId, foalId }: { noteId: number; foalId: number }) => {
+      const { error } = await (supabase.from("breeding_note_foals") as any)
+        .delete()
+        .eq("breeding_note_id", noteId)
+        .eq("foal_id", foalId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: "Removed", description: "Foal removed from pairing." });
+    },
+    onError: () =>
+      toast({ title: "Error", description: "Could not remove the foal.", variant: "destructive" }),
   });
 
   const setTries = useMutation({
