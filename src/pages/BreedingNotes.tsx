@@ -36,11 +36,23 @@ const BreedingNotes = () => {
       const { data, error } = await supabase
         .from("breeding_notes")
         .select(
-          "*, stallion:stallion_id(id, name), mare:mare_id(id, name), foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))"
+          `*,
+          stallion:stallion_id(id, name),
+          mare:mare_id(id, name),
+          breeding_note_foals(
+            id,
+            foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))
+          )`
         )
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data || [];
+      return (data || []).map((n: any) => ({
+        ...n,
+        foals:
+          n.breeding_note_foals
+            ?.map((bnf: any) => bnf.foal)
+            .filter(Boolean) || [],
+      }));
     },
   });
 
