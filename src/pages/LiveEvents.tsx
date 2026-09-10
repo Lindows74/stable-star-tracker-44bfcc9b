@@ -643,9 +643,14 @@ const LiveEvents = () => {
                                   .map((h) => ({ ...h, isTopTimed: topTimedIds.has(h.id) } as any))
                               );
 
-                            // Sort: top timed first, then tier desc, then fastest time, then existing logic
+                            // Sort: top timed first (by fastest time), then matching horses by tier desc, etc.
                             const sorted = displayHorses.sort((a, b) => {
                               if (a.isTopTimed !== b.isTopTimed) return a.isTopTimed ? -1 : 1;
+                              if (a.isTopTimed && b.isTopTimed) {
+                                const tA = timesForRace.get(a.id) ?? Infinity;
+                                const tB = timesForRace.get(b.id) ?? Infinity;
+                                return tA - tB;
+                              }
                               if (b.tier !== a.tier) return b.tier - a.tier;
                               const tA = timesForRace.get(a.id);
                               const tB = timesForRace.get(b.id);
