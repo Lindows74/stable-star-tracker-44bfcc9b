@@ -767,11 +767,11 @@ const LiveEvents = () => {
                              </Table>
                            );
                          })()
-                       ) : (
-                         <p className="text-center py-4 text-xs text-muted-foreground">
-                           No horses match this race
-                         </p>
-                       )}
+                        ) : (
+                          <p className="text-center py-4 text-xs text-muted-foreground">
+                            No recorded times for this race
+                          </p>
+                        )}
                         </div>
                       </div>
                     </div>
