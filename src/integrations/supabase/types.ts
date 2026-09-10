@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      breeding_note_foals: {
+        Row: {
+          breeding_note_id: number
+          created_at: string
+          foal_id: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          breeding_note_id: number
+          created_at?: string
+          foal_id: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          breeding_note_id?: number
+          created_at?: string
+          foal_id?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "breeding_note_foals_breeding_note_id_fkey"
+            columns: ["breeding_note_id"]
+            isOneToOne: false
+            referencedRelation: "breeding_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "breeding_note_foals_foal_id_fkey"
+            columns: ["foal_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       breeding_notes: {
         Row: {
           created_at: string
