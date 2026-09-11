@@ -207,7 +207,7 @@ export const BreedingProjects = ({
       )}
 
       {projects.map((p) => {
-        const isOpen = open[p.id] ?? true;
+        const isOpen = open[p.id] ?? false;
         const list = pairingsByProject[p.id] || [];
         const edit = editing[p.id];
         return (
