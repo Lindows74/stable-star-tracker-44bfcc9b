@@ -229,8 +229,13 @@ const LiveEvents = () => {
           { d: '1400', s: 'firm' },
         ];
         
-        const isSteeple = (r: any) => /steeplechase/i.test(r.race_name || '');
         const isCrossCountry = (r: any) => r.distance === '0' || /cross country/i.test(r.race_name || '');
+        // Classify by distance+surface first so renaming a race never changes its number
+        const isSteeple = (r: any) =>
+          !isCrossCountry(r) &&
+          (steepleOrder.some(o => o.d === String(r.distance) && o.s === r.surface) ||
+            /steeplechase/i.test(r.race_name || ''));
+
         
         const flats = raceMatchesWithAll.filter((r: any) => !isSteeple(r) && !isCrossCountry(r));
         const steeples = raceMatchesWithAll.filter((r: any) => isSteeple(r));
