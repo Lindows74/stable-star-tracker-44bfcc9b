@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { HorseCard } from "@/components/horses/HorseCard";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
+import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { BreedingProjects } from "@/components/breeding/BreedingProjects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +38,8 @@ const BreedingNotes = () => {
         .from("breeding_notes")
         .select(
           `*,
-          stallion:stallion_id(id, name),
-          mare:mare_id(id, name),
+          stallion:stallion_id(id, name, gender),
+          mare:mare_id(id, name, gender),
           breeding_note_foals(
             id,
             foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))
@@ -339,8 +340,8 @@ const BreedingNotes = () => {
                   <div className="min-w-0">
                     {n.title && <p className="font-semibold break-words">{n.title}</p>}
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {n.stallion?.name && <Badge variant="secondary">♂ {n.stallion.name}</Badge>}
-                      {n.mare?.name && <Badge variant="secondary">♀ {n.mare.name}</Badge>}
+                      {n.stallion?.name && <HorseNameBadge horse={n.stallion} icon="♂" />}
+                      {n.mare?.name && <HorseNameBadge horse={n.mare} icon="♀" />}
                       {n.target_tier != null && (
                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {n.target_tier}</Badge>
                       )}

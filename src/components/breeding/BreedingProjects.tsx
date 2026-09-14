@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X, Pencil } from "lucide-react";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
+import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 
 export type BreedingProject = {
@@ -56,8 +57,8 @@ const PairingRow = ({
         <div className="min-w-0">
           {pairing.title && <p className="text-sm font-semibold break-words">{pairing.title}</p>}
           <div className="flex flex-wrap gap-1 mt-1">
-            {pairing.stallion?.name && <Badge variant="secondary">♂ {pairing.stallion.name}</Badge>}
-            {pairing.mare?.name && <Badge variant="secondary">♀ {pairing.mare.name}</Badge>}
+            {pairing.stallion?.name && <HorseNameBadge horse={pairing.stallion} icon="♂" />}
+            {pairing.mare?.name && <HorseNameBadge horse={pairing.mare} icon="♀" />}
             {pairing.target_tier != null && (
               <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {pairing.target_tier}</Badge>
             )}
@@ -115,9 +116,7 @@ const PairingRow = ({
             <div key={`${foal.id}-${idx}`} className="rounded-md border bg-muted/40 p-2 space-y-1">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1">
-                  <Badge className={`${getGenderNameBackgroundClass(foal.gender || '')} text-foreground hover:opacity-90`}>
-                    🐴 {foal.name}
-                  </Badge>
+                  <HorseNameBadge horse={foal} icon="🐴" />
                   {foal.tier != null && <Badge variant="outline">Tier {foal.tier}</Badge>}
                 </div>
                 <Button
