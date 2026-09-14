@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X, Pencil } from "lucide-react";
+import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 
 export type BreedingProject = {
@@ -114,7 +115,7 @@ const PairingRow = ({
             <div key={`${foal.id}-${idx}`} className="rounded-md border bg-muted/40 p-2 space-y-1">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1">
-                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
+                  <Badge className={`${getGenderNameBackgroundClass(foal.gender || '')} text-foreground hover:opacity-90`}>
                     🐴 {foal.name}
                   </Badge>
                   {foal.tier != null && <Badge variant="outline">Tier {foal.tier}</Badge>}
