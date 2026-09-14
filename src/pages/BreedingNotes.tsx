@@ -38,8 +38,8 @@ const BreedingNotes = () => {
         .from("breeding_notes")
         .select(
           `*,
-          stallion:stallion_id(id, name),
-          mare:mare_id(id, name),
+          stallion:stallion_id(id, name, gender),
+          mare:mare_id(id, name, gender),
           breeding_note_foals(
             id,
             foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))
