@@ -57,8 +57,8 @@ const PairingRow = ({
         <div className="min-w-0">
           {pairing.title && <p className="text-sm font-semibold break-words">{pairing.title}</p>}
           <div className="flex flex-wrap gap-1 mt-1">
-            {pairing.stallion?.name && <Badge variant="secondary">♂ {pairing.stallion.name}</Badge>}
-            {pairing.mare?.name && <Badge variant="secondary">♀ {pairing.mare.name}</Badge>}
+            {pairing.stallion?.name && <HorseNameBadge horse={pairing.stallion} icon="♂" />}
+            {pairing.mare?.name && <HorseNameBadge horse={pairing.mare} icon="♀" />}
             {pairing.target_tier != null && (
               <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {pairing.target_tier}</Badge>
             )}
