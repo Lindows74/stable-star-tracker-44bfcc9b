@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { HorseCard } from "@/components/horses/HorseCard";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
+import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { BreedingProjects } from "@/components/breeding/BreedingProjects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
