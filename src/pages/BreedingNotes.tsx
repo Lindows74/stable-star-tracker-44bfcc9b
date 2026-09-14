@@ -340,8 +340,8 @@ const BreedingNotes = () => {
                   <div className="min-w-0">
                     {n.title && <p className="font-semibold break-words">{n.title}</p>}
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {n.stallion?.name && <Badge variant="secondary">♂ {n.stallion.name}</Badge>}
-                      {n.mare?.name && <Badge variant="secondary">♀ {n.mare.name}</Badge>}
+                      {n.stallion?.name && <HorseNameBadge horse={n.stallion} icon="♂" />}
+                      {n.mare?.name && <HorseNameBadge horse={n.mare} icon="♀" />}
                       {n.target_tier != null && (
                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {n.target_tier}</Badge>
                       )}
