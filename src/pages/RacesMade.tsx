@@ -212,7 +212,7 @@ const RacesMade = () => {
                       }}
                       className="w-full flex items-center justify-between gap-2 p-3 md:p-4 text-left"
                     >
-                      <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race)}</CardTitle>
+                      <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race, group.number)}</CardTitle>
                       {isOpen ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       ) : (
