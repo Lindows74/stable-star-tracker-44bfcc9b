@@ -17,7 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
-import { formatRaceLabel, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, parseRaceTime, sortRacesCanonically } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
