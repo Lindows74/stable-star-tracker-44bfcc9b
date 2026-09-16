@@ -17,7 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
-import { formatRaceLabel, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, parseRaceTime, sortRacesCanonically } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
@@ -34,13 +34,17 @@ const RacesMade = () => {
       const { data, error } = await supabase
         .from("live_races")
         .select("id, race_name, surface, distance, tier_restriction")
-        .order("race_name", { ascending: true });
+        .order("id", { ascending: true });
       if (error) throw error;
       return data || [];
     },
   });
 
   const { data: results } = useRaceResults();
+
+  // Race numbers derived from the full race list, so new races always get a number
+  const raceNumbers = useMemo(() => buildRaceNumberMap(races || []), [races]);
+  const sortedRaces = useMemo(() => sortRacesCanonically(races || []), [races]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -88,22 +92,25 @@ const RacesMade = () => {
       if (!byRace.has(row.race_id)) byRace.set(row.race_id, []);
       byRace.get(row.race_id)!.push(row);
     });
-    return Array.from(byRace.entries()).map(([id, rows]) => {
-      const sorted = [...rows].sort((a, b) => a.time_ms - b.time_ms);
-      const bestByTier = new Map<number, number>();
-      sorted.forEach((row) => {
-        const tier = row.horses?.tier ?? 0;
-        const current = bestByTier.get(tier);
-        if (current == null || row.time_ms < current) bestByTier.set(tier, row.time_ms);
-      });
-      return {
-        raceId: id,
-        race: rows[0].live_races,
-        rows: sorted,
-        bestByTier,
-      };
-    });
-  }, [results]);
+    return Array.from(byRace.entries())
+      .map(([id, rows]) => {
+        const sorted = [...rows].sort((a, b) => a.time_ms - b.time_ms);
+        const bestByTier = new Map<number, number>();
+        sorted.forEach((row) => {
+          const tier = row.horses?.tier ?? 0;
+          const current = bestByTier.get(tier);
+          if (current == null || row.time_ms < current) bestByTier.set(tier, row.time_ms);
+        });
+        return {
+          raceId: id,
+          race: rows[0].live_races,
+          rows: sorted,
+          bestByTier,
+          number: raceNumbers.get(id) ?? null,
+        };
+      })
+      .sort((a, b) => (a.number ?? 999) - (b.number ?? 999));
+  }, [results, raceNumbers]);
 
   return (
     <Layout>
@@ -152,9 +159,12 @@ const RacesMade = () => {
                     <SelectValue placeholder="Choose race..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {(races || []).map((race: any) => (
+                    {sortedRaces.map((race: any) => (
                       <SelectItem key={race.id} value={String(race.id)}>
-                        {formatRaceLabel(race)}
+                        {formatRaceLabel(race, raceNumbers.get(race.id) ?? null)}
+                        {race.tier_restriction
+                          ? ` ${race.tier_restriction === "odd_grades" ? "Odd" : "Even"}`
+                          : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -202,7 +212,7 @@ const RacesMade = () => {
                       }}
                       className="w-full flex items-center justify-between gap-2 p-3 md:p-4 text-left"
                     >
-                      <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race)}</CardTitle>
+                      <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race, group.number)}</CardTitle>
                       {isOpen ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       ) : (

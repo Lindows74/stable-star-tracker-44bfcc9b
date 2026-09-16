@@ -107,10 +107,10 @@ export const getRaceNumber = (race: any): number | null => {
   return idx === -1 ? null : idx + 1;
 };
 
-export const formatRaceLabel = (race: any): string => {
+export const formatRaceLabel = (race: any, numberOverride?: number | null): string => {
   if (!race) return "Unknown race";
   const kind = getRaceKind(race);
-  const number = getRaceNumber(race);
+  const number = numberOverride !== undefined ? numberOverride : getRaceNumber(race);
   const parts: string[] = [];
   if (number) parts.push(`#${number}`);
   parts.push(kind === "xc" ? "XC" : kind === "sc" ? "SC" : "Flat");
@@ -120,5 +120,62 @@ export const formatRaceLabel = (race: any): string => {
   const surface = formatSurfaceShort(race.surface);
   if (surface) parts.push(surface);
   return parts.join(" ");
+};
+
+// Canonical ordering of a full race list, matching the Live Events page:
+// Flat first (official order, unknown ones last), then Steeplechase, then Cross Country.
+export const sortRacesCanonically = <T extends Record<string, any>>(races: T[]): T[] => {
+  const orderIndex = (race: any, order: { d: string; s: string }[]) => {
+    const i = order.findIndex((o) => o.d === String(race.distance) && o.s === race.surface);
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+  };
+  const surfPref = ["very_hard", "very_soft", "hard", "firm", "medium", "soft"];
+
+  const flats: T[] = [];
+  const steeples: T[] = [];
+  const cross: T[] = [];
+  races.forEach((race) => {
+    const kind = getRaceKind(race);
+    if (kind === "xc") cross.push(race);
+    else if (kind === "sc") steeples.push(race);
+    else flats.push(race);
+  });
+
+  const byOrder = (order: { d: string; s: string }[]) => (a: T, b: T) => {
+    const d = orderIndex(a, order) - orderIndex(b, order);
+    return d !== 0 ? d : (a.id || 0) - (b.id || 0);
+  };
+
+  cross.sort((a, b) => {
+    const pref = (s: string) => {
+      const i = surfPref.indexOf(s);
+      return i === -1 ? surfPref.length : i;
+    };
+    const d = pref(a.surface) - pref(b.surface);
+    return d !== 0 ? d : (a.id || 0) - (b.id || 0);
+  });
+
+  return [...flats.sort(byOrder(FLAT_ORDER)), ...steeples.sort(byOrder(STEEPLE_ORDER)), ...cross];
+};
+
+// Race number per race id, derived from the full list so newly added races
+// (e.g. a new Cross Country surface) always get a number.
+export const buildRaceNumberMap = (races: any[] = []): Map<number, number> => {
+  const sorted = sortRacesCanonically(races);
+  const map = new Map<number, number>();
+  const seen = new Map<string, number>();
+  let next = 1;
+  sorted.forEach((race) => {
+    const key = `${getRaceKind(race)}|${race.surface}|${race.distance}|${race.tier_restriction || ""}`;
+    const existing = seen.get(key);
+    if (existing != null) {
+      map.set(race.id, existing);
+      return;
+    }
+    seen.set(key, next);
+    map.set(race.id, next);
+    next += 1;
+  });
+  return map;
 };
 
