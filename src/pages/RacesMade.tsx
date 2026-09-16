@@ -92,22 +92,25 @@ const RacesMade = () => {
       if (!byRace.has(row.race_id)) byRace.set(row.race_id, []);
       byRace.get(row.race_id)!.push(row);
     });
-    return Array.from(byRace.entries()).map(([id, rows]) => {
-      const sorted = [...rows].sort((a, b) => a.time_ms - b.time_ms);
-      const bestByTier = new Map<number, number>();
-      sorted.forEach((row) => {
-        const tier = row.horses?.tier ?? 0;
-        const current = bestByTier.get(tier);
-        if (current == null || row.time_ms < current) bestByTier.set(tier, row.time_ms);
-      });
-      return {
-        raceId: id,
-        race: rows[0].live_races,
-        rows: sorted,
-        bestByTier,
-      };
-    });
-  }, [results]);
+    return Array.from(byRace.entries())
+      .map(([id, rows]) => {
+        const sorted = [...rows].sort((a, b) => a.time_ms - b.time_ms);
+        const bestByTier = new Map<number, number>();
+        sorted.forEach((row) => {
+          const tier = row.horses?.tier ?? 0;
+          const current = bestByTier.get(tier);
+          if (current == null || row.time_ms < current) bestByTier.set(tier, row.time_ms);
+        });
+        return {
+          raceId: id,
+          race: rows[0].live_races,
+          rows: sorted,
+          bestByTier,
+          number: raceNumbers.get(id) ?? null,
+        };
+      })
+      .sort((a, b) => (a.number ?? 999) - (b.number ?? 999));
+  }, [results, raceNumbers]);
 
   return (
     <Layout>
