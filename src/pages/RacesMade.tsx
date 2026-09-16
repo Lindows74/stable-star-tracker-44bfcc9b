@@ -156,9 +156,12 @@ const RacesMade = () => {
                     <SelectValue placeholder="Choose race..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {(races || []).map((race: any) => (
+                    {sortedRaces.map((race: any) => (
                       <SelectItem key={race.id} value={String(race.id)}>
-                        {formatRaceLabel(race)}
+                        {formatRaceLabel(race, raceNumbers.get(race.id) ?? null)}
+                        {race.tier_restriction
+                          ? ` ${race.tier_restriction === "odd_grades" ? "Odd" : "Even"}`
+                          : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
