@@ -28,7 +28,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
 import { useRaceResults } from "@/hooks/useRaceResults";
-import { formatRaceTime } from "@/utils/raceTimeUtils";
+import { formatRaceTime, formatSurfaceShort } from "@/utils/raceTimeUtils";
 
 interface MatchingHorse {
   id: number;
@@ -444,6 +444,60 @@ const LiveEvents = () => {
           );
         })()}
 
+        {/* Race shortlist — quick links to every race on the page */}
+        {raceMatches.length > 0 && (() => {
+          const scrollToRace = (raceId: number) => {
+            const id = `race-${raceId}`;
+            const doScroll = () => {
+              const el = document.getElementById(id);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            if (document.getElementById(id)) {
+              doScroll();
+            } else {
+              // Race not rendered yet due to lazy loading — load all races first
+              setVisibleCount(raceMatches.length);
+              setTimeout(doScroll, 200);
+            }
+          };
+          const typeColor = (raceNumber: number) =>
+            raceNumber <= 17 ? 'text-blue-500 border-blue-500/40 hover:bg-blue-500/10'
+              : raceNumber <= 20 ? 'text-yellow-600 border-yellow-500/40 hover:bg-yellow-500/10'
+                : 'text-green-600 border-green-500/40 hover:bg-green-500/10';
+          return (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm md:text-base">Race shortlist</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap gap-1.5">
+                  {raceMatches.map((race, index) => {
+                    const raceNumber = index + 1;
+                    const grades = race.tier_restriction === 'odd_grades'
+                      ? 'Odd'
+                      : race.tier_restriction === 'even_grades'
+                        ? 'Even'
+                        : '';
+                    return (
+                      <button
+                        key={race.id}
+                        onClick={() => scrollToRace(race.id)}
+                        className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] md:text-xs font-medium transition-colors ${typeColor(raceNumber)}`}
+                        title={`${race.race_name || ''}`}
+                      >
+                        <span className="font-bold">#{raceNumber}</span>
+                        {race.distance !== '0' && <span>{race.distance}m</span>}
+                        <span>{formatSurfaceShort(race.surface)}</span>
+                        {grades && <span className="opacity-80">{grades}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
+
         {/* Add Race Form */}
         <AddRaceForm onRaceAdded={fetchLiveRaces} />
 
@@ -488,7 +542,7 @@ const LiveEvents = () => {
                    const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
                    
                    return (
-                     <div key={race.id}>
+                     <div key={race.id} id={`race-${race.id}`} className="scroll-mt-20 md:scroll-mt-24">
                        {isFirstOfType && (
                          <div id={sectionId} className="scroll-mt-20 md:scroll-mt-24 -mx-2 md:-mx-6 pt-2 pb-1">
                            <h3 className="text-base md:text-xl font-bold text-foreground bg-muted/60 px-3 md:px-6 py-2 rounded-md border-y">
