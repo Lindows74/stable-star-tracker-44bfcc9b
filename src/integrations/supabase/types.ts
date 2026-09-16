@@ -493,6 +493,7 @@ export type Database = {
           created_at: string
           horse_id: number
           id: number
+          note: string
           race_id: number
           raced_at: string
           time_ms: number
@@ -502,6 +503,7 @@ export type Database = {
           created_at?: string
           horse_id: number
           id?: number
+          note?: string
           race_id: number
           raced_at?: string
           time_ms: number
@@ -511,6 +513,7 @@ export type Database = {
           created_at?: string
           horse_id?: number
           id?: number
+          note?: string
           race_id?: number
           raced_at?: string
           time_ms?: number
