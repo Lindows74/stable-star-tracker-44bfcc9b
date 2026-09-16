@@ -34,13 +34,17 @@ const RacesMade = () => {
       const { data, error } = await supabase
         .from("live_races")
         .select("id, race_name, surface, distance, tier_restriction")
-        .order("race_name", { ascending: true });
+        .order("id", { ascending: true });
       if (error) throw error;
       return data || [];
     },
   });
 
   const { data: results } = useRaceResults();
+
+  // Race numbers derived from the full race list, so new races always get a number
+  const raceNumbers = useMemo(() => buildRaceNumberMap(races || []), [races]);
+  const sortedRaces = useMemo(() => sortRacesCanonically(races || []), [races]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
