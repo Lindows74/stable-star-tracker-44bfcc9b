@@ -28,7 +28,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
 import { useRaceResults } from "@/hooks/useRaceResults";
-import { formatRaceTime } from "@/utils/raceTimeUtils";
+import { formatRaceTime, formatSurfaceShort } from "@/utils/raceTimeUtils";
 
 interface MatchingHorse {
   id: number;
@@ -488,7 +488,7 @@ const LiveEvents = () => {
                    const matchedTiers = new Set(race.matchingHorses.map(h => h.tier));
                    
                    return (
-                     <div key={race.id}>
+                     <div key={race.id} id={`race-${race.id}`} className="scroll-mt-20 md:scroll-mt-24">
                        {isFirstOfType && (
                          <div id={sectionId} className="scroll-mt-20 md:scroll-mt-24 -mx-2 md:-mx-6 pt-2 pb-1">
                            <h3 className="text-base md:text-xl font-bold text-foreground bg-muted/60 px-3 md:px-6 py-2 rounded-md border-y">
