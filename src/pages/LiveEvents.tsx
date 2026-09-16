@@ -240,10 +240,11 @@ const LiveEvents = () => {
         const flats = raceMatchesWithAll.filter((r: any) => !isSteeple(r) && !isCrossCountry(r));
         const steeples = raceMatchesWithAll.filter((r: any) => isSteeple(r));
         
-        // Enforce exactly two Cross Country races (very_hard and very_soft) and dedupe by surface
-        const crossSurfaces = ['very_hard', 'very_soft'];
-        const crossAll = raceMatchesWithAll.filter((r: any) => isCrossCountry(r) && crossSurfaces.includes(r.surface));
-        const cross = Array.from(new Map(crossAll.map((r: any) => [r.surface, r])).values());
+        // Cross Country: any surface, deduped by surface + tier restriction
+        const crossAll = raceMatchesWithAll.filter((r: any) => isCrossCountry(r));
+        const cross = Array.from(
+          new Map(crossAll.map((r: any) => [`${r.surface}|${r.tier_restriction || ''}`, r])).values()
+        );
         
         const sortByOrder = (arr: any[], order: { d: string; s: string }[]) =>
           arr.sort((a, b) => {
@@ -257,9 +258,14 @@ const LiveEvents = () => {
         const flatsSorted = sortByOrder(flats, flatOrder);
         const steeplesSorted = sortByOrder(steeples, steepleOrder);
         const crossSorted = cross.sort((a: any, b: any) => {
-          // Very Hard first, then Very Soft
-          const pref = (s: string) => (s === 'very_hard' ? 0 : s === 'very_soft' ? 1 : 2);
-          return pref(a.surface) - pref(b.surface);
+          // Known surfaces first (Very Hard, Very Soft), then any new ones, finally by id
+          const surfPref = ['very_hard', 'very_soft', 'hard', 'firm', 'medium', 'soft'];
+          const pref = (s: string) => {
+            const i = surfPref.indexOf(s);
+            return i === -1 ? surfPref.length : i;
+          };
+          const d = pref(a.surface) - pref(b.surface);
+          return d !== 0 ? d : (a.id || 0) - (b.id || 0);
         });
         
         const sorted = [...flatsSorted, ...steeplesSorted, ...crossSorted];
