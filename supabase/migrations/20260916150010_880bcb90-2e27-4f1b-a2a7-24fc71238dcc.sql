@@ -1,0 +1,1 @@
+ALTER TABLE public.race_results ADD COLUMN IF NOT EXISTS note text NOT NULL DEFAULT ''::text;

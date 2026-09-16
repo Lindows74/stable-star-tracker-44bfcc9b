@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
+import { RaceResultNote } from "@/components/races/RaceResultNote";
 import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, parseRaceTime, sortRacesCanonically } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
@@ -68,6 +69,24 @@ const RacesMade = () => {
     onError: (error: any) => {
       toast({
         title: "Could not save",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const noteMutation = useMutation({
+    mutationFn: async ({ id, note }: { id: number; note: string }) => {
+      const { error } = await supabase.from("race_results").update({ note } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["race_results"] });
+      toast({ title: "Saved", description: "Note updated." });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Could not save note",
         description: error?.message || "Please try again.",
         variant: "destructive",
       });
@@ -238,6 +257,13 @@ const RacesMade = () => {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="font-mono">{formatRaceTime(row.time_ms)}</span>
+                            <RaceResultNote
+                              horseName={row.horses?.name || "Horse"}
+                              note={row.note || ""}
+                              onSave={async (note) => {
+                                await noteMutation.mutateAsync({ id: row.id, note });
+                              }}
+                            />
                             <Button
                               variant="ghost"
                               size="icon"

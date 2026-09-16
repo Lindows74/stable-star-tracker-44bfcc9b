@@ -7,6 +7,7 @@ export interface RaceResultRow {
   race_id: number;
   time_ms: number;
   raced_at: string;
+  note?: string | null;
   horses?: { id: number; name: string; tier: number | null; gender: string | null } | null;
   live_races?: {
     id: number;
@@ -24,7 +25,7 @@ export const useRaceResults = () => {
       const { data, error } = await supabase
         .from("race_results")
         .select(
-          `id, horse_id, race_id, time_ms, raced_at,
+          `id, horse_id, race_id, time_ms, raced_at, note,
            horses(id, name, tier, gender),
            live_races(id, race_name, surface, distance, tier_restriction)`
         )
