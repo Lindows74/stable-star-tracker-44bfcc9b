@@ -677,6 +677,16 @@ const LiveEvents = () => {
                            <Button
                              variant="ghost"
                              size="icon"
+                             className={`h-7 w-7 md:h-9 md:w-9 ${race.is_active === false ? 'text-destructive' : ''}`}
+                             title={race.is_active === false ? 'Activate race' : 'Deactivate race'}
+                             onClick={() => handleToggleRaceActive(race)}
+                           >
+                             <Power className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                           </Button>
+                           <Button
+
+                             variant="ghost"
+                             size="icon"
                              className="h-7 w-7 md:h-9 md:w-9"
                              onClick={() => setEditingRace(race)}
                            >
