@@ -184,8 +184,10 @@ const RacesMade = () => {
                         {race.tier_restriction
                           ? ` ${race.tier_restriction === "odd_grades" ? "Odd" : "Even"}`
                           : ""}
+                        {race.race_name ? ` — ${race.race_name}` : ""}
                       </SelectItem>
                     ))}
+
                   </SelectContent>
                 </Select>
               </div>
