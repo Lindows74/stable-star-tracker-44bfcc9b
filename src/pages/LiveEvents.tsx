@@ -28,7 +28,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
 import { useRaceResults } from "@/hooks/useRaceResults";
-import { formatRaceTime, formatSurfaceShort, getRaceKind, isShowJumping } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, formatRaceTime, formatSurfaceShort, getRaceKind, isShowJumping } from "@/utils/raceTimeUtils";
 
 interface MatchingHorse {
   id: number;
