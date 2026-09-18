@@ -183,6 +183,9 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     if (pendingAction === 'edit') {
       setIsEditing(true);
     }
+    if (pendingAction === 'sold') {
+      soldMutation.mutate(!isSold);
+    }
     // For delete, user will need to click delete button again after auth
     setPendingAction(null);
   };
