@@ -128,8 +128,10 @@ export const formatRaceLabel = (race: any, numberOverride?: number | null): stri
     const surface = formatSurfaceShort(race.surface);
     if (surface) parts.push(surface);
   }
-  if (race.tier_restriction === "odd_grades") parts.push("Odd");
-  else if (race.tier_restriction === "even_grades") parts.push("Even");
+  if (kind === "sj") {
+    if (race.tier_restriction === "odd_grades") parts.push("Odd");
+    else if (race.tier_restriction === "even_grades") parts.push("Even");
+  }
   return parts.join(" ");
 };
 
