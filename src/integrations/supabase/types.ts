@@ -375,6 +375,7 @@ export type Database = {
           diet_sprint_energy: number | null
           gender: string | null
           id: number
+          is_sold: boolean
           jump: number | null
           max_acceleration: boolean | null
           max_agility: boolean | null
@@ -383,6 +384,7 @@ export type Database = {
           max_sprint_energy: boolean | null
           name: string
           notes: string | null
+          sold_at: string | null
           speed: number | null
           sprint_energy: number | null
           tier: number | null
@@ -401,6 +403,7 @@ export type Database = {
           diet_sprint_energy?: number | null
           gender?: string | null
           id?: number
+          is_sold?: boolean
           jump?: number | null
           max_acceleration?: boolean | null
           max_agility?: boolean | null
@@ -409,6 +412,7 @@ export type Database = {
           max_sprint_energy?: boolean | null
           name: string
           notes?: string | null
+          sold_at?: string | null
           speed?: number | null
           sprint_energy?: number | null
           tier?: number | null
@@ -427,6 +431,7 @@ export type Database = {
           diet_sprint_energy?: number | null
           gender?: string | null
           id?: number
+          is_sold?: boolean
           jump?: number | null
           max_acceleration?: boolean | null
           max_agility?: boolean | null
@@ -435,6 +440,7 @@ export type Database = {
           max_sprint_energy?: boolean | null
           name?: string
           notes?: string | null
+          sold_at?: string | null
           speed?: number | null
           sprint_energy?: number | null
           tier?: number | null
