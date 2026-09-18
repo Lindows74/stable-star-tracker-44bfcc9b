@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
 import { RaceResultNote } from "@/components/races/RaceResultNote";
-import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, parseRaceTime, sortRacesCanonically } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
@@ -34,7 +34,7 @@ const RacesMade = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("live_races")
-        .select("id, race_name, surface, distance, tier_restriction")
+        .select("id, race_name, surface, distance, tier_restriction, is_active")
         .order("id", { ascending: true });
       if (error) throw error;
       return data || [];
@@ -45,7 +45,14 @@ const RacesMade = () => {
 
   // Race numbers derived from the full race list, so new races always get a number
   const raceNumbers = useMemo(() => buildRaceNumberMap(races || []), [races]);
-  const sortedRaces = useMemo(() => sortRacesCanonically(races || []), [races]);
+  // Only the races that actually exist in Live Events are selectable here
+  const sortedRaces = useMemo(() => dedupeRacesLikeLiveEvents(races || []), [races]);
+  const racesById = useMemo(() => {
+    const map = new Map<number, any>();
+    (races || []).forEach((race: any) => map.set(race.id, race));
+    return map;
+  }, [races]);
+
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -185,6 +192,8 @@ const RacesMade = () => {
                           ? ` ${race.tier_restriction === "odd_grades" ? "Odd" : "Even"}`
                           : ""}
                         {race.race_name ? ` — ${race.race_name}` : ""}
+                        {race.is_active === false ? " (deactivated race)" : ""}
+
                       </SelectItem>
                     ))}
 
@@ -234,11 +243,17 @@ const RacesMade = () => {
                       className="w-full flex items-center justify-between gap-2 p-3 md:p-4 text-left"
                     >
                       <div className="min-w-0">
-                        <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race, group.number)}</CardTitle>
+                        <CardTitle className="text-sm md:text-base">
+                          {formatRaceLabel(group.race, group.number)}
+                          {racesById.get(group.raceId)?.is_active === false && (
+                            <span className="ml-2 text-xs font-normal text-destructive">(deactivated race)</span>
+                          )}
+                        </CardTitle>
                         {group.race.race_name && (
                           <p className="text-xs text-muted-foreground truncate">{group.race.race_name}</p>
                         )}
                       </div>
+
                       {isOpen ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       ) : (

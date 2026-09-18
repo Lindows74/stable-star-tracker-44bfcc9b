@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp } from "lucide-react";
+import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
@@ -350,7 +350,31 @@ const LiveEvents = () => {
     }
   };
 
+  const handleToggleRaceActive = async (race: any) => {
+    try {
+      const nextActive = race.is_active === false;
+      const { error } = await supabase
+        .from('live_races')
+        .update({ is_active: nextActive })
+        .eq('id', race.id);
+      if (error) throw error;
+      toast({
+        title: nextActive ? "Race activated" : "Race deactivated",
+        description: nextActive ? "The race is active again." : "The race is marked as deactivated.",
+      });
+      fetchLiveRaces();
+    } catch (error) {
+      console.error('Error toggling race:', error);
+      toast({
+        title: "Error",
+        description: "Could not change the race status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteRace = async (raceId: number) => {
+
     try {
       const { error } = await supabase
         .from('live_races')
@@ -651,6 +675,16 @@ const LiveEvents = () => {
                          </div>
                          <div className="flex gap-1 ml-2 flex-shrink-0">
                            <Button
+                             variant="ghost"
+                             size="icon"
+                             className={`h-7 w-7 md:h-9 md:w-9 ${race.is_active === false ? 'text-destructive' : ''}`}
+                             title={race.is_active === false ? 'Activate race' : 'Deactivate race'}
+                             onClick={() => handleToggleRaceActive(race)}
+                           >
+                             <Power className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                           </Button>
+                           <Button
+
                              variant="ghost"
                              size="icon"
                              className="h-7 w-7 md:h-9 md:w-9"
