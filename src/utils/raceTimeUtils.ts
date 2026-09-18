@@ -74,15 +74,21 @@ export const formatSurfaceShort = (surface?: string | null): string => {
       return "S";
     case "very_soft":
       return "VS";
+    case "none":
+      return "";
     default:
       return surface ? String(surface).replace(/_/g, " ") : "";
   }
 };
 
-export type RaceKind = "flat" | "sc" | "xc";
+export type RaceKind = "flat" | "sc" | "xc" | "sj";
+
+export const isShowJumping = (race: any): boolean =>
+  !!race && (race.surface === "none" || /show jumping/i.test(race.race_name || ""));
 
 export const getRaceKind = (race: any): RaceKind => {
   if (!race) return "flat";
+  if (isShowJumping(race)) return "sj";
   const distance = String(race.distance ?? "");
   if (distance === "0" || /cross country/i.test(race.race_name || "")) return "xc";
   if (/steeplechase/i.test(race.race_name || "")) return "sc";
@@ -94,6 +100,7 @@ export const getRaceKind = (race: any): RaceKind => {
 export const getRaceNumber = (race: any): number | null => {
   if (!race) return null;
   const kind = getRaceKind(race);
+  if (kind === "sj") return null;
   const distance = String(race.distance ?? "");
   if (kind === "xc") {
     const idx = CROSS_ORDER.indexOf(race.surface);
@@ -113,12 +120,18 @@ export const formatRaceLabel = (race: any, numberOverride?: number | null): stri
   const number = numberOverride !== undefined ? numberOverride : getRaceNumber(race);
   const parts: string[] = [];
   if (number) parts.push(`#${number}`);
-  parts.push(kind === "xc" ? "XC" : kind === "sc" ? "SC" : "Flat");
-  if (kind !== "xc" && race.distance && String(race.distance) !== "0") {
+  parts.push(kind === "xc" ? "XC" : kind === "sc" ? "SC" : kind === "sj" ? "SJ" : "Flat");
+  if (kind !== "xc" && kind !== "sj" && race.distance && String(race.distance) !== "0") {
     parts.push(`${race.distance}m`);
   }
-  const surface = formatSurfaceShort(race.surface);
-  if (surface) parts.push(surface);
+  if (kind !== "sj") {
+    const surface = formatSurfaceShort(race.surface);
+    if (surface) parts.push(surface);
+  }
+  if (kind === "sj") {
+    if (race.tier_restriction === "odd_grades") parts.push("Odd");
+    else if (race.tier_restriction === "even_grades") parts.push("Even");
+  }
   return parts.join(" ");
 };
 
@@ -134,11 +147,18 @@ export const sortRacesCanonically = <T extends Record<string, any>>(races: T[]):
   const flats: T[] = [];
   const steeples: T[] = [];
   const cross: T[] = [];
+  const showJumping: T[] = [];
   races.forEach((race) => {
     const kind = getRaceKind(race);
-    if (kind === "xc") cross.push(race);
+    if (kind === "sj") showJumping.push(race);
+    else if (kind === "xc") cross.push(race);
     else if (kind === "sc") steeples.push(race);
     else flats.push(race);
+  });
+  showJumping.sort((a, b) => {
+    const grade = (r: any) => (r.tier_restriction === "even_grades" ? 0 : 1);
+    const d = grade(a) - grade(b);
+    return d !== 0 ? d : (a.id || 0) - (b.id || 0);
   });
 
   const byOrder = (order: { d: string; s: string }[]) => (a: T, b: T) => {
@@ -155,7 +175,12 @@ export const sortRacesCanonically = <T extends Record<string, any>>(races: T[]):
     return d !== 0 ? d : (a.id || 0) - (b.id || 0);
   });
 
-  return [...flats.sort(byOrder(FLAT_ORDER)), ...steeples.sort(byOrder(STEEPLE_ORDER)), ...cross];
+  return [
+    ...flats.sort(byOrder(FLAT_ORDER)),
+    ...steeples.sort(byOrder(STEEPLE_ORDER)),
+    ...cross,
+    ...showJumping,
+  ];
 };
 
 // Race number per race id, derived from the full list so newly added races
@@ -186,18 +211,23 @@ export const dedupeRacesLikeLiveEvents = <T extends Record<string, any>>(races: 
   // Live Events keeps the LAST duplicate for a surface|tier key (Map overwrite),
   // but in the position of the FIRST one. Mirror that exactly so names match.
   const crossByKey = new Map<string, T>();
+  const dedupKey = (race: any) => `${getRaceKind(race)}|${race.surface}|${race.tier_restriction || ""}`;
+  const isDeduped = (race: any) => {
+    const kind = getRaceKind(race);
+    return kind === "xc" || kind === "sj";
+  };
   sorted.forEach((race) => {
-    if (getRaceKind(race) !== "xc") return;
-    crossByKey.set(`${race.surface}|${race.tier_restriction || ""}`, race);
+    if (!isDeduped(race)) return;
+    crossByKey.set(dedupKey(race), race);
   });
   const usedKeys = new Set<string>();
   const out: T[] = [];
   sorted.forEach((race) => {
-    if (getRaceKind(race) !== "xc") {
+    if (!isDeduped(race)) {
       out.push(race);
       return;
     }
-    const key = `${race.surface}|${race.tier_restriction || ""}`;
+    const key = dedupKey(race);
     if (usedKeys.has(key)) return;
     usedKeys.add(key);
     out.push(crossByKey.get(key) as T);

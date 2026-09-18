@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { formatSurface } from "@/utils/formatUtils";
+import { isShowJumping } from "@/utils/raceTimeUtils";
 
 interface EditRaceFormProps {
   race: {
@@ -31,6 +32,7 @@ interface EditRaceFormProps {
     tier_restriction: string | null;
     track_name: string | null;
     start_time: string;
+    tier_courses?: Record<string, string> | null;
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -49,6 +51,10 @@ const EditRaceForm = ({ race, open, onOpenChange, onRaceUpdated }: EditRaceFormP
     start_date: new Date(race.start_time).toISOString().split('T')[0],
     start_time: new Date(race.start_time).toTimeString().slice(0, 5),
   });
+  const [tierCourses, setTierCourses] = useState<Record<string, string>>(
+    (race.tier_courses as Record<string, string>) || {}
+  );
+  const showJumping = isShowJumping(race);
 
   const raceTypes = [
     { value: "flat", label: "Flat Racing" },
@@ -85,6 +91,7 @@ const EditRaceForm = ({ race, open, onOpenChange, onRaceUpdated }: EditRaceFormP
           surface: formData.surface,
           tier_restriction: formData.tier_restriction || null,
           track_name: formData.track_name || null,
+          tier_courses: showJumping ? tierCourses : undefined,
           start_time: startDateTime.toISOString(),
         })
         .eq('id', race.id);
@@ -131,6 +138,7 @@ const EditRaceForm = ({ race, open, onOpenChange, onRaceUpdated }: EditRaceFormP
             />
           </div>
 
+          {!showJumping && (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="distance">Distance</Label>
@@ -170,6 +178,25 @@ const EditRaceForm = ({ race, open, onOpenChange, onRaceUpdated }: EditRaceFormP
               </Select>
             </div>
           </div>
+          )}
+
+          {showJumping && (
+            <div className="space-y-2">
+              <Label>Course names per grade</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {(formData.tier_restriction === 'odd_grades' ? [3, 5, 7, 9] : [2, 4, 6, 8]).map((tier) => (
+                  <div key={tier} className="flex items-center gap-2">
+                    <span className="text-xs font-semibold w-10 shrink-0">G{tier}</span>
+                    <Input
+                      value={tierCourses[String(tier)] || ""}
+                      onChange={(e) => setTierCourses({ ...tierCourses, [String(tier)]: e.target.value })}
+                      placeholder={`Course for grade ${tier}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="tier_restriction">Tier Restriction</Label>

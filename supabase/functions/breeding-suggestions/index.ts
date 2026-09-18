@@ -52,8 +52,9 @@ Deno.serve(async (req) => {
 
     // For each live race, find matching horses
     const raceMatches = liveRaces.map(race => {
-      const isCrossCountry = /cross country/i.test(race.race_name || '');
-      const checkDistance = !isCrossCountry && race.distance !== '0';
+      const isShowJumping = race.surface === 'none' || /show jumping/i.test(race.race_name || '');
+      const isCrossCountry = !isShowJumping && /cross country/i.test(race.race_name || '');
+      const checkDistance = !isCrossCountry && !isShowJumping && race.distance !== '0';
 
       const tierSet = race.tier_restriction === 'odd_grades' ? oddTiers
         : race.tier_restriction === 'even_grades' ? evenTiers
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
 
       const matchingHorses = horseLookup
         .filter(({ horse, surfaces, distances }) => {
-          if (!surfaces.has(race.surface)) return false;
+          if (!isShowJumping && !surfaces.has(race.surface)) return false;
           if (checkDistance && !distances.has(race.distance)) return false;
           if (tierSet && (!horse.tier || !tierSet.has(horse.tier))) return false;
           return true;
