@@ -22,12 +22,14 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
     tierRestriction: "",
     trackName: ""
   });
+  const [tierCourses, setTierCourses] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const raceTypes = [
     { value: "flat_racing", label: "Flat Racing" },
     { value: "steeplechase", label: "Steeplechase" },
-    { value: "cross_country", label: "Cross Country" }
+    { value: "cross_country", label: "Cross Country" },
+    { value: "show_jumping", label: "Show Jumping" }
   ];
 
   const surfaces = [
@@ -47,7 +49,13 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isCrossCountry = formData.raceType === "cross_country";
-    if (!formData.raceType || (!isCrossCountry && !formData.distance) || !formData.surface || !formData.tierRestriction) {
+    const isShowJumping = formData.raceType === "show_jumping";
+    if (
+      !formData.raceType ||
+      (!isCrossCountry && !isShowJumping && !formData.distance) ||
+      (!isShowJumping && !formData.surface) ||
+      !formData.tierRestriction
+    ) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -59,18 +67,27 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
     setLoading(true);
     try {
       const startDateTime = new Date().toISOString();
-      const distanceValue = isCrossCountry ? "0" : formData.distance;
+      const distanceValue = isCrossCountry || isShowJumping ? "0" : formData.distance;
+      const surfaceValue = isShowJumping ? "none" : formData.surface;
       const gradesLabel = formData.tierRestriction === 'odd_grades' ? 'Odd Grades' : 'Even Grades';
-      const raceName = isCrossCountry
-        ? `Cross Country ${formatSurface(formData.surface)} (${gradesLabel})`
-        : `${formData.distance}m ${formData.surface} (${gradesLabel})`;
+      const raceName = isShowJumping
+        ? `Show Jumping (${gradesLabel})`
+        : isCrossCountry
+          ? `Cross Country ${formatSurface(formData.surface)} (${gradesLabel})`
+          : `${formData.distance}m ${formData.surface} (${gradesLabel})`;
+      const coursesValue = isShowJumping
+        ? Object.fromEntries(
+            Object.entries(tierCourses).filter(([, name]) => (name || "").trim() !== "")
+          )
+        : {};
 
       const { error } = await supabase
         .from('live_races')
         .insert([{
           race_name: raceName,
-          surface: formData.surface,
+          surface: surfaceValue,
           distance: distanceValue,
+          tier_courses: coursesValue,
           tier_restriction: formData.tierRestriction,
           start_time: startDateTime,
           track_name: formData.trackName || null,
@@ -101,6 +118,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
         tierRestriction: "",
         trackName: ""
       });
+      setTierCourses({});
       setIsOpen(false);
       onRaceAdded();
 
@@ -169,7 +187,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
               </Select>
             </div>
 
-            {formData.raceType !== 'cross_country' && (
+            {formData.raceType !== 'cross_country' && formData.raceType !== 'show_jumping' && (
             <div>
               <Label htmlFor="distance">Distance (meters) *</Label>
               <Select 
@@ -190,6 +208,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
             </div>
             )}
 
+            {formData.raceType !== 'show_jumping' && (
             <div>
               <Label htmlFor="surface">Surface *</Label>
               <Select 
@@ -208,6 +227,7 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
                 </SelectContent>
               </Select>
             </div>
+            )}
 
             <div>
               <Label htmlFor="tierRestriction">Tier Restriction *</Label>
@@ -237,6 +257,24 @@ const AddRaceForm = ({ onRaceAdded }: AddRaceFormProps) => {
 
             {/* Removed prize money field */}
           </div>
+
+          {formData.raceType === 'show_jumping' && formData.tierRestriction && (
+            <div className="space-y-2">
+              <Label>Course names per grade</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {(formData.tierRestriction === 'odd_grades' ? [3, 5, 7, 9] : [2, 4, 6, 8]).map((tier) => (
+                  <div key={tier} className="flex items-center gap-2">
+                    <span className="text-xs font-semibold w-10 shrink-0">G{tier}</span>
+                    <Input
+                      value={tierCourses[String(tier)] || ""}
+                      onChange={(e) => setTierCourses({ ...tierCourses, [String(tier)]: e.target.value })}
+                      placeholder={`Course for grade ${tier}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" disabled={loading}>
