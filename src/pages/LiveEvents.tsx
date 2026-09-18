@@ -350,7 +350,31 @@ const LiveEvents = () => {
     }
   };
 
+  const handleToggleRaceActive = async (race: any) => {
+    try {
+      const nextActive = race.is_active === false;
+      const { error } = await supabase
+        .from('live_races')
+        .update({ is_active: nextActive })
+        .eq('id', race.id);
+      if (error) throw error;
+      toast({
+        title: nextActive ? "Race activated" : "Race deactivated",
+        description: nextActive ? "The race is active again." : "The race is marked as deactivated.",
+      });
+      fetchLiveRaces();
+    } catch (error) {
+      console.error('Error toggling race:', error);
+      toast({
+        title: "Error",
+        description: "Could not change the race status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteRace = async (raceId: number) => {
+
     try {
       const { error } = await supabase
         .from('live_races')
