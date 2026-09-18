@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
 import { RaceResultNote } from "@/components/races/RaceResultNote";
-import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, getRaceKind, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
@@ -188,7 +188,7 @@ const RacesMade = () => {
                     {sortedRaces.map((race: any) => (
                       <SelectItem key={race.id} value={String(race.id)}>
                         {formatRaceLabel(race, raceNumbers.get(race.id) ?? null)}
-                        {race.tier_restriction
+                        {race.tier_restriction && getRaceKind(race) !== "sj"
                           ? ` ${race.tier_restriction === "odd_grades" ? "Odd" : "Even"}`
                           : ""}
                         {race.race_name ? ` — ${race.race_name}` : ""}
