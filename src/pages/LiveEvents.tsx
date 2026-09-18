@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power } from "lucide-react";
+import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power, Rows3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
@@ -28,7 +28,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
 import { useRaceResults } from "@/hooks/useRaceResults";
-import { formatRaceTime, formatSurfaceShort } from "@/utils/raceTimeUtils";
+import { formatRaceTime, formatSurfaceShort, getRaceKind, isShowJumping } from "@/utils/raceTimeUtils";
 
 interface MatchingHorse {
   id: number;
@@ -61,6 +61,7 @@ interface RaceMatch {
   track_name: string;
   tier_restriction: string | null;
   is_active?: boolean;
+  tier_courses?: Record<string, string> | null;
   matchingHorses: MatchingHorse[];
 }
 
@@ -111,14 +112,17 @@ const LiveEvents = () => {
     return map;
   }, [raceResults, raceKeyById]);
 
-  const raceKey = (race: any) => `${race.distance}|${race.surface}`;
+  const raceKey = (race: any) =>
+    isShowJumping(race)
+      ? `sj|${race.tier_restriction || ''}`
+      : `${race.distance}|${race.surface}`;
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('live_races').select('id, distance, surface');
+      const { data } = await supabase.from('live_races').select('id, distance, surface, race_name, tier_restriction');
       if (data) {
         const map: Record<number, string> = {};
-        data.forEach((r: any) => { map[r.id] = `${r.distance}|${r.surface}`; });
+        data.forEach((r: any) => { map[r.id] = raceKey(r); });
         setRaceKeyById(map);
       }
     })();
@@ -229,18 +233,27 @@ const LiveEvents = () => {
           { d: '1400', s: 'firm' },
         ];
         
-        const isCrossCountry = (r: any) => r.distance === '0' || /cross country/i.test(r.race_name || '');
+        const isSJ = (r: any) => isShowJumping(r);
+        const isCrossCountry = (r: any) => !isSJ(r) && (r.distance === '0' || /cross country/i.test(r.race_name || ''));
         // Classify by distance+surface first so renaming a race never changes its number
         const isSteeple = (r: any) =>
-          !isCrossCountry(r) &&
+          !isCrossCountry(r) && !isSJ(r) &&
           (steepleOrder.some(o => o.d === String(r.distance) && o.s === r.surface) ||
             /steeplechase/i.test(r.race_name || ''));
 
         
-        const flats = raceMatchesWithAll.filter((r: any) => !isSteeple(r) && !isCrossCountry(r));
+        const flats = raceMatchesWithAll.filter((r: any) => !isSteeple(r) && !isCrossCountry(r) && !isSJ(r));
         const steeples = raceMatchesWithAll.filter((r: any) => isSteeple(r));
         
         // Cross Country: any surface, deduped by surface + tier restriction
+        const showJumpingAll = raceMatchesWithAll.filter((r: any) => isSJ(r));
+        const showJumping = Array.from(
+          new Map(showJumpingAll.map((r: any) => [`${r.tier_restriction || ''}`, r])).values()
+        ).sort((a: any, b: any) => {
+          const grade = (r: any) => (r.tier_restriction === 'even_grades' ? 0 : 1);
+          const d = grade(a) - grade(b);
+          return d !== 0 ? d : (a.id || 0) - (b.id || 0);
+        });
         const crossAll = raceMatchesWithAll.filter((r: any) => isCrossCountry(r));
         const cross = Array.from(
           new Map(crossAll.map((r: any) => [`${r.surface}|${r.tier_restriction || ''}`, r])).values()
@@ -268,7 +281,7 @@ const LiveEvents = () => {
           return d !== 0 ? d : (a.id || 0) - (b.id || 0);
         });
         
-        const sorted = [...flatsSorted, ...steeplesSorted, ...crossSorted];
+        const sorted = [...flatsSorted, ...steeplesSorted, ...crossSorted, ...showJumping];
         
         setRaceMatches(sorted);
         setVisibleCount(INITIAL_RACES);
@@ -428,13 +441,12 @@ const LiveEvents = () => {
 
         {/* Section anchors */}
         {(() => {
-          const flatCount = raceMatches.filter((_, i) => i + 1 <= 17).length;
-          const steepleCount = raceMatches.filter((_, i) => i + 1 > 17 && i + 1 <= 20).length;
-          const crossCount = raceMatches.filter((_, i) => i + 1 > 20).length;
+          const countKind = (kind: string) => raceMatches.filter((r) => getRaceKind(r) === kind).length;
           const anchors = [
-            { id: 'flat-races', label: 'Flat Race', count: flatCount, icon: Circle, color: 'text-blue-500' },
-            { id: 'steeplechase-races', label: 'Steeple Chase', count: steepleCount, icon: Triangle, color: 'text-yellow-500' },
-            { id: 'cross-country-races', label: 'Cross Country', count: crossCount, icon: Mountain, color: 'text-green-500' },
+            { id: 'flat-races', label: 'Flat Race', count: countKind('flat'), icon: Circle, color: 'text-blue-500' },
+            { id: 'steeplechase-races', label: 'Steeple Chase', count: countKind('sc'), icon: Triangle, color: 'text-yellow-500' },
+            { id: 'cross-country-races', label: 'Cross Country', count: countKind('xc'), icon: Mountain, color: 'text-green-500' },
+            { id: 'show-jumping-races', label: 'Show Jumping', count: countKind('sj'), icon: Rows3, color: 'text-purple-500' },
           ];
           const scrollTo = (id: string) => {
             const doScroll = () => {
@@ -450,7 +462,7 @@ const LiveEvents = () => {
             }
           };
           return (
-            <div className="grid grid-cols-3 gap-2 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
               {anchors.map((a) => {
                 const Icon = a.icon;
                 return (
@@ -491,10 +503,13 @@ const LiveEvents = () => {
               setTimeout(doScroll, 200);
             }
           };
-          const typeColor = (raceNumber: number) =>
-            raceNumber <= 17 ? 'text-blue-500 border-blue-500/40 hover:bg-blue-500/10'
-              : raceNumber <= 20 ? 'text-yellow-600 border-yellow-500/40 hover:bg-yellow-500/10'
-                : 'text-green-600 border-green-500/40 hover:bg-green-500/10';
+          const typeColor = (race: any) => {
+            const kind = getRaceKind(race);
+            if (kind === 'sj') return 'text-purple-600 border-purple-500/40 hover:bg-purple-500/10';
+            if (kind === 'xc') return 'text-green-600 border-green-500/40 hover:bg-green-500/10';
+            if (kind === 'sc') return 'text-yellow-600 border-yellow-500/40 hover:bg-yellow-500/10';
+            return 'text-blue-500 border-blue-500/40 hover:bg-blue-500/10';
+          };
           return (
             <Card>
               <CardHeader className="pb-2">
@@ -513,10 +528,11 @@ const LiveEvents = () => {
                       <button
                         key={race.id}
                         onClick={() => scrollToRace(race.id)}
-                        className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] md:text-xs font-medium transition-colors ${typeColor(raceNumber)}`}
+                        className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] md:text-xs font-medium transition-colors ${typeColor(race)}`}
                         title={`${race.race_name || ''}`}
                       >
                         <span className="font-bold">#{raceNumber}</span>
+                        {getRaceKind(race) === 'sj' && <span>SJ</span>}
                         {race.distance !== '0' && <span>{race.distance}m</span>}
                         <span>{formatSurfaceShort(race.surface)}</span>
                         {grades && <span className="opacity-80">{grades}</span>}
@@ -542,31 +558,32 @@ const LiveEvents = () => {
               <div className="space-y-6">
                 {raceMatches.slice(0, visibleCount).map((race, index) => {
                    const raceNumber = index + 1;
-                   const getRaceType = (n: number) => {
-                     if (n <= 17) return "Flat Race";
-                     if (n <= 20) return "Steeple Chase";
-                     return "Cross Country";
+                   const kindLabels: Record<string, string> = {
+                     flat: "Flat Race",
+                     sc: "Steeple Chase",
+                     xc: "Cross Country",
+                     sj: "Show Jumping",
                    };
-                   const raceType = getRaceType(raceNumber);
-                   let raceLabel = "";
-                   
-                   if (raceNumber <= 17) {
-                     raceLabel = `Race ${raceNumber} - ${raceType}`;
-                   } else if (raceNumber <= 20) {
-                     raceLabel = `Race ${raceNumber} - ${raceType}`;
-                     if (race.race_name?.includes('Under Repair')) {
-                       raceLabel += ' (Under Repair)';
-                     }
-                   } else {
-                     raceLabel = `Race ${raceNumber} - ${raceType} (Surface preference only)`;
+                   const getRaceType = (r: any) => kindLabels[getRaceKind(r)] || "Flat Race";
+                   const raceType = getRaceType(race);
+                   const kind = getRaceKind(race);
+                   let raceLabel = `Race ${raceNumber} - ${raceType}`;
+                   if (kind === 'sc' && race.race_name?.includes('Under Repair')) {
+                     raceLabel += ' (Under Repair)';
+                   } else if (kind === 'xc') {
+                     raceLabel += ' (Surface preference only)';
+                   } else if (kind === 'sj') {
+                     raceLabel += race.tier_restriction === 'odd_grades' ? ' (Odd Grades)' : ' (Even Grades)';
                    }
                    
-                   const sectionId = raceType === "Flat Race"
+                   const sectionId = kind === 'flat'
                      ? "flat-races"
-                     : raceType === "Steeple Chase"
+                     : kind === 'sc'
                        ? "steeplechase-races"
-                       : "cross-country-races";
-                   const prevType = index > 0 ? getRaceType(index) : null;
+                       : kind === 'xc'
+                         ? "cross-country-races"
+                         : "show-jumping-races";
+                   const prevType = index > 0 ? getRaceType(raceMatches[index - 1]) : null;
                    const isFirstOfType = raceType !== prevType;
                    
                    const allTiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -595,9 +612,11 @@ const LiveEvents = () => {
                                   {race.distance}m
                                 </span>
                               )}
-                              <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
-                                {formatSurface(race.surface)}
-                              </span>
+                              {kind !== 'sj' && (
+                                <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
+                                  {formatSurface(race.surface)}
+                                </span>
+                              )}
                               {race.track_name && (
                                 <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
                                   📍 {race.track_name}
@@ -665,6 +684,20 @@ const LiveEvents = () => {
                                  )}
                                </span>
                              )}
+                             {kind === 'sj' && race.tier_courses && Object.keys(race.tier_courses).length > 0 && (
+                               <>
+                                 {(race.tier_restriction === 'odd_grades' ? [3, 5, 7, 9] : [2, 4, 6, 8])
+                                   .filter((tier) => (race.tier_courses as any)?.[String(tier)])
+                                   .map((tier) => (
+                                     <span
+                                       key={`course-${tier}`}
+                                       className="text-[10px] md:text-xs font-medium text-purple-700 bg-purple-500/10 border border-purple-500/30 px-1.5 py-0.5 rounded"
+                                     >
+                                       G{tier}: {(race.tier_courses as any)[String(tier)]}
+                                     </span>
+                                   ))}
+                               </>
+                             )}
                              {race.is_active === false && (
                                <span className="text-[10px] md:text-xs font-medium text-destructive-foreground bg-destructive px-1.5 py-0.5 rounded">⚠ Repair</span>
                              )}
@@ -717,7 +750,7 @@ const LiveEvents = () => {
                               "Rolling Current",
                               "Rolling Current Pro",
                             ]);
-                            const isCC = raceType === "Cross Country";
+                            const isCC = kind === 'xc';
                             const hasCCTrait = (h: any) =>
                               (h.traits || []).some((t: string) => CROSS_COUNTRY_TRAITS.has(t));
 
