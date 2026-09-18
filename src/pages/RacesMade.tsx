@@ -241,11 +241,17 @@ const RacesMade = () => {
                       className="w-full flex items-center justify-between gap-2 p-3 md:p-4 text-left"
                     >
                       <div className="min-w-0">
-                        <CardTitle className="text-sm md:text-base">{formatRaceLabel(group.race, group.number)}</CardTitle>
+                        <CardTitle className="text-sm md:text-base">
+                          {formatRaceLabel(group.race, group.number)}
+                          {racesById.get(group.raceId)?.is_active === false && (
+                            <span className="ml-2 text-xs font-normal text-destructive">(deactivated race)</span>
+                          )}
+                        </CardTitle>
                         {group.race.race_name && (
                           <p className="text-xs text-muted-foreground truncate">{group.race.race_name}</p>
                         )}
                       </div>
+
                       {isOpen ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       ) : (
