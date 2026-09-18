@@ -97,6 +97,10 @@ const LiveEvents = () => {
   const { data: raceResults } = useRaceResults();
   const [raceKeyById, setRaceKeyById] = useState<Record<number, string>>({});
 
+  // Race numbers come from the shared canonical numbering so Live Events and
+  // Races Made always show the same number for the same race.
+  const raceNumberMap = useMemo(() => buildRaceNumberMap(raceMatches), [raceMatches]);
+
   // Best (fastest) logged time per race "kind" (distance + surface), per horse.
   // Keyed by distance|surface so duplicate races of the same type share times.
   const bestTimesByKey = useMemo(() => {
