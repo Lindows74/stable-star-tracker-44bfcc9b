@@ -91,6 +91,53 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     soldMutation.mutate(!isSold);
   };
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [linksLoading, setLinksLoading] = useState(false);
+  const [links, setLinks] = useState({ breedingNotes: 0, foalLinks: 0, raceResults: 0 });
+  const hasLinks = links.breedingNotes > 0 || links.foalLinks > 0 || links.raceResults > 0;
+
+  const loadLinks = async () => {
+    setLinksLoading(true);
+    try {
+      const countOf = async (p: any) => (await p).count ?? 0;
+      const [notes, foals, results] = await Promise.all([
+        countOf(
+          supabase
+            .from("breeding_notes")
+            .select("id", { count: "exact", head: true })
+            .or(`mare_id.eq.${horse.id},stallion_id.eq.${horse.id},foal_id.eq.${horse.id}`)
+        ),
+        countOf(
+          supabase
+            .from("breeding_note_foals")
+            .select("id", { count: "exact", head: true })
+            .eq("foal_id", horse.id)
+        ),
+        countOf(
+          supabase
+            .from("race_results")
+            .select("id", { count: "exact", head: true })
+            .eq("horse_id", horse.id)
+        ),
+      ]);
+      setLinks({ breedingNotes: notes, foalLinks: foals, raceResults: results });
+    } catch {
+      setLinks({ breedingNotes: 0, foalLinks: 0, raceResults: 0 });
+    } finally {
+      setLinksLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setPendingAction('delete');
+      setShowMasterKeyDialog(true);
+      return;
+    }
+    loadLinks();
+  };
+
   const deleteMutation = useMutation({
     mutationFn: async (horseId: number) => {
       console.log("HorseCard: Deleting horse with ID:", horseId);
