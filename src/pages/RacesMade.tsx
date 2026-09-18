@@ -34,7 +34,7 @@ const RacesMade = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("live_races")
-        .select("id, race_name, surface, distance, tier_restriction")
+        .select("id, race_name, surface, distance, tier_restriction, is_active")
         .order("id", { ascending: true });
       if (error) throw error;
       return data || [];
@@ -45,7 +45,14 @@ const RacesMade = () => {
 
   // Race numbers derived from the full race list, so new races always get a number
   const raceNumbers = useMemo(() => buildRaceNumberMap(races || []), [races]);
-  const sortedRaces = useMemo(() => sortRacesCanonically(races || []), [races]);
+  // Only the races that actually exist in Live Events are selectable here
+  const sortedRaces = useMemo(() => dedupeRacesLikeLiveEvents(races || []), [races]);
+  const racesById = useMemo(() => {
+    const map = new Map<number, any>();
+    (races || []).forEach((race: any) => map.set(race.id, race));
+    return map;
+  }, [races]);
+
 
   const saveMutation = useMutation({
     mutationFn: async () => {

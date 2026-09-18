@@ -179,3 +179,18 @@ export const buildRaceNumberMap = (races: any[] = []): Map<number, number> => {
   return map;
 };
 
+// The races shown in Live Events: cross country is deduped by surface + tier
+// restriction (the same rule Live Events uses), everything else is kept as is.
+export const dedupeRacesLikeLiveEvents = <T extends Record<string, any>>(races: T[] = []): T[] => {
+  const sorted = sortRacesCanonically(races);
+  const seenCross = new Set<string>();
+  return sorted.filter((race) => {
+    if (getRaceKind(race) !== "xc") return true;
+    const key = `${race.surface}|${race.tier_restriction || ""}`;
+    if (seenCross.has(key)) return false;
+    seenCross.add(key);
+    return true;
+  });
+};
+
+
