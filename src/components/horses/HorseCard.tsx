@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Lock, Star, Trophy } from "lucide-react";
+import { Edit2, Trash2, Lock, Star, Trophy, Tag } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -42,7 +42,7 @@ interface HorseCardProps {
 export const HorseCard = ({ horse }: HorseCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showMasterKeyDialog, setShowMasterKeyDialog] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'edit' | 'delete' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'edit' | 'delete' | 'sold' | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
@@ -56,6 +56,39 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     const key = `${raceTypeKey(bt.race) || `race-${bt.raceId}`}|${horse.tier}`;
     const best = tierBestTimes.get(key);
     return best != null && bt.timeMs <= best;
+  };
+
+  const isSold = !!horse.is_sold;
+
+  const soldMutation = useMutation({
+    mutationFn: async (sold: boolean) => {
+      const { error } = await supabase
+        .from("horses")
+        .update({ is_sold: sold, sold_at: sold ? new Date().toISOString() : null })
+        .eq("id", horse.id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, sold) => {
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+      toast({
+        title: sold ? "Marked as sold" : "Back in your stable",
+        description: sold
+          ? `${horse.name} is kept with all history, but hidden from race matching.`
+          : `${horse.name} is active again.`,
+      });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Could not update sold status", variant: "destructive" });
+    },
+  });
+
+  const handleSoldToggle = () => {
+    if (!isAuthenticated) {
+      setPendingAction('sold');
+      setShowMasterKeyDialog(true);
+      return;
+    }
+    soldMutation.mutate(!isSold);
   };
 
   const deleteMutation = useMutation({
@@ -150,18 +183,26 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     if (pendingAction === 'edit') {
       setIsEditing(true);
     }
+    if (pendingAction === 'sold') {
+      soldMutation.mutate(!isSold);
+    }
     // For delete, user will need to click delete button again after auth
     setPendingAction(null);
   };
 
   return (
-    <Card className="w-full">
+    <Card className={`w-full ${isSold ? 'opacity-60 grayscale' : ''}`}>
       <CardHeader className="pb-2 md:pb-3 p-3 md:p-6">
         <div className="space-y-2">
           {/* Horse name - full width */}
           <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} ${fullyMaxTrained ? `border-[5px] ${horse.gender === 'stallion' ? 'border-blue-600' : horse.gender === 'mare' ? 'border-pink-600' : 'border-gray-600'}` : ''}`}>
             <CardTitle className="text-sm md:text-lg flex items-center gap-1 flex-wrap">
-              <span>{horse.name}</span>
+              <span className={isSold ? 'line-through' : ''}>{horse.name}</span>
+              {isSold && (
+                <Badge variant="secondary" className="text-[10px] md:text-xs bg-gray-700 text-white">
+                  Sold
+                </Badge>
+              )}
               {hasEliteLineage && <Star className="h-3 w-3 md:h-4 md:w-4 fill-purple-500 text-purple-500 flex-shrink-0" />}
               {hasFullStaminaTrait && <span className="text-sm md:text-lg flex-shrink-0">💯</span>}
               {hasSpeedStackingTraits && <span className="text-sm md:text-lg flex-shrink-0">🔥</span>}
@@ -186,6 +227,16 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               </span>
             </div>
             <div className="flex gap-1.5 md:gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleSoldToggle}
+                disabled={soldMutation.isPending}
+                title={isSold ? "Mark as not sold" : "Mark as sold"}
+                className={`h-7 w-7 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'} ${isSold ? 'bg-gray-200' : ''}`}
+              >
+                <Tag className="h-3 w-3 md:h-4 md:w-4" />
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
