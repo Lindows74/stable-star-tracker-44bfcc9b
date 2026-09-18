@@ -522,7 +522,7 @@ const LiveEvents = () => {
               <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-1.5">
                   {raceMatches.map((race, index) => {
-                    const raceNumber = index + 1;
+                    const raceNumber = raceNumberMap.get(race.id) ?? index + 1;
                     const grades = race.tier_restriction === 'odd_grades'
                       ? 'Odd'
                       : race.tier_restriction === 'even_grades'
@@ -561,7 +561,7 @@ const LiveEvents = () => {
             {raceMatches.length > 0 ? (
               <div className="space-y-6">
                 {raceMatches.slice(0, visibleCount).map((race, index) => {
-                   const raceNumber = index + 1;
+                   const raceNumber = raceNumberMap.get(race.id) ?? index + 1;
                    const kindLabels: Record<string, string> = {
                      flat: "Flat Race",
                      sc: "Steeple Chase",
