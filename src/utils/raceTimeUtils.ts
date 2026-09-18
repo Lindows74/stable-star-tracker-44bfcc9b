@@ -161,9 +161,20 @@ export const sortRacesCanonically = <T extends Record<string, any>>(races: T[]):
     return d !== 0 ? d : (a.id || 0) - (b.id || 0);
   });
 
+  const pref = (s: string) => {
+    const i = surfPref.indexOf(s);
+    return i === -1 ? surfPref.length : i;
+  };
+  // Known distance/surface combos keep the official order; new ones are appended
+  // after them, ordered by distance and then surface, so numbering stays stable.
   const byOrder = (order: { d: string; s: string }[]) => (a: T, b: T) => {
     const d = orderIndex(a, order) - orderIndex(b, order);
-    return d !== 0 ? d : (a.id || 0) - (b.id || 0);
+    if (d !== 0) return d;
+    const dist = Number(a.distance || 0) - Number(b.distance || 0);
+    if (dist !== 0) return dist;
+    const surf = pref(a.surface) - pref(b.surface);
+    if (surf !== 0) return surf;
+    return (a.id || 0) - (b.id || 0);
   };
 
   cross.sort((a, b) => {
