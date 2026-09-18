@@ -245,13 +245,12 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               >
                 <Edit2 className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
-              <AlertDialog>
+              <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogTrigger asChild>
                   <Button 
                     variant="outline" 
                     size="icon"
-                    onClick={() => !isAuthenticated && handleDelete()}
-                    disabled={!isAuthenticated && pendingAction === 'delete'}
+                    onClick={handleDeleteClick}
                     className={`h-7 w-7 md:h-9 md:w-9 border-2 ${isAuthenticated ? 'border-green-500' : 'border-red-500'}`}
                   >
                     <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
@@ -259,19 +258,54 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Horse</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete {horse.name}? This action cannot be undone.
+                    <AlertDialogTitle>Delete {horse.name}?</AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-2 text-left">
+                        {linksLoading ? (
+                          <p>Checking what is linked to this horse…</p>
+                        ) : hasLinks ? (
+                          <>
+                            <p className="font-medium text-destructive">
+                              This horse is still used elsewhere:
+                            </p>
+                            <ul className="list-disc pl-5">
+                              {!!links.breedingNotes && (
+                                <li>{links.breedingNotes} breeding note{links.breedingNotes > 1 ? 's' : ''} / pairing{links.breedingNotes > 1 ? 's' : ''}</li>
+                              )}
+                              {!!links.foalLinks && (
+                                <li>{links.foalLinks} foal link{links.foalLinks > 1 ? 's' : ''}</li>
+                              )}
+                              {!!links.raceResults && (
+                                <li>{links.raceResults} recorded race time{links.raceResults > 1 ? 's' : ''}</li>
+                              )}
+                            </ul>
+                            <p>
+                              Deleting removes all of this for good. Marking the horse as sold keeps every
+                              note, pairing and time, and only hides the horse from race matching.
+                            </p>
+                          </>
+                        ) : (
+                          <p>Nothing else is linked to this horse. This action cannot be undone.</p>
+                        )}
+                      </div>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
+                  <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    {!isSold && (
+                      <AlertDialogAction
+                        onClick={() => soldMutation.mutate(true)}
+                        className="bg-amber-600 text-white hover:bg-amber-700"
+                      >
+                        Mark as sold instead
+                      </AlertDialogAction>
+                    )}
                     <AlertDialogAction
-                      onClick={() => isAuthenticated && deleteMutation.mutate(horse.id)}
+                      onClick={() => deleteMutation.mutate(horse.id)}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      disabled={!isAuthenticated}
+                      disabled={linksLoading}
                     >
-                      Delete
+                      Delete anyway
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
