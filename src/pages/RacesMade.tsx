@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
 import { RaceResultNote } from "@/components/races/RaceResultNote";
-import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, parseRaceTime, sortRacesCanonically } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
