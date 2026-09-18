@@ -1,0 +1,1 @@
+ALTER TABLE public.live_races ADD COLUMN IF NOT EXISTS tier_courses jsonb NOT NULL DEFAULT '{}'::jsonb;
