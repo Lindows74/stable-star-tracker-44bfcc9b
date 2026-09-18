@@ -114,7 +114,7 @@ export const formatRaceLabel = (race: any, numberOverride?: number | null): stri
   const parts: string[] = [];
   if (number) parts.push(`#${number}`);
   parts.push(kind === "xc" ? "XC" : kind === "sc" ? "SC" : "Flat");
-  if (kind === "flat" && race.distance && String(race.distance) !== "0") {
+  if (kind !== "xc" && race.distance && String(race.distance) !== "0") {
     parts.push(`${race.distance}m`);
   }
   const surface = formatSurfaceShort(race.surface);
