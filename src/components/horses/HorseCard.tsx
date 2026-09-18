@@ -69,7 +69,14 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
       await supabase.from("horse_positions").delete().eq("horse_id", horseId);
       await supabase.from("horse_breeding").delete().eq("horse_id", horseId);
       await supabase.from("horse_traits").delete().eq("horse_id", horseId);
-      
+      await supabase.from("race_results").delete().eq("horse_id", horseId);
+
+      // Remove breeding references
+      await supabase.from("breeding_note_foals").delete().eq("foal_id", horseId);
+      await supabase.from("breeding_notes").update({ foal_id: null }).eq("foal_id", horseId);
+      await supabase.from("breeding_notes").update({ mare_id: null }).eq("mare_id", horseId);
+      await supabase.from("breeding_notes").update({ stallion_id: null }).eq("stallion_id", horseId);
+
       // Delete the horse
       const { error } = await supabase.from("horses").delete().eq("id", horseId);
       if (error) throw error;
