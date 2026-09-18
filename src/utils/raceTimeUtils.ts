@@ -183,14 +183,26 @@ export const buildRaceNumberMap = (races: any[] = []): Map<number, number> => {
 // restriction (the same rule Live Events uses), everything else is kept as is.
 export const dedupeRacesLikeLiveEvents = <T extends Record<string, any>>(races: T[] = []): T[] => {
   const sorted = sortRacesCanonically(races);
-  const seenCross = new Set<string>();
-  return sorted.filter((race) => {
-    if (getRaceKind(race) !== "xc") return true;
-    const key = `${race.surface}|${race.tier_restriction || ""}`;
-    if (seenCross.has(key)) return false;
-    seenCross.add(key);
-    return true;
+  // Live Events keeps the LAST duplicate for a surface|tier key (Map overwrite),
+  // but in the position of the FIRST one. Mirror that exactly so names match.
+  const crossByKey = new Map<string, T>();
+  sorted.forEach((race) => {
+    if (getRaceKind(race) !== "xc") return;
+    crossByKey.set(`${race.surface}|${race.tier_restriction || ""}`, race);
   });
+  const usedKeys = new Set<string>();
+  const out: T[] = [];
+  sorted.forEach((race) => {
+    if (getRaceKind(race) !== "xc") {
+      out.push(race);
+      return;
+    }
+    const key = `${race.surface}|${race.tier_restriction || ""}`;
+    if (usedKeys.has(key)) return;
+    usedKeys.add(key);
+    out.push(crossByKey.get(key) as T);
+  });
+  return out;
 };
 
 
