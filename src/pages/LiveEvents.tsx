@@ -295,7 +295,8 @@ const LiveEvents = () => {
             max_agility,
             max_jump,
             horse_traits!inner(trait_name)
-          `);
+          `)
+          .eq('is_sold', false);
 
         if (allHorses) {
           const mapHorse = (horse: any) => ({

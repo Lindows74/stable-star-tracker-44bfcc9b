@@ -30,7 +30,7 @@ serve(async (req) => {
         horse_positions (position),
         horse_breeding (breed_id, percentage),
         horse_categories (category)
-      `)
+      `).eq('is_sold', false)
     ]);
 
     if (racesResult.error) throw racesResult.error;
