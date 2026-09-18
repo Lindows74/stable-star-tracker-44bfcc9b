@@ -192,6 +192,8 @@ const RacesMade = () => {
                           ? ` ${race.tier_restriction === "odd_grades" ? "Odd" : "Even"}`
                           : ""}
                         {race.race_name ? ` — ${race.race_name}` : ""}
+                        {race.is_active === false ? " (deactivated race)" : ""}
+
                       </SelectItem>
                     ))}
 
