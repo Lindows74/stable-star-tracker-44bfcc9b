@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Lock, Star, Trophy } from "lucide-react";
+import { Edit2, Trash2, Lock, Star, Trophy, Tag } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -42,7 +42,7 @@ interface HorseCardProps {
 export const HorseCard = ({ horse }: HorseCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showMasterKeyDialog, setShowMasterKeyDialog] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'edit' | 'delete' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'edit' | 'delete' | 'sold' | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
@@ -56,6 +56,39 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     const key = `${raceTypeKey(bt.race) || `race-${bt.raceId}`}|${horse.tier}`;
     const best = tierBestTimes.get(key);
     return best != null && bt.timeMs <= best;
+  };
+
+  const isSold = !!horse.is_sold;
+
+  const soldMutation = useMutation({
+    mutationFn: async (sold: boolean) => {
+      const { error } = await supabase
+        .from("horses")
+        .update({ is_sold: sold, sold_at: sold ? new Date().toISOString() : null })
+        .eq("id", horse.id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, sold) => {
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+      toast({
+        title: sold ? "Marked as sold" : "Back in your stable",
+        description: sold
+          ? `${horse.name} is kept with all history, but hidden from race matching.`
+          : `${horse.name} is active again.`,
+      });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Could not update sold status", variant: "destructive" });
+    },
+  });
+
+  const handleSoldToggle = () => {
+    if (!isAuthenticated) {
+      setPendingAction('sold');
+      setShowMasterKeyDialog(true);
+      return;
+    }
+    soldMutation.mutate(!isSold);
   };
 
   const deleteMutation = useMutation({
