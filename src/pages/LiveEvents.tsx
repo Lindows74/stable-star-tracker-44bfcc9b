@@ -28,7 +28,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
 import { useRaceResults } from "@/hooks/useRaceResults";
-import { formatRaceTime, formatSurfaceShort, getRaceKind, isShowJumping } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, formatRaceTime, formatSurfaceShort, getRaceKind, isShowJumping } from "@/utils/raceTimeUtils";
 
 interface MatchingHorse {
   id: number;
@@ -96,6 +96,10 @@ const LiveEvents = () => {
   const isMobile = useIsMobile();
   const { data: raceResults } = useRaceResults();
   const [raceKeyById, setRaceKeyById] = useState<Record<number, string>>({});
+
+  // Race numbers come from the shared canonical numbering so Live Events and
+  // Races Made always show the same number for the same race.
+  const raceNumberMap = useMemo(() => buildRaceNumberMap(raceMatches), [raceMatches]);
 
   // Best (fastest) logged time per race "kind" (distance + surface), per horse.
   // Keyed by distance|surface so duplicate races of the same type share times.
@@ -518,7 +522,7 @@ const LiveEvents = () => {
               <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-1.5">
                   {raceMatches.map((race, index) => {
-                    const raceNumber = index + 1;
+                    const raceNumber = raceNumberMap.get(race.id) ?? index + 1;
                     const grades = race.tier_restriction === 'odd_grades'
                       ? 'Odd'
                       : race.tier_restriction === 'even_grades'
@@ -557,7 +561,7 @@ const LiveEvents = () => {
             {raceMatches.length > 0 ? (
               <div className="space-y-6">
                 {raceMatches.slice(0, visibleCount).map((race, index) => {
-                   const raceNumber = index + 1;
+                   const raceNumber = raceNumberMap.get(race.id) ?? index + 1;
                    const kindLabels: Record<string, string> = {
                      flat: "Flat Race",
                      sc: "Steeple Chase",
