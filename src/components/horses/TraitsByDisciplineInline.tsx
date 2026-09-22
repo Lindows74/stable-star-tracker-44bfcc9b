@@ -1,70 +1,15 @@
 import { TraitBadge } from "./TraitBadge";
 import { Separator } from "@/components/ui/separator";
+import { TRAIT_DISCIPLINES } from "@/utils/traitMetadata";
 
 interface TraitsByDisciplineInlineProps {
   traits: Array<{ trait_name: string; trait_value?: string }>;
   allTraitNames: string[];
+  horseBreeding?: Array<{ percentage: number; breeds: { name: string } }>;
 }
 
 // Trait categorization based on official guide (same as TraitsByDiscipline)
-const TRAIT_CATEGORIES = {
-  universal: [
-    "Blazing Hoof", "Blazing Hoof Pro",
-    "Fleet Dash", "Fleet Dash Pro", 
-    "Agile Arrow", "Agile Arrow Pro",
-    "Flash Ignite", "Flash Ignite Pro",
-    "To The Moon", "To The Moon Pro"
-  ],
-  flatRacing: [
-    "Endless Stride", "Endless Stride Pro",
-    "Lightning Bolt",
-    "Top Endurance", 
-    "Steam Burst",
-    "Hard N' Fast",
-    "Thundering Hooves"
-  ],
-  steeplechase: [
-    "Streak Shield", "Streak Shield Pro",
-    "Leaping Star",
-    "Perfect Step",
-    "Leaping Lancer", 
-    "Kinetic Boost"
-  ],
-  crossCountry: [
-    "River Rider",
-    "Fast Draw",
-    "Revitalizing Surge",
-    "Meadowstride",
-    "Rolling Current", "Rolling Current Pro"
-  ],
-  multiDiscipline: [
-  ],
-  surfacePreference: [
-    "Granite Gallop",
-    "Mid Dash", 
-    "Swampy Strider"
-  ],
-  distancePreference: [
-    "Quick Gallop",
-    "Swift Trot",
-    "Steady Strider", 
-    "Meadow Runner",
-    "Endurance Charger",
-    "Marathon Trotter",
-    "Short Star",
-    "Mid Miracle", 
-    "Marathon Master"
-  ],
-  special: [
-    "Energy Saver",
-    "Thrifty Spender",
-    "Elite Lineage",
-    "Top Student",
-    "Majestic Mane",
-    "Crystal Coat",
-    "Noble Braid"
-  ]
-};
+const TRAIT_CATEGORIES = TRAIT_DISCIPLINES;
 
 const categorizeTraits = (traits: Array<{ trait_name: string; trait_value?: string }>) => {
   const categorized: Record<string, Array<{ trait_name: string; trait_value?: string }>> = {};
@@ -88,7 +33,7 @@ const categorizeTraits = (traits: Array<{ trait_name: string; trait_value?: stri
   return categorized;
 };
 
-export const TraitsByDisciplineInline = ({ traits, allTraitNames }: TraitsByDisciplineInlineProps) => {
+export const TraitsByDisciplineInline = ({ traits, allTraitNames, horseBreeding }: TraitsByDisciplineInlineProps) => {
   if (!traits || traits.length === 0) {
     return null;
   }
@@ -122,6 +67,7 @@ export const TraitsByDisciplineInline = ({ traits, allTraitNames }: TraitsByDisc
               key={`${category}-${traitIndex}`}
               traitName={trait.trait_name}
               allTraits={allTraitNames}
+              horseBreeding={horseBreeding}
             />
           ))}
           {categoryIndex < nonEmptyCategories.length - 1 && (
