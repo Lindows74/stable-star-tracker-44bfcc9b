@@ -1025,9 +1025,7 @@ const LiveEvents = () => {
                          <TableCell className="font-medium">
                            <div className="flex items-center gap-1.5">
                               <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
-                             {getHorseSpecialIcons(horse.traits || []) && (
-                               <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                             )}
+                              <HorseSpecialIcons traits={horse.traits} />
                            </div>
                          </TableCell>
                          <TableCell>
