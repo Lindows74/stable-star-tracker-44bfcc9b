@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { getTraitInfo } from "./TraitInfo";
 import { checkTraitShouldBePro } from "@/utils/horseTraitUtils";
+import { getTraitSpecialCategory } from "@/utils/traitMetadata";
 
 interface TraitBadgeProps {
   traitName: string;
@@ -34,29 +35,7 @@ const STACKING_TRAIT_GROUPS = [
   ["Perfect Step", "Leaping Lancer"], // Enhanced boost after perfect jump in Steeplechase
 ];
 
-// Define traits that provide full stamina benefits
-const FULL_STAMINA_TRAITS = [
-  "Top Endurance", // Start with more Sprint Energy in Flat Racing
-  "Thundering Hooves", // Starts with full stamina bar
-];
-
-// Define exotic traits that should have special gold border styling
-const EXOTIC_TRAITS = [
-  "Steam Burst",
-  "Short Star", 
-  "Mid Miracle",
-  "Marathon Master",
-  "Thundering Hooves",
-  "Hard 'N' Fast",
-  "Meadowstride",
-  "Leaping Lancer",
-  "Majestic Mane",
-  "Crystal Coat",
-  "Noble Braid",
-  "Kinetic Boost"
-];
-
-const getTraitCategoryColor = (category: string, isPro?: boolean, isStacking?: boolean, isExotic?: boolean) => {
+const getTraitCategoryColor = (category: string, isPro?: boolean, isStacking?: boolean, specialCategory?: ReturnType<typeof getTraitSpecialCategory>) => {
   // Red background for stacking traits
   if (isStacking) {
     return "bg-red-600 text-white border-red-700 font-bold shadow-lg";
@@ -66,9 +45,12 @@ const getTraitCategoryColor = (category: string, isPro?: boolean, isStacking?: b
     return "bg-gradient-to-r from-yellow-300 to-orange-300 text-orange-900 border-2 border-yellow-500 font-bold shadow-lg";
   }
 
-  // Gold border for exotic traits
-  if (isExotic) {
-    return "bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-900 border-4 border-amber-400 font-bold shadow-lg ring-2 ring-amber-300";
+  if (specialCategory === "star-club") {
+    return "bg-card text-foreground border-[3px] border-trait-club font-bold shadow-sm";
+  }
+
+  if (specialCategory === "exotic") {
+    return "bg-card text-foreground border-[3px] border-trait-exotic font-bold shadow-sm";
   }
   
   switch (category) {
@@ -106,18 +88,19 @@ const checkIfTraitStacks = (traitName: string, allTraits: string[] = []): boolea
   });
 };
 
-const TraitInfoContent = ({ traitName, traitInfo, isStacking, isPro, isExotic }: {
+const TraitInfoContent = ({ traitName, traitInfo, isStacking, isPro, specialCategory }: {
   traitName: string;
   traitInfo: ReturnType<typeof getTraitInfo>;
   isStacking: boolean;
   isPro: boolean;
-  isExotic: boolean;
+  specialCategory: ReturnType<typeof getTraitSpecialCategory>;
 }) => (
   <div className="space-y-1">
     <div className="flex items-center gap-2 font-medium flex-wrap">
       {isStacking && <span className="text-red-600 font-bold">🔥 STACKING</span>}
       {isPro && <span className="text-yellow-600 font-bold">⭐ PRO</span>}
-      {isExotic && <span className="text-amber-600 font-bold">💎 EXOTIC</span>}
+      {specialCategory === "exotic" && <span className="text-trait-exotic font-bold">💎 EXOTIC</span>}
+      {specialCategory === "star-club" && <span className="text-trait-club font-bold">★ STAR CLUB</span>}
       <span>{traitName}</span>
     </div>
     {traitInfo && (
@@ -147,13 +130,13 @@ export const TraitBadge = ({ traitName, allTraits = [], horseBreeding }: TraitBa
   const [popoverOpen, setPopoverOpen] = useState(false);
   const traitInfo = getTraitInfo(traitName);
   const isStacking = checkIfTraitStacks(traitName, allTraits);
-  const isExotic = EXOTIC_TRAITS.includes(traitName);
+  const specialCategory = getTraitSpecialCategory(traitName);
   
   const shouldBePro = horseBreeding ? checkTraitShouldBePro(traitName, horseBreeding) : false;
   const isPro = traitInfo?.isPro || shouldBePro;
   
   const colorClass = isStacking ? "bg-red-600 text-white border-red-700 font-bold shadow-lg" : 
-    (traitInfo ? getTraitCategoryColor(traitInfo.category, isPro, isStacking, isExotic) : "bg-gray-100 text-gray-800 border-gray-200");
+    (traitInfo ? getTraitCategoryColor(traitInfo.category, isPro, isStacking, specialCategory) : "bg-gray-100 text-gray-800 border-gray-200");
 
   const badgeElement = (
     <Badge 
@@ -181,7 +164,7 @@ export const TraitBadge = ({ traitName, allTraits = [], horseBreeding }: TraitBa
               traitInfo={traitInfo}
               isStacking={isStacking}
               isPro={isPro}
-              isExotic={isExotic}
+              specialCategory={specialCategory}
             />
           </PopoverContent>
         </Popover>
@@ -202,7 +185,7 @@ export const TraitBadge = ({ traitName, allTraits = [], horseBreeding }: TraitBa
                     traitInfo={traitInfo}
                     isStacking={isStacking}
                     isPro={isPro}
-                    isExotic={isExotic}
+                    specialCategory={specialCategory}
                   />
                   <div className="text-xs text-muted-foreground mt-1 pt-1 border-t">
                     Right-click for more options
@@ -218,7 +201,7 @@ export const TraitBadge = ({ traitName, allTraits = [], horseBreeding }: TraitBa
                   traitInfo={traitInfo}
                   isStacking={isStacking}
                   isPro={isPro}
-                  isExotic={isExotic}
+                  specialCategory={specialCategory}
                 />
               </ContextMenuItem>
             </ContextMenuContent>

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { formatSurface } from "@/utils/formatUtils";
+import { TraitBadge } from "@/components/horses/TraitBadge";
 
 interface HorseAttributeSummaryProps {
   horse: any;
@@ -58,10 +59,12 @@ export const HorseAttributeSummary = ({
       {traits.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {traits.map((t: any, i: number) => (
-            <Badge key={`t-${i}`} variant="secondary" className="text-[10px] px-1 py-0">
-              {t.trait_name}
-              {t.trait_value ? ` ${t.trait_value}` : ""}
-            </Badge>
+            <TraitBadge
+              key={`t-${i}`}
+              traitName={t.trait_name}
+              allTraits={traits.map((trait) => trait.trait_name)}
+              horseBreeding={breeding}
+            />
           ))}
         </div>
       )}
