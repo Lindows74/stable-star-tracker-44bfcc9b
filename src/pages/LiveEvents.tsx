@@ -342,7 +342,8 @@ const LiveEvents = () => {
             max_acceleration,
             max_agility,
             max_jump,
-             horse_traits(trait_name)
+             horse_traits(trait_name),
+             horse_breeding(percentage, breeds(name))
           `)
           .eq('is_sold', false);
 
