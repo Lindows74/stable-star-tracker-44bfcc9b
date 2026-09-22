@@ -7,7 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
 import { useHorseSearch } from "@/hooks/useHorseSearch";
 import { useBreeds } from "@/hooks/useBreeds";
-import { TRAITS } from "@/utils/constants";
+import { TRAITS, SURFACES, DISTANCES } from "@/utils/constants";
+import { formatSurface } from "@/utils/formatUtils";
+import { HorseAttributeSummary } from "@/components/breeding/HorseAttributeSummary";
 import { Search } from "lucide-react";
 
 interface HorsePickerProps {
