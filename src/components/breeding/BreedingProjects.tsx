@@ -57,12 +57,22 @@ const PairingRow = ({
         <div className="min-w-0">
           {pairing.title && <p className="text-sm font-semibold break-words">{pairing.title}</p>}
           <div className="flex flex-wrap gap-1 mt-1">
-            {pairing.stallion?.name && <HorseNameBadge horse={pairing.stallion} icon="♂" />}
-            {pairing.mare?.name && <HorseNameBadge horse={pairing.mare} icon="♀" />}
             {pairing.target_tier != null && (
               <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {pairing.target_tier}</Badge>
             )}
           </div>
+          {pairing.stallion?.name && (
+            <div className="mt-1 space-y-1">
+              <HorseNameBadge horse={pairing.stallion} icon="♂" />
+              <HorseAttributeSummary horse={pairing.stallion} />
+            </div>
+          )}
+          {pairing.mare?.name && (
+            <div className="mt-1 space-y-1">
+              <HorseNameBadge horse={pairing.mare} icon="♀" />
+              <HorseAttributeSummary horse={pairing.mare} />
+            </div>
+          )}
         </div>
         <Button variant="ghost" size="icon" aria-label="Remove pairing" onClick={() => onRemove(pairing.id)}>
           <Trash2 className="h-4 w-4" />
