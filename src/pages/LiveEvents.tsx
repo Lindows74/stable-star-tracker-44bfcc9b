@@ -12,8 +12,9 @@ import EditRaceForm from "@/components/races/EditRaceForm";
 import { RaceTierNote } from "@/components/races/RaceTierNote";
 import { TraitsByDisciplineInline } from "@/components/horses/TraitsByDisciplineInline";
 import { getHorseSpecialIcons, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits, checkHorseHasFullStaminaTrait } from "@/utils/horseTraitUtils";
-import { formatSurface, formatDateTime } from "@/utils/formatUtils";
+import { formatSurface, formatDateTime, getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import { isMaxTrained } from "@/utils/horseUtils";
+import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   AlertDialog,
@@ -33,6 +34,7 @@ import { buildRaceNumberMap, formatRaceTime, formatSurfaceShort, getRaceKind, is
 interface MatchingHorse {
   id: number;
   name: string;
+  gender?: string;
   tier: number;
   traits: string[];
   speed?: number;
@@ -68,6 +70,7 @@ interface RaceMatch {
 interface NonMatchingHorse {
   id: number;
   name: string;
+  gender?: string;
   tier: number;
   traits: string[];
   max_speed?: boolean;
@@ -79,6 +82,20 @@ interface NonMatchingHorse {
 
 const INITIAL_RACES = 5;
 const LOAD_MORE_COUNT = 5;
+
+const getLiveEventHorseNameClass = (horse: MatchingHorse | NonMatchingHorse) =>
+  cn(
+    "inline-block rounded px-1.5 py-0.5 font-medium",
+    getGenderNameBackgroundClass(horse.gender || ""),
+    isMaxTrained(horse) &&
+      `border-[3px] ${
+        horse.gender === "stallion"
+          ? "border-blue-600"
+          : horse.gender === "mare"
+            ? "border-pink-600"
+            : "border-gray-600"
+      }`,
+  );
 
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
@@ -287,7 +304,6 @@ const LiveEvents = () => {
         
         const sorted = [...flatsSorted, ...steeplesSorted, ...crossSorted, ...showJumping];
         
-        setRaceMatches(sorted);
         setVisibleCount(INITIAL_RACES);
         setTotalHorses(data.totalHorses || 0);
         
@@ -305,6 +321,7 @@ const LiveEvents = () => {
           .select(`
             id,
             name,
+             gender,
             tier,
             max_speed,
             max_sprint_energy,
@@ -316,9 +333,19 @@ const LiveEvents = () => {
           .eq('is_sold', false);
 
         if (allHorses) {
+          const gendersByHorseId = new Map(allHorses.map((horse: any) => [horse.id, horse.gender]));
+          const sortedWithGenders = sorted.map((race: RaceMatch) => ({
+            ...race,
+            matchingHorses: race.matchingHorses.map((horse) => ({
+              ...horse,
+              gender: horse.gender || gendersByHorseId.get(horse.id),
+            })),
+          }));
+          setRaceMatches(sortedWithGenders);
           const mapHorse = (horse: any) => ({
             id: horse.id,
             name: horse.name,
+            gender: horse.gender,
             tier: horse.tier,
             traits: horse.horse_traits?.map((ht: any) => ht.trait_name) || [],
             max_speed: horse.max_speed,
@@ -333,6 +360,7 @@ const LiveEvents = () => {
             .map((horse: any) => ({
               id: horse.id,
               name: horse.name,
+               gender: horse.gender,
               tier: horse.tier,
               traits: horse.horse_traits?.map((ht: any) => ht.trait_name) || [],
               max_speed: horse.max_speed,
@@ -843,7 +871,7 @@ const LiveEvents = () => {
                                         <div className="flex items-center justify-between">
                                           <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                               <HorseStatsPopover horse={horse} name={horse.name}>
-                                                <span className={`font-medium text-xs truncate inline-block ${isMaxTrained(horse) ? "border-[3px] border-black dark:border-white rounded px-1.5" : ""}`}>{horse.name}</span>
+                                                <span className={cn("text-xs truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
                                               </HorseStatsPopover>
                                             {isMaxTrained(horse) && (
                                               <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
@@ -897,7 +925,7 @@ const LiveEvents = () => {
                                         <TableCell className="font-medium">
                                           <div className="flex items-center gap-1.5">
                                               <HorseStatsPopover horse={horse} name={horse.name}>
-                                                <span className={isMaxTrained(horse) ? "inline-block border-[3px] border-black dark:border-white rounded px-2 py-0.5" : ""}>{horse.name}</span>
+                                                 <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
                                               </HorseStatsPopover>
                                             {isMaxTrained(horse) && (
                                               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
@@ -971,7 +999,7 @@ const LiveEvents = () => {
                    {nonMatchingHorses.map((horse) => (
                      <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                         <span className="font-medium text-sm truncate">{horse.name}</span>
+                          <span className={cn("text-sm truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
                          {isMaxTrained(horse) && (
                            <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30 flex-shrink-0">
                              MAX
@@ -999,7 +1027,7 @@ const LiveEvents = () => {
                        <TableRow key={horse.id}>
                          <TableCell className="font-medium">
                            <div className="flex items-center gap-1.5">
-                             {horse.name}
+                              <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
                              {isMaxTrained(horse) && (
                                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
                                  MAX
