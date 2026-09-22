@@ -52,6 +52,7 @@ interface MatchingHorse {
   max_acceleration?: boolean;
   max_agility?: boolean;
   max_jump?: boolean;
+  horseBreeding?: Array<{ percentage: number; breeds: { name: string } }>;
 }
 
 interface RaceMatch {
@@ -78,6 +79,7 @@ interface NonMatchingHorse {
   max_acceleration?: boolean;
   max_agility?: boolean;
   max_jump?: boolean;
+  horseBreeding?: Array<{ percentage: number; breeds: { name: string } }>;
 }
 
 const INITIAL_RACES = 5;
@@ -345,13 +347,17 @@ const LiveEvents = () => {
           .eq('is_sold', false);
 
         if (allHorses) {
-          const gendersByHorseId = new Map(allHorses.map((horse: any) => [horse.id, horse.gender]));
+          const horseDetailsById = new Map(allHorses.map((horse: any) => [horse.id, horse]));
           const sortedWithGenders = sorted.map((race: RaceMatch) => ({
             ...race,
-            matchingHorses: race.matchingHorses.map((horse) => ({
-              ...horse,
-              gender: horse.gender || gendersByHorseId.get(horse.id),
-            })),
+            matchingHorses: race.matchingHorses.map((horse) => {
+              const details = horseDetailsById.get(horse.id);
+              return {
+                ...horse,
+                gender: horse.gender || details?.gender,
+                horseBreeding: details?.horse_breeding || [],
+              };
+            }),
           }));
           setRaceMatches(sortedWithGenders);
           const mapHorse = (horse: any) => ({
@@ -360,6 +366,7 @@ const LiveEvents = () => {
             gender: horse.gender,
             tier: horse.tier,
             traits: horse.horse_traits?.map((ht: any) => ht.trait_name) || [],
+            horseBreeding: horse.horse_breeding || [],
             max_speed: horse.max_speed,
             max_sprint_energy: horse.max_sprint_energy,
             max_acceleration: horse.max_acceleration,
@@ -375,6 +382,7 @@ const LiveEvents = () => {
                gender: horse.gender,
               tier: horse.tier,
               traits: horse.horse_traits?.map((ht: any) => ht.trait_name) || [],
+              horseBreeding: horse.horse_breeding || [],
               max_speed: horse.max_speed,
               max_sprint_energy: horse.max_sprint_energy,
               max_acceleration: horse.max_acceleration,
@@ -907,6 +915,7 @@ const LiveEvents = () => {
                                             <TraitsByDisciplineInline
                                               traits={horse.traits.map(t => ({ trait_name: t }))}
                                               allTraitNames={horse.traits}
+                                             horseBreeding={horse.horseBreeding}
                                             />
                                           </div>
                                         )}
@@ -955,6 +964,7 @@ const LiveEvents = () => {
                                           <TraitsByDisciplineInline
                                             traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
                                             allTraitNames={horse.traits || []}
+                                             horseBreeding={horse.horseBreeding}
                                           />
                                         </TableCell>
                                       </TableRow>
@@ -1035,6 +1045,7 @@ const LiveEvents = () => {
                            <TraitsByDisciplineInline 
                              traits={horse.traits?.map(traitName => ({ trait_name: traitName })) || []}
                              allTraitNames={horse.traits || []}
+                              horseBreeding={horse.horseBreeding}
                            />
                          </TableCell>
                        </TableRow>
