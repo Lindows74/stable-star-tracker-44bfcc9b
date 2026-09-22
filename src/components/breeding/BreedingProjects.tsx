@@ -140,16 +140,8 @@ const PairingRow = ({
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              {foal.horse_traits?.length > 0 ? (
-                <div className="flex flex-wrap gap-1">
-                  {foal.horse_traits.map((t: any, i: number) => (
-                    <Badge key={i} variant="secondary" className="text-[10px]">
-                      {t.trait_name}
-                      {t.trait_value ? ` ${t.trait_value}` : ""}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
+              <HorseAttributeSummary horse={foal} />
+              {!foal.horse_traits?.length && (
                 <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>
               )}
             </div>
