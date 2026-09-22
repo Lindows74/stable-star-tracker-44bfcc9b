@@ -169,23 +169,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
                   <span className="font-medium truncate">{horse.name}</span>
                   {horse.tier != null && <Badge variant="secondary">Tier {horse.tier}</Badge>}
                 </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {horse.horse_breeding?.map((b: any, i: number) => (
-                    <Badge key={i} variant="outline" className="text-[10px]">
-                      {b.breeds?.name} {Number(b.percentage)}%
-                    </Badge>
-                  ))}
-                </div>
-                {horse.horse_traits?.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {horse.horse_traits.map((t: any, i: number) => (
-                      <Badge key={i} variant="secondary" className="text-[10px]">
-                        {t.trait_name}
-                        {t.trait_value ? ` ${t.trait_value}` : ""}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                <HorseAttributeSummary horse={horse} className="mt-1" />
               </button>
             ))}
           </div>
