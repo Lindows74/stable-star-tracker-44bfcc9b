@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power, Rows3 } from "lucide-react";
+import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power, Rows3, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
@@ -96,6 +96,18 @@ const getLiveEventHorseNameClass = (horse: MatchingHorse | NonMatchingHorse) =>
             : "border-gray-600"
       }`,
   );
+
+const HorseSpecialIcons = ({ traits }: { traits?: string[] }) => {
+  const icons = getHorseSpecialIcons(traits || []);
+  return (
+    <>
+      {icons && <span className="flex-shrink-0">{icons}</span>}
+      {traits?.includes("Elite Lineage") && (
+        <Star className="h-3 w-3 fill-purple-500 text-purple-500 flex-shrink-0" />
+      )}
+    </>
+  );
+};
 
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
