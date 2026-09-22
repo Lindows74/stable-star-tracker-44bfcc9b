@@ -887,9 +887,7 @@ const LiveEvents = () => {
                                               <HorseStatsPopover horse={horse} name={horse.name}>
                                                 <span className={cn("text-xs truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
                                               </HorseStatsPopover>
-                                             {getHorseSpecialIcons(horse.traits || []) && (
-                                               <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                             )}
+                                             <HorseSpecialIcons traits={horse.traits} />
                                              {(horse as any).isNonMatching && (
                                                <span className="text-[9px] px-1 py-px rounded bg-muted text-muted-foreground flex-shrink-0">no match</span>
                                              )}
