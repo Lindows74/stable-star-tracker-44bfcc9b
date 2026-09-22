@@ -936,9 +936,7 @@ const LiveEvents = () => {
                                               <HorseStatsPopover horse={horse} name={horse.name}>
                                                  <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
                                               </HorseStatsPopover>
-                                             {getHorseSpecialIcons(horse.traits || []) && (
-                                               <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                             )}
+                                             <HorseSpecialIcons traits={horse.traits} />
                                              {timesForRace.get(horse.id) != null && (
                                                <span className={`text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded ${(horse as any).isTopTimed ? "bg-amber-500/30 text-amber-700 dark:text-amber-300" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"}`}>
                                                  {(horse as any).isTopTimed && <Trophy className="h-3 w-3 inline -mt-0.5 mr-0.5" />}
