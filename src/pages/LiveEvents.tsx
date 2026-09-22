@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power, Rows3 } from "lucide-react";
+import { Loader2, Calendar, Trophy, RefreshCw, Edit, Trash2, Circle, Triangle, Mountain, ArrowUp, Power, Rows3, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
@@ -96,6 +96,18 @@ const getLiveEventHorseNameClass = (horse: MatchingHorse | NonMatchingHorse) =>
             : "border-gray-600"
       }`,
   );
+
+const HorseSpecialIcons = ({ traits }: { traits?: string[] }) => {
+  const icons = getHorseSpecialIcons(traits || []);
+  return (
+    <>
+      {icons && <span className="flex-shrink-0">{icons}</span>}
+      {traits?.includes("Elite Lineage") && (
+        <Star className="h-3 w-3 fill-purple-500 text-purple-500 flex-shrink-0" />
+      )}
+    </>
+  );
+};
 
 const LiveEvents = () => {
   const [raceMatches, setRaceMatches] = useState<RaceMatch[]>([]);
@@ -875,9 +887,7 @@ const LiveEvents = () => {
                                               <HorseStatsPopover horse={horse} name={horse.name}>
                                                 <span className={cn("text-xs truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
                                               </HorseStatsPopover>
-                                             {getHorseSpecialIcons(horse.traits || []) && (
-                                               <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                             )}
+                                             <HorseSpecialIcons traits={horse.traits} />
                                              {(horse as any).isNonMatching && (
                                                <span className="text-[9px] px-1 py-px rounded bg-muted text-muted-foreground flex-shrink-0">no match</span>
                                              )}
@@ -926,9 +936,7 @@ const LiveEvents = () => {
                                               <HorseStatsPopover horse={horse} name={horse.name}>
                                                  <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
                                               </HorseStatsPopover>
-                                             {getHorseSpecialIcons(horse.traits || []) && (
-                                               <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                                             )}
+                                             <HorseSpecialIcons traits={horse.traits} />
                                              {timesForRace.get(horse.id) != null && (
                                                <span className={`text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded ${(horse as any).isTopTimed ? "bg-amber-500/30 text-amber-700 dark:text-amber-300" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"}`}>
                                                  {(horse as any).isTopTimed && <Trophy className="h-3 w-3 inline -mt-0.5 mr-0.5" />}
@@ -996,9 +1004,7 @@ const LiveEvents = () => {
                      <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
                           <span className={cn("text-sm truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
-                         {getHorseSpecialIcons(horse.traits || []) && (
-                           <span className="text-sm flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                         )}
+                          <HorseSpecialIcons traits={horse.traits} />
                        </div>
                        <Badge variant="outline" className="text-[10px] flex-shrink-0 ml-2">T{horse.tier}</Badge>
                      </div>
@@ -1019,9 +1025,7 @@ const LiveEvents = () => {
                          <TableCell className="font-medium">
                            <div className="flex items-center gap-1.5">
                               <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
-                             {getHorseSpecialIcons(horse.traits || []) && (
-                               <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
-                             )}
+                              <HorseSpecialIcons traits={horse.traits} />
                            </div>
                          </TableCell>
                          <TableCell>
