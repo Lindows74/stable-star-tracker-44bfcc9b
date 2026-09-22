@@ -8,6 +8,7 @@ import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X, Pencil } from 
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
+import { HorseAttributeSummary } from "@/components/breeding/HorseAttributeSummary";
 
 export type BreedingProject = {
   id: number;
