@@ -7,66 +7,14 @@ import { ChevronsUpDown, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { OFFICIAL_TRAIT_CATEGORIES } from "@/utils/traitMetadata";
 
 interface TraitSelectorProps {
   selectedTraits: string[];
   onTraitsChange: (traits: string[]) => void;
 }
 
-const TRAIT_CATEGORIES = {
-  "General Traits": [
-    "Blazing Hoof",
-    "Fleet Dash",
-    "Agile Arrow",
-    "Flash Ignite",
-    "To The Moon",
-    "Energy Saver",
-    "Endless Stride",
-    "Rolling Current",
-    "Streak Shield"
-  ],
-  "Surface Preference Traits": [
-    "Granite Gallop",
-    "Mid Dash",
-    "Swampy Strider"
-  ],
-  "Specific Game Mode Traits": [
-    "Lightning Bolt",
-    "Top Endurance",
-    "Leaping Star",
-    "Perfect Step",
-    "River Rider",
-    "Fast Draw",
-    "Revitalizing Surge"
-  ],
-  "Distance Preference Traits": [
-    "Quick Gallop",
-    "Swift Trot",
-    "Steady Strider",
-    "Meadow Runner",
-    "Endurance Charger",
-    "Marathon Trotter"
-  ],
-  "Exotic Traits": [
-    "Steam Burst",
-    "Short Star",
-    "Mid Miracle",
-    "Marathon Master",
-    "Thundering Hooves",
-    "Hard 'N' Fast",
-    "Meadowstride",
-    "Leaping Lancer",
-    "Majestic Mane",
-    "Crystal Coat",
-    "Noble Braid",
-    "Kinetic Boost"
-  ],
-  "Star Club Traits": [
-    "Thrifty Spender",
-    "Elite Lineage",
-    "Top Student"
-  ]
-};
+const TRAIT_CATEGORIES = OFFICIAL_TRAIT_CATEGORIES;
 
 export const TraitSelector = memo(({ selectedTraits, onTraitsChange }: TraitSelectorProps) => {
   const [open, setOpen] = useState(false);

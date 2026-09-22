@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { TraitBadge } from "./TraitBadge";
+import { TRAIT_DISCIPLINES } from "@/utils/traitMetadata";
 
 interface TraitsByDisciplineProps {
   traits: Array<{ trait_name: string; trait_value?: string }>;
@@ -8,64 +9,7 @@ interface TraitsByDisciplineProps {
 }
 
 // Trait categorization based on official guide
-const TRAIT_CATEGORIES = {
-  universal: [
-    "Blazing Hoof", "Blazing Hoof Pro",
-    "Fleet Dash", "Fleet Dash Pro", 
-    "Agile Arrow", "Agile Arrow Pro",
-    "Flash Ignite", "Flash Ignite Pro",
-    "To The Moon", "To The Moon Pro"
-  ],
-  flatRacing: [
-    "Endless Stride", "Endless Stride Pro",
-    "Lightning Bolt",
-    "Top Endurance", 
-    "Steam Burst",
-    "Hard N' Fast",
-    "Thundering Hooves"
-  ],
-  steeplechase: [
-    "Streak Shield", "Streak Shield Pro",
-    "Leaping Star",
-    "Perfect Step",
-    "Leaping Lancer", 
-    "Kinetic Boost"
-  ],
-  crossCountry: [
-    "River Rider",
-    "Fast Draw",
-    "Revitalizing Surge",
-    "Meadowstride",
-    "Rolling Current", "Rolling Current Pro"
-  ],
-  multiDiscipline: [
-  ],
-  surfacePreference: [
-    "Granite Gallop",
-    "Mid Dash", 
-    "Swampy Strider"
-  ],
-  distancePreference: [
-    "Quick Gallop",
-    "Swift Trot",
-    "Steady Strider", 
-    "Meadow Runner",
-    "Endurance Charger",
-    "Marathon Trotter",
-    "Short Star",
-    "Mid Miracle", 
-    "Marathon Master"
-  ],
-  special: [
-    "Energy Saver",
-    "Thrifty Spender",
-    "Elite Lineage",
-    "Top Student",
-    "Majestic Mane",
-    "Crystal Coat",
-    "Noble Braid"
-  ]
-};
+const TRAIT_CATEGORIES = TRAIT_DISCIPLINES;
 
 const CATEGORY_LABELS = {
   universal: "🌟 All Disciplines",

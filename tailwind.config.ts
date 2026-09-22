@@ -20,6 +20,8 @@ export default {
 		extend: {
 			colors: {
 				border: 'hsl(var(--border))',
+				'trait-exotic': 'hsl(var(--trait-exotic))',
+				'trait-club': 'hsl(var(--trait-club))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
