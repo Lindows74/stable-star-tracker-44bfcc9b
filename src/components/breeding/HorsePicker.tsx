@@ -114,7 +114,39 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
               open={tiersOpen}
               onOpenChange={setTiersOpen}
             />
+            <MultiSelectDropdown
+              label="Distance"
+              placeholder="Select distances..."
+              searchPlaceholder="Search distances..."
+              options={[...DISTANCES]}
+              selectedValues={selectedDistances}
+              onToggle={(v) => toggle(selectedDistances, setSelectedDistances, v)}
+              open={distancesOpen}
+              onOpenChange={setDistancesOpen}
+            />
+            <MultiSelectDropdown
+              label="Surface"
+              placeholder="Select surfaces..."
+              searchPlaceholder="Search surfaces..."
+              options={SURFACES.map((s) => formatSurface(s))}
+              selectedValues={selectedSurfaces.map((s) => formatSurface(s))}
+              onToggle={(labelValue) => {
+                const raw = SURFACES.find((s) => formatSurface(s) === labelValue);
+                if (raw) toggle(selectedSurfaces, setSelectedSurfaces, raw);
+              }}
+              open={surfacesOpen}
+              onOpenChange={setSurfacesOpen}
+            />
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={pureBreedOnly}
+              onChange={(e) => setPureBreedOnly(e.target.checked)}
+            />
+            Pure breed only (100%)
+          </label>
         </div>
 
         <ScrollArea className="mt-3 pr-3 h-[55vh]">
