@@ -26,24 +26,29 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
+  const [selectedSurfaces, setSelectedSurfaces] = useState<string[]>([]);
+  const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
+  const [pureBreedOnly, setPureBreedOnly] = useState(false);
   const [traitsOpen, setTraitsOpen] = useState(false);
   const [breedsOpen, setBreedsOpen] = useState(false);
   const [tiersOpen, setTiersOpen] = useState(false);
+  const [surfacesOpen, setSurfacesOpen] = useState(false);
+  const [distancesOpen, setDistancesOpen] = useState(false);
 
   const { data: availableBreeds } = useBreeds();
 
   const { data: horses, isLoading } = useHorseSearch({
     searchTerm,
     selectedCategories: [],
-    selectedSurfaces: [],
-    selectedDistances: [],
+    selectedSurfaces,
+    selectedDistances,
     selectedPositions: [],
     selectedTraits,
     selectedBreeds,
     minTierInput: "",
     maxTierInput: "",
     selectedDateSort: null,
-    pureBreedOnly: false,
+    pureBreedOnly,
   });
 
   const filtered = useMemo(
