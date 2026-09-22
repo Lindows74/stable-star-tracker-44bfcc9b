@@ -328,7 +328,7 @@ const LiveEvents = () => {
             max_acceleration,
             max_agility,
             max_jump,
-            horse_traits!inner(trait_name)
+             horse_traits(trait_name)
           `)
           .eq('is_sold', false);
 
@@ -372,6 +372,8 @@ const LiveEvents = () => {
             .sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
           
           setNonMatchingHorses(nonMatching);
+        } else {
+          setRaceMatches(sorted);
         }
         
         const totalMatches = sorted.reduce((sum: number, race: any) => sum + race.matchingHorses.length, 0);
