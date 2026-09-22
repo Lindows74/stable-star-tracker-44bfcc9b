@@ -875,9 +875,6 @@ const LiveEvents = () => {
                                               <HorseStatsPopover horse={horse} name={horse.name}>
                                                 <span className={cn("text-xs truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
                                               </HorseStatsPopover>
-                                            {isMaxTrained(horse) && (
-                                              <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400 flex-shrink-0">MAX</span>
-                                            )}
                                              {getHorseSpecialIcons(horse.traits || []) && (
                                                <span className="text-xs flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
                                              )}
@@ -929,9 +926,6 @@ const LiveEvents = () => {
                                               <HorseStatsPopover horse={horse} name={horse.name}>
                                                  <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
                                               </HorseStatsPopover>
-                                            {isMaxTrained(horse) && (
-                                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">MAX</span>
-                                            )}
                                              {getHorseSpecialIcons(horse.traits || []) && (
                                                <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
                                              )}
@@ -1002,11 +996,6 @@ const LiveEvents = () => {
                      <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
                           <span className={cn("text-sm truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
-                         {isMaxTrained(horse) && (
-                           <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30 flex-shrink-0">
-                             MAX
-                           </span>
-                         )}
                          {getHorseSpecialIcons(horse.traits || []) && (
                            <span className="text-sm flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
                          )}
@@ -1030,11 +1019,6 @@ const LiveEvents = () => {
                          <TableCell className="font-medium">
                            <div className="flex items-center gap-1.5">
                               <span className={getLiveEventHorseNameClass(horse)}>{horse.name}</span>
-                             {isMaxTrained(horse) && (
-                               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-400/30">
-                                 MAX
-                               </span>
-                             )}
                              {getHorseSpecialIcons(horse.traits || []) && (
                                <span className="text-sm">{getHorseSpecialIcons(horse.traits || [])}</span>
                              )}
