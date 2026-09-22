@@ -7,7 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
 import { useHorseSearch } from "@/hooks/useHorseSearch";
 import { useBreeds } from "@/hooks/useBreeds";
-import { TRAITS } from "@/utils/constants";
+import { TRAITS, SURFACES, DISTANCES } from "@/utils/constants";
+import { formatSurface } from "@/utils/formatUtils";
+import { HorseAttributeSummary } from "@/components/breeding/HorseAttributeSummary";
 import { Search } from "lucide-react";
 
 interface HorsePickerProps {
@@ -24,24 +26,29 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
+  const [selectedSurfaces, setSelectedSurfaces] = useState<string[]>([]);
+  const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
+  const [pureBreedOnly, setPureBreedOnly] = useState(false);
   const [traitsOpen, setTraitsOpen] = useState(false);
   const [breedsOpen, setBreedsOpen] = useState(false);
   const [tiersOpen, setTiersOpen] = useState(false);
+  const [surfacesOpen, setSurfacesOpen] = useState(false);
+  const [distancesOpen, setDistancesOpen] = useState(false);
 
   const { data: availableBreeds } = useBreeds();
 
   const { data: horses, isLoading } = useHorseSearch({
     searchTerm,
     selectedCategories: [],
-    selectedSurfaces: [],
-    selectedDistances: [],
+    selectedSurfaces,
+    selectedDistances,
     selectedPositions: [],
     selectedTraits,
     selectedBreeds,
     minTierInput: "",
     maxTierInput: "",
     selectedDateSort: null,
-    pureBreedOnly: false,
+    pureBreedOnly,
   });
 
   const filtered = useMemo(
@@ -107,7 +114,39 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
               open={tiersOpen}
               onOpenChange={setTiersOpen}
             />
+            <MultiSelectDropdown
+              label="Distance"
+              placeholder="Select distances..."
+              searchPlaceholder="Search distances..."
+              options={[...DISTANCES]}
+              selectedValues={selectedDistances}
+              onToggle={(v) => toggle(selectedDistances, setSelectedDistances, v)}
+              open={distancesOpen}
+              onOpenChange={setDistancesOpen}
+            />
+            <MultiSelectDropdown
+              label="Surface"
+              placeholder="Select surfaces..."
+              searchPlaceholder="Search surfaces..."
+              options={SURFACES.map((s) => formatSurface(s))}
+              selectedValues={selectedSurfaces.map((s) => formatSurface(s))}
+              onToggle={(labelValue) => {
+                const raw = SURFACES.find((s) => formatSurface(s) === labelValue);
+                if (raw) toggle(selectedSurfaces, setSelectedSurfaces, raw);
+              }}
+              open={surfacesOpen}
+              onOpenChange={setSurfacesOpen}
+            />
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={pureBreedOnly}
+              onChange={(e) => setPureBreedOnly(e.target.checked)}
+            />
+            Pure breed only (100%)
+          </label>
         </div>
 
         <ScrollArea className="mt-3 pr-3 h-[55vh]">
@@ -130,23 +169,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
                   <span className="font-medium truncate">{horse.name}</span>
                   {horse.tier != null && <Badge variant="secondary">Tier {horse.tier}</Badge>}
                 </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {horse.horse_breeding?.map((b: any, i: number) => (
-                    <Badge key={i} variant="outline" className="text-[10px]">
-                      {b.breeds?.name} {Number(b.percentage)}%
-                    </Badge>
-                  ))}
-                </div>
-                {horse.horse_traits?.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {horse.horse_traits.map((t: any, i: number) => (
-                      <Badge key={i} variant="secondary" className="text-[10px]">
-                        {t.trait_name}
-                        {t.trait_value ? ` ${t.trait_value}` : ""}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                <HorseAttributeSummary horse={horse} className="mt-1" />
               </button>
             ))}
           </div>

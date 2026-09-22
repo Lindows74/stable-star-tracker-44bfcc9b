@@ -8,6 +8,7 @@ import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X, Pencil } from 
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
+import { HorseAttributeSummary } from "@/components/breeding/HorseAttributeSummary";
 
 export type BreedingProject = {
   id: number;
@@ -57,12 +58,22 @@ const PairingRow = ({
         <div className="min-w-0">
           {pairing.title && <p className="text-sm font-semibold break-words">{pairing.title}</p>}
           <div className="flex flex-wrap gap-1 mt-1">
-            {pairing.stallion?.name && <HorseNameBadge horse={pairing.stallion} icon="♂" />}
-            {pairing.mare?.name && <HorseNameBadge horse={pairing.mare} icon="♀" />}
             {pairing.target_tier != null && (
               <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {pairing.target_tier}</Badge>
             )}
           </div>
+          {pairing.stallion?.name && (
+            <div className="mt-1 space-y-1">
+              <HorseNameBadge horse={pairing.stallion} icon="♂" />
+              <HorseAttributeSummary horse={pairing.stallion} />
+            </div>
+          )}
+          {pairing.mare?.name && (
+            <div className="mt-1 space-y-1">
+              <HorseNameBadge horse={pairing.mare} icon="♀" />
+              <HorseAttributeSummary horse={pairing.mare} />
+            </div>
+          )}
         </div>
         <Button variant="ghost" size="icon" aria-label="Remove pairing" onClick={() => onRemove(pairing.id)}>
           <Trash2 className="h-4 w-4" />
@@ -129,16 +140,8 @@ const PairingRow = ({
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              {foal.horse_traits?.length > 0 ? (
-                <div className="flex flex-wrap gap-1">
-                  {foal.horse_traits.map((t: any, i: number) => (
-                    <Badge key={i} variant="secondary" className="text-[10px]">
-                      {t.trait_name}
-                      {t.trait_value ? ` ${t.trait_value}` : ""}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
+              <HorseAttributeSummary horse={foal} />
+              {!foal.horse_traits?.length && (
                 <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>
               )}
             </div>
