@@ -38,11 +38,29 @@ const BreedingNotes = () => {
         .from("breeding_notes")
         .select(
           `*,
-          stallion:stallion_id(id, name, gender),
-          mare:mare_id(id, name, gender),
+          stallion:stallion_id(
+            id, name, gender, tier,
+            horse_traits(trait_name, trait_value, trait_category),
+            horse_surfaces(surface),
+            horse_distances(distance),
+            horse_breeding(percentage, breeds(name))
+          ),
+          mare:mare_id(
+            id, name, gender, tier,
+            horse_traits(trait_name, trait_value, trait_category),
+            horse_surfaces(surface),
+            horse_distances(distance),
+            horse_breeding(percentage, breeds(name))
+          ),
           breeding_note_foals(
             id,
-            foal:foal_id(id, name, tier, gender, horse_traits(trait_name, trait_value, trait_category))
+            foal:foal_id(
+              id, name, tier, gender,
+              horse_traits(trait_name, trait_value, trait_category),
+              horse_surfaces(surface),
+              horse_distances(distance),
+              horse_breeding(percentage, breeds(name))
+            )
           )`
         )
         .order("updated_at", { ascending: false });
