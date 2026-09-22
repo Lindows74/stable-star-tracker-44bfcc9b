@@ -1004,9 +1004,7 @@ const LiveEvents = () => {
                      <div key={horse.id} className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
                           <span className={cn("text-sm truncate", getLiveEventHorseNameClass(horse))}>{horse.name}</span>
-                         {getHorseSpecialIcons(horse.traits || []) && (
-                           <span className="text-sm flex-shrink-0">{getHorseSpecialIcons(horse.traits || [])}</span>
-                         )}
+                          <HorseSpecialIcons traits={horse.traits} />
                        </div>
                        <Badge variant="outline" className="text-[10px] flex-shrink-0 ml-2">T{horse.tier}</Badge>
                      </div>
