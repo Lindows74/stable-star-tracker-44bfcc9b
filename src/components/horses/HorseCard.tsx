@@ -206,7 +206,11 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   const horseDistances = horse.horse_distances?.map((d: any) => d.distance.toString()) || [];
   const horseSurfaces = horse.horse_surfaces?.map((s: any) => s.surface) || [];
   const horseCategories = horse.horse_categories?.map((c: any) => c.category) || [];
-  const liveRaceMatches = checkHorseLiveRaceMatches(horseDistances, horseSurfaces, horseCategories, horse.tier);
+  const liveRaceMatches = useHorseLiveRaceMatches({
+    tier: horse.tier,
+    surfaces: horseSurfaces,
+    distances: horseDistances,
+  });
 
   const handleEdit = () => {
     if (isAuthenticated) {
