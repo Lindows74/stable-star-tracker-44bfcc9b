@@ -512,24 +512,43 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               <span>Race Matches</span>
             </h4>
             <div className="space-y-1">
-              {liveRaceMatches.map((match: HorseRaceMatch, idx: number) => (
-                <div key={idx} className="flex flex-wrap items-center gap-1 md:gap-2 text-[10px] md:text-xs">
-                  <Badge variant="default" className="text-[10px] md:text-xs bg-blue-600 text-white hover:bg-blue-700">
-                    {match.category}
-                  </Badge>
-                  {match.distance > 0 && (
-                    <Badge variant="outline" className="text-[10px] md:text-xs">
-                      {match.distance}m
+              {liveRaceMatches.map(({ race, number }) => {
+                const kind = getRaceKind(race);
+                const categoryLabel =
+                  kind === "xc"
+                    ? "Cross Country"
+                    : kind === "sc"
+                    ? "Steeplechase"
+                    : kind === "sj"
+                    ? "Show Jumping"
+                    : "Flat Racing";
+                const grades =
+                  race.tier_restriction === "odd_grades"
+                    ? "Odd"
+                    : race.tier_restriction === "even_grades"
+                    ? "Even"
+                    : "All";
+                return (
+                  <div key={race.id} className="flex flex-wrap items-center gap-1 md:gap-2 text-[10px] md:text-xs">
+                    <Badge variant="default" className="text-[10px] md:text-xs bg-blue-600 text-white hover:bg-blue-700">
+                      {number ? `#${number} ` : ""}{categoryLabel}
                     </Badge>
-                  )}
-                  <Badge variant="outline" className="text-[10px] md:text-xs">
-                    {formatSurfaceName(match.surface)}
-                  </Badge>
-                  <Badge variant="secondary" className="text-[10px] md:text-xs">
-                    {match.grades} Grades
-                  </Badge>
-                </div>
-              ))}
+                    {kind !== "xc" && kind !== "sj" && String(race.distance) !== "0" && (
+                      <Badge variant="outline" className="text-[10px] md:text-xs">
+                        {race.distance}m
+                      </Badge>
+                    )}
+                    {kind !== "sj" && (
+                      <Badge variant="outline" className="text-[10px] md:text-xs">
+                        {formatSurfaceName(race.surface)}
+                      </Badge>
+                    )}
+                    <Badge variant="secondary" className="text-[10px] md:text-xs">
+                      {grades} Grades
+                    </Badge>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
