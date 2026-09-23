@@ -17,7 +17,7 @@ import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullSta
 import { calculateAllStats, getMaxTrainedStats, isMaxTrained } from "@/utils/horseUtils";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import { useBestTimesForHorse, useTierBestTimes, raceTypeKey } from "@/hooks/useRaceResults";
-import { formatRaceLabel, formatRaceTime } from "@/utils/raceTimeUtils";
+import { formatRaceLabel, formatRaceTime, getRaceKind } from "@/utils/raceTimeUtils";
 import {
   AlertDialog,
   AlertDialogAction,
