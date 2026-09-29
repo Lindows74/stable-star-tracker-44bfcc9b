@@ -13,7 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { useLiveRacesList } from "@/hooks/useLiveRaceMatches";
-import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, sortRacesCanonically } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, getRaceKind, sortRacesCanonically } from "@/utils/raceTimeUtils";
+import { Badge } from "@/components/ui/badge";
+import { Check, X as XIcon } from "lucide-react";
 
 const db = supabase as any;
 
@@ -40,7 +42,7 @@ const Training = () => {
     queryFn: async () => {
       const { data, error } = await db
         .from("training_focus")
-        .select("id, horse_id, race_id, note, created_at, horses(id, name, gender, tier)")
+        .select("id, horse_id, race_id, note, created_at, horses(id, name, gender, tier, horse_surfaces(surface), horse_distances(distance))")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as any[];
