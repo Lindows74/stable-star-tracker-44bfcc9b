@@ -104,6 +104,7 @@ export const BreedingLineageCard = ({
   onRemoveFoal,
   onSetTries,
   footer,
+  ancestry,
 }: LineageProps) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
   const dirty = outcome !== (pairing.outcome || "");
@@ -131,8 +132,8 @@ export const BreedingLineageCard = ({
       <div className="p-3 md:p-4">
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_2rem_minmax(0,1.25fr)] md:items-center">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
-            <ParentNode horse={pairing.stallion} role="Stallion" icon="♂" />
-            <ParentNode horse={pairing.mare} role="Mare" icon="♀" />
+            <ParentNode horse={pairing.stallion} role="Stallion" icon="♂" ancestry={ancestry} />
+            <ParentNode horse={pairing.mare} role="Mare" icon="♀" ancestry={ancestry} />
           </div>
 
           <div className="flex h-8 items-center justify-center md:h-full md:flex-col" aria-hidden="true">
