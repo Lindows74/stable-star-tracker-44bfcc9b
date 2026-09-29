@@ -215,6 +215,7 @@ export const BreedingProjects = ({
   onAddFoal,
   onRemoveFoal,
   onSetTries,
+  ancestry,
 }: Props) => {
   const [newTitle, setNewTitle] = useState("");
   const [newNotes, setNewNotes] = useState("");
@@ -286,7 +287,7 @@ export const BreedingProjects = ({
                     {list.length === 0 ? (
                       <p className="rounded-md border border-dashed p-5 text-center text-xs text-muted-foreground">Drop a pairing here</p>
                     ) : list.map((pair) => (
-                      <BreedingLineageCard key={pair.id} pairing={pair} onUpdateOutcome={onUpdateOutcome} onRemove={onRemovePairing} onAddFoal={onAddFoal} onRemoveFoal={onRemoveFoal} onSetTries={onSetTries} />
+                      <BreedingLineageCard key={pair.id} pairing={pair} onUpdateOutcome={onUpdateOutcome} onRemove={onRemovePairing} onAddFoal={onAddFoal} onRemoveFoal={onRemoveFoal} onSetTries={onSetTries} ancestry={ancestry} />
                     ))}
                   </div>
                 )}
