@@ -332,7 +332,13 @@ const BreedingNotes = () => {
                 <SelectTrigger className="h-9">
                   <SelectValue placeholder="Wanted foal tier" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  position="popper"
+                  side="bottom"
+                  sideOffset={4}
+                  align="start"
+                  className="max-h-[min(20rem,var(--radix-select-content-available-height))] [&_[role=listbox]]:max-h-[min(18rem,var(--radix-select-content-available-height))] [&_[role=listbox]]:overflow-y-auto [&_[role=listbox]]:overscroll-contain [&_[role=listbox]]:touch-pan-y"
+                >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((t) => (
                     <SelectItem key={t} value={String(t)}>
                       Tier {t}
