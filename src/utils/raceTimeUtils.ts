@@ -31,6 +31,16 @@ export const formatRaceTime = (ms: number): string => {
   return `${minutes}:${String(seconds).padStart(2, "0")}.${String(millis).padStart(3, "0")}`;
 };
 
+// Date of a saved result, e.g. "30 sept -26"
+const MONTHS_SHORT = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sept", "oct", "nov", "dec"];
+
+export const formatResultDate = (iso?: string | null): string => {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return "";
+  return `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} -${String(date.getFullYear()).slice(-2)}`;
+};
+
 // Canonical race order (same as Live Events): 17 flat, 3 steeplechase, 2 cross country
 const FLAT_ORDER = [
   { d: "800", s: "very_soft" },
