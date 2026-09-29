@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
 import { RaceResultNote } from "@/components/races/RaceResultNote";
-import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, getRaceKind, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, formatResultDate, getRaceKind, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
@@ -279,6 +279,11 @@ const RacesMade = () => {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="font-mono">{formatRaceTime(row.time_ms)}</span>
+                            {formatResultDate(row.raced_at) && (
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                {formatResultDate(row.raced_at)}
+                              </span>
+                            )}
                             <RaceResultNote
                               horseName={row.horses?.name || "Horse"}
                               note={row.note || ""}
