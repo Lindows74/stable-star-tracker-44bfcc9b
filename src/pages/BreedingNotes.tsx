@@ -381,7 +381,7 @@ const BreedingNotes = () => {
                 footer={projects && projects.length > 0 ? (
                   <Select onValueChange={(v) => assignPairing.mutate({ id: n.id, projectId: Number(v) })}>
                     <SelectTrigger className="h-9 w-full sm:w-64"><SelectValue placeholder="Move to race..." /></SelectTrigger>
-                    <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={String(p.id)}>{p.title || "Untitled race"}</SelectItem>)}</SelectContent>
+                    <SelectContent>{projects.filter((p: any) => !p.is_archived).map((p: any) => <SelectItem key={p.id} value={String(p.id)}>{p.title || "Untitled race"}</SelectItem>)}</SelectContent>
                   </Select>
                 ) : undefined}
               />
