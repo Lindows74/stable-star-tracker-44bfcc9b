@@ -200,6 +200,7 @@ const Training = () => {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <HorseNameBadge horse={e.horses} />
+                        <HorseSpecialIcons traits={(e.horses?.horse_traits || []).map((t: any) => t.trait_name)} />
                         {e.horses?.tier != null && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600">T{e.horses.tier}</Badge>
                         )}
