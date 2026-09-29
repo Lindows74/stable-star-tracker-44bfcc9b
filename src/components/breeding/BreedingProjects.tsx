@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Plus, Minus, Trash2, Save, X, Pencil } from "lucide-react";
-import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
+import { ChevronDown, ChevronRight, GitBranch, Plus, Minus, Trash2, Save, X, Pencil } from "lucide-react";
 import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 import { HorseAttributeSummary } from "@/components/breeding/HorseAttributeSummary";
@@ -30,131 +29,135 @@ type Props = {
   onSetTries: (pairingId: number, tries: number) => void;
 };
 
-const PairingRow = ({
-  pairing,
-  onUpdateOutcome,
-  onRemove,
-  onAddFoal,
-  onRemoveFoal,
-  onSetTries,
-}: {
+type LineageProps = {
   pairing: any;
   onUpdateOutcome: (id: number, outcome: string) => void;
   onRemove: (id: number) => void;
   onAddFoal: (id: number, foalId: number) => void;
   onRemoveFoal: (id: number, foalId: number) => void;
   onSetTries: (id: number, tries: number) => void;
-}) => {
+  footer?: React.ReactNode;
+};
+
+const ParentNode = ({ horse, role, icon }: { horse: any; role: string; icon: string }) => (
+  <div className="rounded-md border bg-background p-3 space-y-2">
+    <p className="text-[10px] font-bold uppercase text-muted-foreground">{role}</p>
+    {horse?.name ? (
+      <>
+        <div className="flex items-center justify-between gap-2">
+          <HorseNameBadge horse={horse} icon={icon} />
+          {horse.tier != null && <Badge variant="outline">Tier {horse.tier}</Badge>}
+        </div>
+        <HorseAttributeSummary horse={horse} />
+      </>
+    ) : (
+      <p className="text-xs text-muted-foreground">Not recorded</p>
+    )}
+  </div>
+);
+
+export const BreedingLineageCard = ({
+  pairing,
+  onUpdateOutcome,
+  onRemove,
+  onAddFoal,
+  onRemoveFoal,
+  onSetTries,
+  footer,
+}: LineageProps) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
   const dirty = outcome !== (pairing.outcome || "");
+  const foals = pairing.foals || [];
 
   return (
     <div
       draggable
       onDragStart={(e) => e.dataTransfer.setData("text/plain", String(pairing.id))}
-      className="rounded-md border bg-background p-2 space-y-2 cursor-grab active:cursor-grabbing"
+      className="rounded-lg border bg-card cursor-grab active:cursor-grabbing overflow-hidden"
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-2 border-b bg-muted/30 p-3">
         <div className="min-w-0">
-          {pairing.title && <p className="text-sm font-semibold break-words">{pairing.title}</p>}
-          <div className="flex flex-wrap gap-1 mt-1">
-            {pairing.target_tier != null && (
-              <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {pairing.target_tier}</Badge>
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            {pairing.target_tier != null && <Badge>Target tier {pairing.target_tier}</Badge>}
+            <p className="font-semibold break-words">{pairing.title || "Breeding record"}</p>
           </div>
-          {pairing.stallion?.name && (
-            <div className="mt-1 space-y-1">
-              <HorseNameBadge horse={pairing.stallion} icon="♂" />
-              <HorseAttributeSummary horse={pairing.stallion} />
-            </div>
-          )}
-          {pairing.mare?.name && (
-            <div className="mt-1 space-y-1">
-              <HorseNameBadge horse={pairing.mare} icon="♀" />
-              <HorseAttributeSummary horse={pairing.mare} />
-            </div>
-          )}
+          {pairing.note && <p className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap break-words">{pairing.note}</p>}
         </div>
         <Button variant="ghost" size="icon" aria-label="Remove pairing" onClick={() => onRemove(pairing.id)}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
-      {pairing.note && <p className="text-xs whitespace-pre-wrap break-words text-muted-foreground">{pairing.note}</p>}
 
-      {/* Tries counter */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">Tries:</span>
-        <div className="flex items-center rounded-md border">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            aria-label="Decrease tries"
-            disabled={(pairing.tries ?? 0) <= 0}
-            onClick={() => onSetTries(pairing.id, Math.max(0, (pairing.tries ?? 0) - 1))}
-          >
-            <Minus className="h-3.5 w-3.5" />
-          </Button>
-          <span className="w-8 text-center text-sm font-semibold tabular-nums">{pairing.tries ?? 0}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            aria-label="Increase tries"
-            onClick={() => onSetTries(pairing.id, (pairing.tries ?? 0) + 1)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </div>
-      <Textarea
-        placeholder="Outcome log (foal stats, traits, result...)"
-        value={outcome}
-        onChange={(e) => setOutcome(e.target.value)}
-        rows={2}
-        className="text-xs"
-      />
-      {dirty && (
-        <Button size="sm" variant="secondary" onClick={() => onUpdateOutcome(pairing.id, outcome)}>
-          <Save className="h-3.5 w-3.5 mr-1" /> Save outcome
-        </Button>
-      )}
+      <div className="p-3 md:p-4">
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_2rem_minmax(0,1.25fr)] md:items-center">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
+            <ParentNode horse={pairing.stallion} role="Stallion" icon="♂" />
+            <ParentNode horse={pairing.mare} role="Mare" icon="♀" />
+          </div>
 
-      {/* Foals */}
-      {(pairing.foals || []).length > 0 && (
-        <div className="space-y-2">
-          {(pairing.foals || []).map((foal: any, idx: number) => (
-            <div key={`${foal.id}-${idx}`} className="rounded-md border bg-muted/40 p-2 space-y-1">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-1">
-                  <HorseNameBadge horse={foal} icon="🐴" />
-                  {foal.tier != null && <Badge variant="outline">Tier {foal.tier}</Badge>}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  aria-label="Remove foal"
-                  onClick={() => onRemoveFoal(pairing.id, foal.id)}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <HorseAttributeSummary horse={foal} />
-              {!foal.horse_traits?.length && (
-                <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>
-              )}
+          <div className="flex h-8 items-center justify-center md:h-full md:flex-col" aria-hidden="true">
+            <span className="h-px flex-1 bg-border md:h-full md:w-px" />
+            <span className="rounded-full border bg-background p-1.5 text-muted-foreground">
+              <GitBranch className="h-4 w-4 rotate-90 md:rotate-0" />
+            </span>
+            <span className="h-px flex-1 bg-border md:h-full md:w-px" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[10px] font-bold uppercase text-muted-foreground">
+                {foals.length === 1 ? "Foal" : `Foals · ${foals.length}`}
+              </p>
+              <HorsePicker gender="any" label="Foal" size="sm" triggerLabel="Add foal" onSelect={(h) => onAddFoal(pairing.id, h.id)} />
             </div>
-          ))}
+            {foals.length === 0 ? (
+              <div className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
+                No foal added yet
+              </div>
+            ) : (
+              foals.map((foal: any, idx: number) => (
+                <div key={`${foal.id}-${idx}`} className="rounded-md border-2 bg-background p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1">
+                      <HorseNameBadge horse={foal} icon="🐴" />
+                      {foal.tier != null && <Badge variant="outline">Tier {foal.tier}</Badge>}
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Remove foal" onClick={() => onRemoveFoal(pairing.id, foal.id)}>
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <HorseAttributeSummary horse={foal} />
+                  {!foal.horse_traits?.length && <p className="text-[10px] text-muted-foreground">No traits registered on this foal.</p>}
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      )}
-      <HorsePicker
-        gender="any"
-        label="Foal"
-        size="sm"
-        triggerLabel="Add foal"
-        onSelect={(h) => onAddFoal(pairing.id, h.id)}
-      />
+
+        <div className="mt-4 grid gap-3 border-t pt-3 md:grid-cols-[auto_minmax(0,1fr)] md:items-start">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Tries</span>
+            <div className="flex items-center rounded-md border">
+              <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Decrease tries" disabled={(pairing.tries ?? 0) <= 0} onClick={() => onSetTries(pairing.id, Math.max(0, (pairing.tries ?? 0) - 1))}>
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="w-8 text-center text-sm font-semibold tabular-nums">{pairing.tries ?? 0}</span>
+              <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Increase tries" onClick={() => onSetTries(pairing.id, (pairing.tries ?? 0) + 1)}>
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Textarea placeholder="Outcome log (foal stats, traits, result...)" value={outcome} onChange={(e) => setOutcome(e.target.value)} rows={2} className="text-xs" />
+            {dirty && (
+              <Button size="sm" variant="secondary" onClick={() => onUpdateOutcome(pairing.id, outcome)}>
+                <Save className="h-3.5 w-3.5" /> Save outcome
+              </Button>
+            )}
+          </div>
+        </div>
+        {footer && <div className="mt-3 border-t pt-3">{footer}</div>}
+      </div>
     </div>
   );
 };
@@ -179,179 +182,78 @@ export const BreedingProjects = ({
   const [editing, setEditing] = useState<Record<number, { title: string; notes: string }>>({});
 
   return (
-    <aside className="space-y-3">
-      <Card>
-        <CardContent className="p-3 space-y-2">
-          <p className="text-sm font-semibold">New race project</p>
-          <Input placeholder="Race / goal" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-          <Textarea
-            placeholder="Notes: distance, surface, traits needed..."
-            value={newNotes}
-            onChange={(e) => setNewNotes(e.target.value)}
-            rows={2}
-          />
-          <Button
-            size="sm"
-            className="w-full"
-            disabled={!newTitle.trim()}
-            onClick={() => {
-              onCreate(newTitle.trim(), newNotes.trim());
-              setNewTitle("");
-              setNewNotes("");
-            }}
-          >
-            <Plus className="h-4 w-4 mr-1" /> Add race
-          </Button>
-        </CardContent>
-      </Card>
+    <section className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-lg md:text-xl font-semibold">Breeding projects</h2>
+          <p className="text-xs text-muted-foreground">Open a project to see its breeding lineage.</p>
+        </div>
+        <Card className="w-full sm:max-w-2xl">
+          <CardContent className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-center">
+            <Input placeholder="Race / goal" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+            <Input placeholder="Notes: distance, surface, traits needed..." value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
+            <Button size="sm" disabled={!newTitle.trim()} onClick={() => { onCreate(newTitle.trim(), newNotes.trim()); setNewTitle(""); setNewNotes(""); }}>
+              <Plus className="h-4 w-4" /> Add race
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
-      {projects.length === 0 && (
-        <p className="text-sm text-muted-foreground">No races yet. Add one above.</p>
-      )}
+      {projects.length === 0 && <p className="text-sm text-muted-foreground">No races yet. Add one above.</p>}
 
-      {projects.map((p) => {
-        const isOpen = open[p.id] ?? false;
-        const list = pairingsByProject[p.id] || [];
-        const edit = editing[p.id];
-        return (
-          <Card
-            key={p.id}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(p.id);
-            }}
-            onDragLeave={() => setDragOver((v) => (v === p.id ? null : v))}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOver(null);
-              const id = Number(e.dataTransfer.getData("text/plain"));
-              if (id) onDropPairing(id, p.id);
-            }}
-            className={dragOver === p.id ? "ring-2 ring-primary" : undefined}
-          >
-            <CardContent className="p-3 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                {edit ? (
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <Input
-                      value={edit.title}
-                      onChange={(e) =>
-                        setEditing((s) => ({ ...s, [p.id]: { ...edit, title: e.target.value } }))
-                      }
-                      placeholder="Race / goal"
-                      className="h-8 text-sm font-semibold"
-                    />
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={edit.title === p.title && edit.notes === p.notes}
-                        onClick={() => {
-                          onUpdate(p.id, { title: edit.title.trim(), notes: edit.notes });
-                          setEditing((s) => {
-                            const n = { ...s };
-                            delete n[p.id];
-                            return n;
-                          });
-                        }}
-                      >
-                        <Save className="h-3.5 w-3.5 mr-1" /> Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() =>
-                          setEditing((s) => {
-                            const n = { ...s };
-                            delete n[p.id];
-                            return n;
-                          })
-                        }
-                      >
-                        <X className="h-3.5 w-3.5 mr-1" /> Cancel
-                      </Button>
+      <div className="grid gap-3 xl:grid-cols-2">
+        {projects.map((p) => {
+          const isOpen = open[p.id] ?? false;
+          const list = pairingsByProject[p.id] || [];
+          const edit = editing[p.id];
+          return (
+            <Card
+              key={p.id}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(p.id); }}
+              onDragLeave={() => setDragOver((v) => (v === p.id ? null : v))}
+              onDrop={(e) => { e.preventDefault(); setDragOver(null); const id = Number(e.dataTransfer.getData("text/plain")); if (id) onDropPairing(id, p.id); }}
+              className={`${dragOver === p.id ? "ring-2 ring-primary" : ""} ${isOpen ? "xl:col-span-2" : ""}`}
+            >
+              <CardContent className="p-3 md:p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  {edit ? (
+                    <div className="flex-1 space-y-2">
+                      <Input value={edit.title} onChange={(e) => setEditing((s) => ({ ...s, [p.id]: { ...edit, title: e.target.value } }))} placeholder="Race / goal" className="h-8 text-sm font-semibold" />
+                      <Textarea value={edit.notes} onChange={(e) => setEditing((s) => ({ ...s, [p.id]: { ...edit, notes: e.target.value } }))} placeholder="Race notes" rows={2} />
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="secondary" disabled={edit.title === p.title && edit.notes === p.notes} onClick={() => { onUpdate(p.id, { title: edit.title.trim(), notes: edit.notes }); setEditing((s) => { const n = { ...s }; delete n[p.id]; return n; }); }}><Save className="h-3.5 w-3.5" /> Save</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditing((s) => { const n = { ...s }; delete n[p.id]; return n; })}><X className="h-3.5 w-3.5" /> Cancel</Button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <button
-                    className="flex items-center gap-1 text-left min-w-0"
-                    onClick={() => setOpen((o) => ({ ...o, [p.id]: !isOpen }))}
-                  >
-                    {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
-                    <span className="font-semibold break-words">{p.title || "Untitled race"}</span>
-                    <Badge variant="outline" className="ml-1">{list.length}</Badge>
-                  </button>
-                )}
-                <div className="flex items-center shrink-0">
-                  {!edit && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Edit race label"
-                      onClick={() => setEditing((s) => ({ ...s, [p.id]: { title: p.title, notes: p.notes } }))}
-                    >
-                      <Pencil className="h-4 w-4" />
+                  ) : (
+                    <Button variant="ghost" className="h-auto flex-1 justify-start whitespace-normal px-1 py-1 text-left" onClick={() => setOpen((o) => ({ ...o, [p.id]: !isOpen }))}>
+                      {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      <span className="font-semibold break-words">{p.title || "Untitled race"}</span>
+                      <Badge variant="outline">{list.length}</Badge>
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" aria-label="Delete race" onClick={() => onDelete(p.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex shrink-0">
+                    {!edit && <Button variant="ghost" size="icon" aria-label="Edit race label" onClick={() => setEditing((s) => ({ ...s, [p.id]: { title: p.title, notes: p.notes } }))}><Pencil className="h-4 w-4" /></Button>}
+                    <Button variant="ghost" size="icon" aria-label="Delete race" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
                 </div>
-              </div>
 
-              {isOpen && (
-                <>
-                  <Textarea
-                    rows={2}
-                    className="text-xs"
-                    value={edit ? edit.notes : p.notes}
-                    onChange={(e) =>
-                      setEditing((s) => ({ ...s, [p.id]: { title: edit ? edit.title : p.title, notes: e.target.value } }))
-                    }
-                    placeholder="Race notes"
-                  />
-                  {edit && edit.notes !== p.notes && edit.title === p.title && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        onUpdate(p.id, { title: p.title, notes: edit.notes });
-                        setEditing((s) => {
-                          const n = { ...s };
-                          delete n[p.id];
-                          return n;
-                        });
-                      }}
-                    >
-                      <Save className="h-3.5 w-3.5 mr-1" /> Save notes
-                    </Button>
-                  )}
+                {!edit && p.notes && <p className="text-xs text-muted-foreground whitespace-pre-wrap break-words">{p.notes}</p>}
 
-                  <div className="space-y-2">
+                {isOpen && (
+                  <div className="space-y-3 border-t pt-3">
                     {list.length === 0 ? (
-                      <p className="rounded-md border border-dashed p-3 text-center text-xs text-muted-foreground">
-                        Drop a pairing here
-                      </p>
-                    ) : (
-                      list.map((pair) => (
-                        <PairingRow
-                          key={pair.id}
-                          pairing={pair}
-                          onUpdateOutcome={onUpdateOutcome}
-                          onRemove={onRemovePairing}
-                          onAddFoal={onAddFoal}
-                          onRemoveFoal={onRemoveFoal}
-                          onSetTries={onSetTries}
-                        />
-                      ))
-                    )}
+                      <p className="rounded-md border border-dashed p-5 text-center text-xs text-muted-foreground">Drop a pairing here</p>
+                    ) : list.map((pair) => (
+                      <BreedingLineageCard key={pair.id} pairing={pair} onUpdateOutcome={onUpdateOutcome} onRemove={onRemovePairing} onAddFoal={onAddFoal} onRemoveFoal={onRemoveFoal} onSetTries={onSetTries} />
+                    ))}
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
-    </aside>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
   );
 };
