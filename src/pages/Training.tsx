@@ -16,6 +16,7 @@ import { useLiveRacesList } from "@/hooks/useLiveRaceMatches";
 import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, getRaceKind, sortRacesCanonically } from "@/utils/raceTimeUtils";
 import { Badge } from "@/components/ui/badge";
 import { Check, X as XIcon } from "lucide-react";
+import { TraitBadge } from "@/components/horses/TraitBadge";
 
 const db = supabase as any;
 
@@ -42,7 +43,7 @@ const Training = () => {
     queryFn: async () => {
       const { data, error } = await db
         .from("training_focus")
-        .select("id, horse_id, race_id, note, created_at, horses(id, name, gender, tier, horse_surfaces(surface), horse_distances(distance))")
+        .select("id, horse_id, race_id, note, created_at, horses(id, name, gender, tier, horse_surfaces(surface), horse_distances(distance), horse_traits(trait_name), horse_breeding(percentage, breeds(name)))")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as any[];
@@ -196,6 +197,18 @@ const Training = () => {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
+                    {(e.horses?.horse_traits || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {e.horses.horse_traits.map((t: any, i: number) => (
+                          <TraitBadge
+                            key={`t-${e.id}-${i}`}
+                            traitName={t.trait_name}
+                            allTraits={e.horses.horse_traits.map((tr: any) => tr.trait_name)}
+                            horseBreeding={e.horses.horse_breeding || []}
+                          />
+                        ))}
+                      </div>
+                    )}
                     <Textarea
                       rows={2}
                       placeholder="Notes"
