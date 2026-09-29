@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
 import { RaceResultNote } from "@/components/races/RaceResultNote";
+import { RaceResultDate } from "@/components/races/RaceResultDate";
 import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, formatResultDate, getRaceKind, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
@@ -108,6 +109,24 @@ const RacesMade = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["race_results"] });
       toast({ title: "Removed", description: "Race result deleted." });
+    },
+  });
+
+  const dateMutation = useMutation({
+    mutationFn: async ({ id, raced_at }: { id: number; raced_at: string }) => {
+      const { error } = await supabase.from("race_results").update({ raced_at } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["race_results"] });
+      toast({ title: "Saved", description: "Date updated." });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Could not save date",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -279,11 +298,13 @@ const RacesMade = () => {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="font-mono">{formatRaceTime(row.time_ms)}</span>
-                            {formatResultDate(row.raced_at) && (
-                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                {formatResultDate(row.raced_at)}
-                              </span>
-                            )}
+                            <RaceResultDate
+                              horseName={row.horses?.name || "Horse"}
+                              racedAt={row.raced_at}
+                              onSave={async (iso) => {
+                                await dateMutation.mutateAsync({ id: row.id, raced_at: iso });
+                              }}
+                            />
                             <RaceResultNote
                               horseName={row.horses?.name || "Horse"}
                               note={row.note || ""}
