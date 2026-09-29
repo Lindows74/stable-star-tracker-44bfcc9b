@@ -229,6 +229,18 @@ const BreedingNotes = () => {
     [notes]
   );
 
+  // horseId -> the pairing that produced this horse, so lineages can be traced
+  // through foals that were later used as parents in new pairings.
+  const ancestry = useMemo(() => {
+    const map: Record<number, any> = {};
+    (notes || []).forEach((n: any) => {
+      (n.foals || []).forEach((foal: any) => {
+        if (foal?.id != null) map[foal.id] = { stallion: n.stallion, mare: n.mare, title: n.title };
+      });
+    });
+    return map;
+  }, [notes]);
+
   const handleSave = () => {
     if (!note.trim()) {
       toast({ title: "Nothing to save", description: "Write a note first.", variant: "destructive" });
@@ -355,7 +367,8 @@ const BreedingNotes = () => {
                 onRemove={(id) => deleteMutation.mutate(id)}
                 onAddFoal={(id, foalId) => addFoal.mutate({ id, foalId })}
                 onRemoveFoal={(id, foalId) => removeFoal.mutate({ noteId: id, foalId })}
-                onSetTries={(id, tries) => setTries.mutate({ id, tries })}
+                 onSetTries={(id, tries) => setTries.mutate({ id, tries })}
+                 ancestry={ancestry}
                 footer={projects && projects.length > 0 ? (
                   <Select onValueChange={(v) => assignPairing.mutate({ id: n.id, projectId: Number(v) })}>
                     <SelectTrigger className="h-9 w-full sm:w-64"><SelectValue placeholder="Move to race..." /></SelectTrigger>
@@ -378,7 +391,8 @@ const BreedingNotes = () => {
               onRemovePairing={(id) => assignPairing.mutate({ id, projectId: null })}
               onAddFoal={(id, foalId) => addFoal.mutate({ id, foalId })}
               onRemoveFoal={(id, foalId) => removeFoal.mutate({ noteId: id, foalId })}
-              onSetTries={(id, tries) => setTries.mutate({ id, tries })}
+               onSetTries={(id, tries) => setTries.mutate({ id, tries })}
+               ancestry={ancestry}
         />
 
         <Button
