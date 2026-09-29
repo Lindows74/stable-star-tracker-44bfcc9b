@@ -139,6 +139,15 @@ const BreedingNotes = () => {
     onSuccess: invalidateAll,
   });
 
+  const archiveProject = useMutation({
+    mutationFn: async ({ id, archived }: { id: number; archived: boolean }) => {
+      const { error } = await supabase.from("breeding_projects").update({ is_archived: archived } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => { invalidateAll(); toast({ title: v.archived ? "Project archived" : "Project restored" }); },
+    onError: () => toast({ title: "Error", description: "Could not archive the project.", variant: "destructive" }),
+  });
+
   const deleteProject = useMutation({
     mutationFn: async (id: number) => {
       const { error } = await supabase.from("breeding_projects").delete().eq("id", id);
@@ -372,7 +381,7 @@ const BreedingNotes = () => {
                 footer={projects && projects.length > 0 ? (
                   <Select onValueChange={(v) => assignPairing.mutate({ id: n.id, projectId: Number(v) })}>
                     <SelectTrigger className="h-9 w-full sm:w-64"><SelectValue placeholder="Move to race..." /></SelectTrigger>
-                    <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={String(p.id)}>{p.title || "Untitled race"}</SelectItem>)}</SelectContent>
+                    <SelectContent>{projects.filter((p: any) => !p.is_archived).map((p: any) => <SelectItem key={p.id} value={String(p.id)}>{p.title || "Untitled race"}</SelectItem>)}</SelectContent>
                   </Select>
                 ) : undefined}
               />
@@ -386,6 +395,7 @@ const BreedingNotes = () => {
               onCreate={(title, notes) => createProject.mutate({ title, notes })}
               onUpdate={(id, values) => updateProject.mutate({ id, values })}
               onDelete={(id) => deleteProject.mutate(id)}
+              onArchive={(id, archived) => archiveProject.mutate({ id, archived })}
               onDropPairing={(pairingId, projectId) => assignPairing.mutate({ id: pairingId, projectId })}
               onUpdateOutcome={(id, outcome) => updateOutcome.mutate({ id, outcome })}
               onRemovePairing={(id) => assignPairing.mutate({ id, projectId: null })}

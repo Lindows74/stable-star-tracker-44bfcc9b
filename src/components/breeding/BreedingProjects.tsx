@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, GitBranch, Plus, Minus, Trash2, Save, X, Pencil } from "lucide-react";
+import { ChevronDown, ChevronRight, GitBranch, Plus, Minus, Trash2, Save, X, Pencil, Archive, ArchiveRestore } from "lucide-react";
 import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 import { HorseAttributeSummary } from "@/components/breeding/HorseAttributeSummary";
@@ -13,6 +13,7 @@ export type BreedingProject = {
   id: number;
   title: string;
   notes: string;
+  is_archived?: boolean;
 };
 
 export type AncestryEntry = { stallion?: any; mare?: any; title?: string };
@@ -24,6 +25,7 @@ type Props = {
   onCreate: (title: string, notes: string) => void;
   onUpdate: (id: number, values: { title: string; notes: string }) => void;
   onDelete: (id: number) => void;
+  onArchive?: (id: number, archived: boolean) => void;
   onDropPairing: (pairingId: number, projectId: number | null) => void;
   onUpdateOutcome: (pairingId: number, outcome: string) => void;
   onRemovePairing: (pairingId: number) => void;
@@ -209,6 +211,7 @@ export const BreedingProjects = ({
   onCreate,
   onUpdate,
   onDelete,
+  onArchive,
   onDropPairing,
   onUpdateOutcome,
   onRemovePairing,
@@ -222,29 +225,13 @@ export const BreedingProjects = ({
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [editing, setEditing] = useState<Record<number, { title: string; notes: string }>>({});
+  const [showArchived, setShowArchived] = useState(false);
+  const activeProjects = projects.filter((p) => !p.is_archived);
+  const archivedProjects = projects.filter((p) => p.is_archived);
 
-  return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="text-lg md:text-xl font-semibold">Breeding projects</h2>
-          <p className="text-xs text-muted-foreground">Open a project to see its breeding lineage.</p>
-        </div>
-        <Card className="w-full sm:max-w-2xl">
-          <CardContent className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-center">
-            <Input placeholder="Race / goal" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-            <Input placeholder="Notes: distance, surface, traits needed..." value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
-            <Button size="sm" disabled={!newTitle.trim()} onClick={() => { onCreate(newTitle.trim(), newNotes.trim()); setNewTitle(""); setNewNotes(""); }}>
-              <Plus className="h-4 w-4" /> Add race
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+  const renderProject = (p: BreedingProject) => {
 
-      {projects.length === 0 && <p className="text-sm text-muted-foreground">No races yet. Add one above.</p>}
 
-      <div className="grid gap-3 xl:grid-cols-2">
-        {projects.map((p) => {
           const isOpen = open[p.id] ?? false;
           const list = pairingsByProject[p.id] || [];
           const edit = editing[p.id];
@@ -276,6 +263,7 @@ export const BreedingProjects = ({
                   )}
                   <div className="flex shrink-0">
                     {!edit && <Button variant="ghost" size="icon" aria-label="Edit race label" onClick={() => setEditing((s) => ({ ...s, [p.id]: { title: p.title, notes: p.notes } }))}><Pencil className="h-4 w-4" /></Button>}
+                    {onArchive && <Button variant="ghost" size="icon" aria-label={p.is_archived ? "Restore race" : "Archive race"} title={p.is_archived ? "Restore" : "Archive"} onClick={() => onArchive(p.id, !p.is_archived)}>{p.is_archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}</Button>}
                     <Button variant="ghost" size="icon" aria-label="Delete race" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
@@ -294,8 +282,41 @@ export const BreedingProjects = ({
               </CardContent>
             </Card>
           );
-        })}
+  };
+
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-lg md:text-xl font-semibold">Breeding projects</h2>
+          <p className="text-xs text-muted-foreground">Open a project to see its breeding lineage.</p>
+        </div>
+        <Card className="w-full sm:max-w-2xl">
+          <CardContent className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-center">
+            <Input placeholder="Race / goal" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+            <Input placeholder="Notes: distance, surface, traits needed..." value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
+            <Button size="sm" disabled={!newTitle.trim()} onClick={() => { onCreate(newTitle.trim(), newNotes.trim()); setNewTitle(""); setNewNotes(""); }}>
+              <Plus className="h-4 w-4" /> Add race
+            </Button>
+          </CardContent>
+        </Card>
       </div>
+
+      {activeProjects.length === 0 && <p className="text-sm text-muted-foreground">No races yet. Add one above.</p>}
+
+      <div className="grid gap-3 xl:grid-cols-2">
+        {activeProjects.map(renderProject)}
+      </div>
+
+      {archivedProjects.length > 0 && (
+        <div className="space-y-3">
+          <Button variant="ghost" size="sm" onClick={() => setShowArchived((v) => !v)}>
+            {showArchived ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <Archive className="h-4 w-4" /> Archived ({archivedProjects.length})
+          </Button>
+          {showArchived && <div className="grid gap-3 xl:grid-cols-2 opacity-80">{archivedProjects.map(renderProject)}</div>}
+        </div>
+      )}
     </section>
   );
 };

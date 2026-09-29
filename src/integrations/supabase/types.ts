@@ -131,6 +131,7 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          is_archived: boolean
           notes: string
           sort_order: number
           title: string
@@ -139,6 +140,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
+          is_archived?: boolean
           notes?: string
           sort_order?: number
           title?: string
@@ -147,6 +149,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+          is_archived?: boolean
           notes?: string
           sort_order?: number
           title?: string
