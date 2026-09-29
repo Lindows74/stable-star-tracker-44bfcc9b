@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRaceResults, type RaceResultRow } from "@/hooks/useRaceResults";
 import { RaceResultNote } from "@/components/races/RaceResultNote";
 import { RaceResultDate } from "@/components/races/RaceResultDate";
-import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, formatResultDate, getRaceKind, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, getRaceKind, formatRaceTime, parseRaceTime } from "@/utils/raceTimeUtils";
 
 const RacesMade = () => {
   const { toast } = useToast();
