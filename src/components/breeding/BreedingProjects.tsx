@@ -15,6 +15,9 @@ export type BreedingProject = {
   notes: string;
 };
 
+export type AncestryEntry = { stallion?: any; mare?: any; title?: string };
+export type AncestryMap = Record<number, AncestryEntry>;
+
 type Props = {
   projects: BreedingProject[];
   pairingsByProject: Record<number, any[]>;
@@ -27,6 +30,7 @@ type Props = {
   onAddFoal: (pairingId: number, foalId: number) => void;
   onRemoveFoal: (pairingId: number, foalId: number) => void;
   onSetTries: (pairingId: number, tries: number) => void;
+  ancestry?: AncestryMap;
 };
 
 type LineageProps = {
@@ -37,9 +41,44 @@ type LineageProps = {
   onRemoveFoal: (id: number, foalId: number) => void;
   onSetTries: (id: number, tries: number) => void;
   footer?: React.ReactNode;
+  ancestry?: AncestryMap;
 };
 
-const ParentNode = ({ horse, role, icon }: { horse: any; role: string; icon: string }) => (
+const LineageChain = ({
+  horseId,
+  ancestry,
+  depth = 0,
+  visited = new Set<number>(),
+}: {
+  horseId: number;
+  ancestry?: AncestryMap;
+  depth?: number;
+  visited?: Set<number>;
+}) => {
+  if (!ancestry || depth > 4 || visited.has(horseId)) return null;
+  const entry = ancestry[horseId];
+  if (!entry) return null;
+  const nextVisited = new Set(visited);
+  nextVisited.add(horseId);
+  const parents = [entry.stallion, entry.mare].filter((p) => p?.id != null);
+  if (!parents.length) return null;
+  return (
+    <div className="space-y-1 border-l-2 border-muted pl-2">
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="text-[10px] font-bold uppercase text-muted-foreground">Born from</span>
+        {parents.map((p) => (
+          <HorseNameBadge key={p.id} horse={p} icon={p.gender === "stallion" ? "♂" : "♀"} className="text-[10px]" />
+        ))}
+        {entry.title ? <span className="text-[10px] text-muted-foreground">({entry.title})</span> : null}
+      </div>
+      {parents.map((p) => (
+        <LineageChain key={p.id} horseId={p.id} ancestry={ancestry} depth={depth + 1} visited={nextVisited} />
+      ))}
+    </div>
+  );
+};
+
+const ParentNode = ({ horse, role, icon, ancestry }: { horse: any; role: string; icon: string; ancestry?: AncestryMap }) => (
   <div className="rounded-md border bg-background p-3 space-y-2">
     <p className="text-[10px] font-bold uppercase text-muted-foreground">{role}</p>
     {horse?.name ? (
@@ -49,6 +88,7 @@ const ParentNode = ({ horse, role, icon }: { horse: any; role: string; icon: str
           {horse.tier != null && <Badge variant="outline">Tier {horse.tier}</Badge>}
         </div>
         <HorseAttributeSummary horse={horse} />
+        {horse.id != null && <LineageChain horseId={horse.id} ancestry={ancestry} />}
       </>
     ) : (
       <p className="text-xs text-muted-foreground">Not recorded</p>
@@ -64,6 +104,7 @@ export const BreedingLineageCard = ({
   onRemoveFoal,
   onSetTries,
   footer,
+  ancestry,
 }: LineageProps) => {
   const [outcome, setOutcome] = useState(pairing.outcome || "");
   const dirty = outcome !== (pairing.outcome || "");
@@ -91,8 +132,8 @@ export const BreedingLineageCard = ({
       <div className="p-3 md:p-4">
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_2rem_minmax(0,1.25fr)] md:items-center">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
-            <ParentNode horse={pairing.stallion} role="Stallion" icon="♂" />
-            <ParentNode horse={pairing.mare} role="Mare" icon="♀" />
+            <ParentNode horse={pairing.stallion} role="Stallion" icon="♂" ancestry={ancestry} />
+            <ParentNode horse={pairing.mare} role="Mare" icon="♀" ancestry={ancestry} />
           </div>
 
           <div className="flex h-8 items-center justify-center md:h-full md:flex-col" aria-hidden="true">
@@ -174,6 +215,7 @@ export const BreedingProjects = ({
   onAddFoal,
   onRemoveFoal,
   onSetTries,
+  ancestry,
 }: Props) => {
   const [newTitle, setNewTitle] = useState("");
   const [newNotes, setNewNotes] = useState("");
@@ -245,7 +287,7 @@ export const BreedingProjects = ({
                     {list.length === 0 ? (
                       <p className="rounded-md border border-dashed p-5 text-center text-xs text-muted-foreground">Drop a pairing here</p>
                     ) : list.map((pair) => (
-                      <BreedingLineageCard key={pair.id} pairing={pair} onUpdateOutcome={onUpdateOutcome} onRemove={onRemovePairing} onAddFoal={onAddFoal} onRemoveFoal={onRemoveFoal} onSetTries={onSetTries} />
+                      <BreedingLineageCard key={pair.id} pairing={pair} onUpdateOutcome={onUpdateOutcome} onRemove={onRemovePairing} onAddFoal={onAddFoal} onRemoveFoal={onRemoveFoal} onSetTries={onSetTries} ancestry={ancestry} />
                     ))}
                   </div>
                 )}
