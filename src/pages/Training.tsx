@@ -13,7 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { useLiveRacesList } from "@/hooks/useLiveRaceMatches";
-import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, sortRacesCanonically } from "@/utils/raceTimeUtils";
+import { buildRaceNumberMap, dedupeRacesLikeLiveEvents, formatRaceLabel, getRaceKind, sortRacesCanonically } from "@/utils/raceTimeUtils";
+import { Badge } from "@/components/ui/badge";
+import { Check, X as XIcon } from "lucide-react";
 
 const db = supabase as any;
 
@@ -40,7 +42,7 @@ const Training = () => {
     queryFn: async () => {
       const { data, error } = await db
         .from("training_focus")
-        .select("id, horse_id, race_id, note, created_at, horses(id, name, gender, tier)")
+        .select("id, horse_id, race_id, note, created_at, horses(id, name, gender, tier, horse_surfaces(surface), horse_distances(distance))")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as any[];
@@ -102,6 +104,29 @@ const Training = () => {
     return `${formatRaceLabel(r as any, raceNumbers.get(id) ?? null)} — ${r.race_name}${r.is_active === false ? " (deactivated race)" : ""}`;
   };
 
+  // Surface/distance match of a horse against its training race ("double green" = both match)
+  const matchFor = (horse: any, race: any) => {
+    if (!horse || !race) return { surface: null as boolean | null, distance: null as boolean | null };
+    const kind = getRaceKind(race);
+    const surfaces: string[] = (horse.horse_surfaces || []).map((s: any) => s.surface);
+    const distances: string[] = (horse.horse_distances || []).map((d: any) => String(d.distance));
+    const surface = kind === "sj" || kind === "xc" ? null : surfaces.includes(race.surface);
+    const distance = kind === "sj" || kind === "xc" || String(race.distance) === "0" ? null : distances.includes(String(race.distance));
+    return { surface, distance };
+  };
+
+  const MatchBadge = ({ label, value }: { label: string; value: boolean | null }) => {
+    if (value === null) return null;
+    return (
+      <Badge
+        variant="outline"
+        className={`text-[10px] px-1.5 py-0 gap-0.5 ${value ? "border-green-500 text-green-600" : "border-red-500 text-red-600"}`}
+      >
+        {value ? <Check className="h-3 w-3" /> : <XIcon className="h-3 w-3" />} {label}
+      </Badge>
+    );
+  };
+
   return (
     <Layout>
       <div className="space-y-4 pb-20">
@@ -153,10 +178,20 @@ const Training = () => {
             <CardContent className="space-y-3">
               {list.map((e) => {
                 const draft = edits[e.id];
+                const race = racesById.get(e.race_id);
+                const match = matchFor(e.horses, race);
+                const doubleGreen = match.surface === true && match.distance === true;
                 return (
-                  <div key={e.id} className="border rounded-md p-2 space-y-2">
+                  <div key={e.id} className={`border rounded-md p-2 space-y-2 ${doubleGreen ? "border-green-500 border-2" : ""}`}>
                     <div className="flex items-center justify-between gap-2">
-                      <HorseNameBadge horse={e.horses} />
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <HorseNameBadge horse={e.horses} />
+                        {e.horses?.tier != null && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600">T{e.horses.tier}</Badge>
+                        )}
+                        <MatchBadge label="Surface" value={match.surface} />
+                        <MatchBadge label="Distance" value={match.distance} />
+                      </div>
                       <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => guard(() => deleteMutation.mutate(e.id))}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
