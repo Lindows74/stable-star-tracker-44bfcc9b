@@ -575,6 +575,48 @@ export type Database = {
         }
         Relationships: []
       }
+      training_focus: {
+        Row: {
+          created_at: string
+          horse_id: number
+          id: number
+          note: string
+          race_id: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          horse_id: number
+          id?: number
+          note?: string
+          race_id: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          horse_id?: number
+          id?: number
+          note?: string
+          race_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_focus_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_focus_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "live_races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

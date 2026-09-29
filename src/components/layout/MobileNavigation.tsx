@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, Plus, Sparkles, Timer } from "lucide-react";
+import { Home, Search, Heart, Plus, Sparkles, Timer, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MobileNavigationProps {
@@ -15,13 +15,14 @@ export const MobileNavigation = ({ onAddHorse }: MobileNavigationProps) => {
     { path: "/breeding", label: "Events", icon: Heart },
     { path: "/breeding-notes", label: "Breeding", icon: Sparkles },
     { path: "/races-made", label: "Races", icon: Timer },
+    { path: "/training", label: "Training", icon: Dumbbell },
   ];
 
   const allNavItems = navItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden safe-bottom">
-      <div className="grid grid-cols-6 h-16">
+      <div className="grid grid-cols-7 h-16">
 
         {allNavItems.map((item) => {
           const Icon = item.icon;
