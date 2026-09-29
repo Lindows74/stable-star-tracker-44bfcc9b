@@ -104,6 +104,29 @@ const Training = () => {
     return `${formatRaceLabel(r as any, raceNumbers.get(id) ?? null)} — ${r.race_name}${r.is_active === false ? " (deactivated race)" : ""}`;
   };
 
+  // Surface/distance match of a horse against its training race ("double green" = both match)
+  const matchFor = (horse: any, race: any) => {
+    if (!horse || !race) return { surface: null as boolean | null, distance: null as boolean | null };
+    const kind = getRaceKind(race);
+    const surfaces: string[] = (horse.horse_surfaces || []).map((s: any) => s.surface);
+    const distances: string[] = (horse.horse_distances || []).map((d: any) => String(d.distance));
+    const surface = kind === "sj" || kind === "xc" ? null : surfaces.includes(race.surface);
+    const distance = kind === "sj" || kind === "xc" || String(race.distance) === "0" ? null : distances.includes(String(race.distance));
+    return { surface, distance };
+  };
+
+  const MatchBadge = ({ label, value }: { label: string; value: boolean | null }) => {
+    if (value === null) return null;
+    return (
+      <Badge
+        variant="outline"
+        className={`text-[10px] px-1.5 py-0 gap-0.5 ${value ? "border-green-500 text-green-600" : "border-red-500 text-red-600"}`}
+      >
+        {value ? <Check className="h-3 w-3" /> : <XIcon className="h-3 w-3" />} {label}
+      </Badge>
+    );
+  };
+
   return (
     <Layout>
       <div className="space-y-4 pb-20">
