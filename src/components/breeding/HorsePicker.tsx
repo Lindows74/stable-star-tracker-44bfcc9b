@@ -72,7 +72,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
           {triggerLabel || `Choose ${label}`}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto overscroll-contain block">
         <DialogHeader>
           <DialogTitle>Choose {label}</DialogTitle>
         </DialogHeader>
@@ -149,7 +149,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
           </label>
         </div>
 
-        <ScrollArea className="mt-3 pr-3 h-[55vh]">
+        <div className="mt-3">
           <div className="space-y-2 pb-2">
             {isLoading && <p className="text-sm text-muted-foreground">Loading horses...</p>}
             {!isLoading && filtered.length === 0 && (
@@ -173,7 +173,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
               </button>
             ))}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
