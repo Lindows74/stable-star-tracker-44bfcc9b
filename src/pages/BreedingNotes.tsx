@@ -3,12 +3,11 @@ import Layout from "@/components/layout/Layout";
 import { HorseCard } from "@/components/horses/HorseCard";
 import { HorsePicker } from "@/components/breeding/HorsePicker";
 import { HorseNameBadge } from "@/components/breeding/HorseNameBadge";
-import { BreedingProjects } from "@/components/breeding/BreedingProjects";
+import { BreedingLineageCard, BreedingProjects } from "@/components/breeding/BreedingProjects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -16,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowUp, Save, Trash2, X } from "lucide-react";
+import { ArrowUp, Heart, Save, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -248,10 +247,12 @@ const BreedingNotes = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-3 space-y-4 md:space-y-6">
-        {/* Pair selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Heart className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Active pairing</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(18rem,0.8fr)] lg:items-start">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <HorsePicker
@@ -269,7 +270,7 @@ const BreedingNotes = () => {
             {stallion ? (
               <HorseCard horse={stallion} />
             ) : (
-              <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-lg border-2 border-dashed p-8 text-center text-sm text-muted-foreground">
                 No stallion selected
               </div>
             )}
@@ -292,19 +293,14 @@ const BreedingNotes = () => {
             {mare ? (
               <HorseCard horse={mare} />
             ) : (
-              <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-lg border-2 border-dashed p-8 text-center text-sm text-muted-foreground">
                 No mare selected
               </div>
             )}
           </div>
-        </div>
-
-        {/* Note editor */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base md:text-lg">Your thoughts on this pairing</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          <Card>
+          <CardContent className="p-4 space-y-3">
+            <p className="text-sm font-semibold">Breeding goal</p>
             <Input
               placeholder="Title (optional)"
               value={title}
@@ -328,82 +324,50 @@ const BreedingNotes = () => {
               placeholder="What are you hoping for from this pairing? Traits, breeds, stats..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              rows={5}
+              rows={4}
             />
             <Button onClick={handleSave} disabled={saveMutation.isPending} className="w-full sm:w-auto">
               <Save className="h-4 w-4 mr-2" />
               Save note
             </Button>
           </CardContent>
-        </Card>
+          </Card>
+          </div>
+        </section>
 
-        {/* Unassigned pairings */}
-        <div className="space-y-2">
-          <h2 className="text-lg md:text-xl font-semibold">Unassigned pairings</h2>
-          <p className="text-xs text-muted-foreground">
-            Drag a pairing onto a race in the side panel, or pick a race below.
-          </p>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h2 className="text-lg md:text-xl font-semibold">Unassigned pairings</h2>
+              <p className="text-xs text-muted-foreground">Move a pairing to a breeding project when ready.</p>
+            </div>
+            <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">{unassigned.length}</span>
+          </div>
           {unassigned.length === 0 && (
             <p className="text-sm text-muted-foreground">No unassigned pairings.</p>
           )}
-          {unassigned.map((n: any) => (
-            <Card
-              key={n.id}
-              draggable
-              onDragStart={(e) => e.dataTransfer.setData("text/plain", String(n.id))}
-              className="cursor-grab active:cursor-grabbing"
-            >
-              <CardContent className="p-3 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    {n.title && <p className="font-semibold break-words">{n.title}</p>}
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {n.stallion?.name && <HorseNameBadge horse={n.stallion} icon="♂" />}
-                      {n.mare?.name && <HorseNameBadge horse={n.mare} icon="♀" />}
-                      {n.target_tier != null && (
-                        <Badge className="bg-amber-500 text-white hover:bg-amber-500">Tier {n.target_tier}</Badge>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete note"
-                    onClick={() => deleteMutation.mutate(n.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-sm whitespace-pre-wrap break-words">{n.note}</p>
-                {projects && projects.length > 0 && (
-                  <Select
-                    onValueChange={(v) => assignPairing.mutate({ id: n.id, projectId: Number(v) })}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Move to race..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {projects.map((p: any) => (
-                        <SelectItem key={p.id} value={String(p.id)}>
-                          {p.title || "Untitled race"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+          <div className="space-y-3">
+            {unassigned.map((n: any) => (
+              <BreedingLineageCard
+                key={n.id}
+                pairing={n}
+                onUpdateOutcome={(id, outcome) => updateOutcome.mutate({ id, outcome })}
+                onRemove={(id) => deleteMutation.mutate(id)}
+                onAddFoal={(id, foalId) => addFoal.mutate({ id, foalId })}
+                onRemoveFoal={(id, foalId) => removeFoal.mutate({ noteId: id, foalId })}
+                onSetTries={(id, tries) => setTries.mutate({ id, tries })}
+                footer={projects && projects.length > 0 ? (
+                  <Select onValueChange={(v) => assignPairing.mutate({ id: n.id, projectId: Number(v) })}>
+                    <SelectTrigger className="h-9 w-full sm:w-64"><SelectValue placeholder="Move to race..." /></SelectTrigger>
+                    <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={String(p.id)}>{p.title || "Untitled race"}</SelectItem>)}</SelectContent>
                   </Select>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  {new Date(n.updated_at).toLocaleString()}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                ) : undefined}
+              />
+            ))}
           </div>
+        </section>
 
-          {/* Side panel: races I'm breeding for */}
-          <div className="lg:col-span-1 order-first lg:order-none space-y-2 lg:sticky lg:top-4 lg:self-start">
-            <h2 className="text-lg md:text-xl font-semibold">Races I'm breeding for</h2>
-            <BreedingProjects
+        <BreedingProjects
               projects={(projects as any) || []}
               pairingsByProject={pairingsByProject}
               onCreate={(title, notes) => createProject.mutate({ title, notes })}
@@ -415,9 +379,7 @@ const BreedingNotes = () => {
               onAddFoal={(id, foalId) => addFoal.mutate({ id, foalId })}
               onRemoveFoal={(id, foalId) => removeFoal.mutate({ noteId: id, foalId })}
               onSetTries={(id, tries) => setTries.mutate({ id, tries })}
-            />
-          </div>
-        </div>
+        />
 
         <Button
           variant="default"
