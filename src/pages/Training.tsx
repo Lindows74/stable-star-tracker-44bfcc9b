@@ -21,6 +21,18 @@ import { TraitBadge } from "@/components/horses/TraitBadge";
 
 const db = supabase as any;
 
+const HorseSpecialIcons = ({ traits }: { traits?: string[] }) => {
+  const icons = getHorseSpecialIcons(traits || []);
+  return (
+    <>
+      {icons && <span className="flex-shrink-0">{icons}</span>}
+      {traits?.includes("Elite Lineage") && (
+        <Star className="h-3 w-3 fill-purple-500 text-purple-500 flex-shrink-0" />
+      )}
+    </>
+  );
+};
+
 const Training = () => {
   const { toast } = useToast();
   const qc = useQueryClient();
