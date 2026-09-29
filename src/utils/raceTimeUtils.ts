@@ -128,7 +128,7 @@ export const formatRaceLabel = (race: any, numberOverride?: number | null): stri
     const surface = formatSurfaceShort(race.surface);
     if (surface) parts.push(surface);
   }
-  if (kind === "sj") {
+  if (kind === "sj" || kind === "xc") {
     if (race.tier_restriction === "odd_grades") parts.push("Odd");
     else if (race.tier_restriction === "even_grades") parts.push("Even");
   }
@@ -183,7 +183,10 @@ export const sortRacesCanonically = <T extends Record<string, any>>(races: T[]):
       return i === -1 ? surfPref.length : i;
     };
     const d = pref(a.surface) - pref(b.surface);
-    return d !== 0 ? d : (a.id || 0) - (b.id || 0);
+    if (d !== 0) return d;
+    const grade = (r: any) => (r.tier_restriction === "even_grades" ? 1 : r.tier_restriction === "odd_grades" ? 2 : 0);
+    const g = grade(a) - grade(b);
+    return g !== 0 ? g : (a.id || 0) - (b.id || 0);
   });
 
   return [

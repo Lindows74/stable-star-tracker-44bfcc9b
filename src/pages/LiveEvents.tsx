@@ -626,7 +626,11 @@ const LiveEvents = () => {
                    if (kind === 'sc' && race.race_name?.includes('Under Repair')) {
                      raceLabel += ' (Under Repair)';
                    } else if (kind === 'xc') {
-                     raceLabel += ' (Surface preference only)';
+                     raceLabel += race.tier_restriction === 'odd_grades'
+                       ? ' (Odd Grades)'
+                       : race.tier_restriction === 'even_grades'
+                         ? ' (Even Grades)'
+                         : ' (Surface preference only)';
                    } else if (kind === 'sj') {
                      raceLabel += race.tier_restriction === 'odd_grades' ? ' (Odd Grades)' : ' (Even Grades)';
                    }
