@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dumbbell, Plus, Trash2, X } from "lucide-react";
+import { Dumbbell, Plus, Trash2, X, Star } from "lucide-react";
+import { getHorseSpecialIcons } from "@/utils/horseTraitUtils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,18 @@ import { Check, X as XIcon } from "lucide-react";
 import { TraitBadge } from "@/components/horses/TraitBadge";
 
 const db = supabase as any;
+
+const HorseSpecialIcons = ({ traits }: { traits?: string[] }) => {
+  const icons = getHorseSpecialIcons(traits || []);
+  return (
+    <>
+      {icons && <span className="flex-shrink-0">{icons}</span>}
+      {traits?.includes("Elite Lineage") && (
+        <Star className="h-3 w-3 fill-purple-500 text-purple-500 flex-shrink-0" />
+      )}
+    </>
+  );
+};
 
 const Training = () => {
   const { toast } = useToast();
@@ -187,6 +200,7 @@ const Training = () => {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <HorseNameBadge horse={e.horses} />
+                        <HorseSpecialIcons traits={(e.horses?.horse_traits || []).map((t: any) => t.trait_name)} />
                         {e.horses?.tier != null && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600">T{e.horses.tier}</Badge>
                         )}
