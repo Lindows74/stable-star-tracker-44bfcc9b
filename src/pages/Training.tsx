@@ -178,10 +178,20 @@ const Training = () => {
             <CardContent className="space-y-3">
               {list.map((e) => {
                 const draft = edits[e.id];
+                const race = racesById.get(e.race_id);
+                const match = matchFor(e.horses, race);
+                const doubleGreen = match.surface === true && match.distance === true;
                 return (
-                  <div key={e.id} className="border rounded-md p-2 space-y-2">
+                  <div key={e.id} className={`border rounded-md p-2 space-y-2 ${doubleGreen ? "border-green-500 border-2" : ""}`}>
                     <div className="flex items-center justify-between gap-2">
-                      <HorseNameBadge horse={e.horses} />
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <HorseNameBadge horse={e.horses} />
+                        {e.horses?.tier != null && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600">T{e.horses.tier}</Badge>
+                        )}
+                        <MatchBadge label="Surface" value={match.surface} />
+                        <MatchBadge label="Distance" value={match.distance} />
+                      </div>
                       <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => guard(() => deleteMutation.mutate(e.id))}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
