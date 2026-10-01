@@ -579,21 +579,26 @@ const LiveEvents = () => {
                       : race.tier_restriction === 'even_grades'
                         ? 'Even'
                         : '';
+                    // Track name and race name are kept the same — show them combined once
+                    const combinedName =
+                      race.track_name && race.track_name !== race.race_name
+                        ? `${race.race_name || ''} — ${race.track_name}`
+                        : race.track_name || race.race_name || '';
                     return (
                       <button
                         key={race.id}
                         onClick={() => scrollToRace(race.id)}
                         className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] md:text-xs font-medium transition-colors ${typeColor(race)}`}
-                        title={`${race.race_name || ''}`}
+                        title={`${combinedName}`}
                       >
                         <span className="font-bold">#{raceNumber}</span>
                         {getRaceKind(race) === 'sj' && <span>SJ</span>}
                         {race.distance !== '0' && <span>{race.distance}m</span>}
                         <span>{formatSurfaceShort(race.surface)}</span>
                         {grades && <span className="opacity-80">{grades}</span>}
-                        {race.race_name && (
+                        {combinedName && (
                           <span className="opacity-90 max-w-[10rem] md:max-w-[16rem] truncate">
-                            {race.race_name}
+                            {combinedName}
                           </span>
                         )}
                       </button>
