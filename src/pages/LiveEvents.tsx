@@ -579,21 +579,26 @@ const LiveEvents = () => {
                       : race.tier_restriction === 'even_grades'
                         ? 'Even'
                         : '';
+                    // Track name and race name are kept the same — show them combined once
+                    const combinedName =
+                      race.track_name && race.track_name !== race.race_name
+                        ? `${race.race_name || ''} — ${race.track_name}`
+                        : race.track_name || race.race_name || '';
                     return (
                       <button
                         key={race.id}
                         onClick={() => scrollToRace(race.id)}
                         className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] md:text-xs font-medium transition-colors ${typeColor(race)}`}
-                        title={`${race.race_name || ''}`}
+                        title={`${combinedName}`}
                       >
                         <span className="font-bold">#{raceNumber}</span>
                         {getRaceKind(race) === 'sj' && <span>SJ</span>}
                         {race.distance !== '0' && <span>{race.distance}m</span>}
                         <span>{formatSurfaceShort(race.surface)}</span>
                         {grades && <span className="opacity-80">{grades}</span>}
-                        {race.race_name && (
+                        {combinedName && (
                           <span className="opacity-90 max-w-[10rem] md:max-w-[16rem] truncate">
-                            {race.race_name}
+                            {combinedName}
                           </span>
                         )}
                       </button>
@@ -667,9 +672,13 @@ const LiveEvents = () => {
                        <div className="bg-muted/40 px-3 py-2 md:px-6 md:py-3 flex justify-between items-center border-b">
                          <div className="min-w-0 flex-1">
                             <h3 className="text-xs md:text-lg font-semibold truncate">{raceLabel}</h3>
-                            {race.race_name && (
-                              <p className="text-[11px] md:text-sm text-muted-foreground truncate">{race.race_name}</p>
-                            )}
+                             {(race.race_name || race.track_name) && (
+                               <p className="text-[11px] md:text-sm text-muted-foreground truncate">
+                                 {race.track_name && race.track_name !== race.race_name
+                                   ? `${race.race_name || ''} — ${race.track_name}`
+                                   : race.track_name || race.race_name}
+                               </p>
+                             )}
                             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                               {race.distance !== '0' && (
                                 <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
@@ -681,7 +690,7 @@ const LiveEvents = () => {
                                   {formatSurface(race.surface)}
                                 </span>
                               )}
-                              {race.track_name && (
+                              {race.track_name && race.track_name !== race.race_name && (
                                 <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
                                   📍 {race.track_name}
                                 </span>
