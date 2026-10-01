@@ -690,7 +690,7 @@ const LiveEvents = () => {
                                   {formatSurface(race.surface)}
                                 </span>
                               )}
-                              {race.track_name && (
+                              {race.track_name && race.track_name !== race.race_name && (
                                 <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
                                   📍 {race.track_name}
                                 </span>
