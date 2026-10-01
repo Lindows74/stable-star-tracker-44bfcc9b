@@ -672,9 +672,13 @@ const LiveEvents = () => {
                        <div className="bg-muted/40 px-3 py-2 md:px-6 md:py-3 flex justify-between items-center border-b">
                          <div className="min-w-0 flex-1">
                             <h3 className="text-xs md:text-lg font-semibold truncate">{raceLabel}</h3>
-                            {race.race_name && (
-                              <p className="text-[11px] md:text-sm text-muted-foreground truncate">{race.race_name}</p>
-                            )}
+                             {(race.race_name || race.track_name) && (
+                               <p className="text-[11px] md:text-sm text-muted-foreground truncate">
+                                 {race.track_name && race.track_name !== race.race_name
+                                   ? `${race.race_name || ''} — ${race.track_name}`
+                                   : race.track_name || race.race_name}
+                               </p>
+                             )}
                             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                               {race.distance !== '0' && (
                                 <span className="text-[10px] md:text-xs font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
