@@ -591,6 +591,11 @@ const LiveEvents = () => {
                         {race.distance !== '0' && <span>{race.distance}m</span>}
                         <span>{formatSurfaceShort(race.surface)}</span>
                         {grades && <span className="opacity-80">{grades}</span>}
+                        {race.race_name && (
+                          <span className="opacity-90 max-w-[10rem] md:max-w-[16rem] truncate">
+                            {race.race_name}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
