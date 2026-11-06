@@ -30,6 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { HorseStatsPopover } from "@/components/horses/HorseStatsPopover";
 import { useRaceResults } from "@/hooks/useRaceResults";
 import { buildRaceNumberMap, formatRaceTime, formatSurfaceShort, getRaceKind, isShowJumping } from "@/utils/raceTimeUtils";
+import { isHorseTierEligible } from "@/utils/raceTierUtils";
 
 interface MatchingHorse {
   id: number;
@@ -239,7 +240,8 @@ const LiveEvents = () => {
         const allRaces = data.liveRaces || [];
         const raceMatchesWithAll = allRaces.map((race: any) => ({
           ...race,
-          matchingHorses: data.raceMatches?.find((rm: any) => rm.id === race.id)?.matchingHorses || []
+          matchingHorses: (data.raceMatches?.find((rm: any) => rm.id === race.id)?.matchingHorses || [])
+            .filter((horse: MatchingHorse) => isHorseTierEligible(race.tier_restriction, horse.tier))
         }));
         
         // Sort to match the official list: 17 Flat, 3 Steeplechase (incl. 1100m under repair), then Cross Country
@@ -833,7 +835,7 @@ const LiveEvents = () => {
 
                             // All timed horses sorted by fastest time
                             const allTimed = allHorsesPool
-                              .filter((h) => timesForRace.has(h.id))
+                              .filter((h) => timesForRace.has(h.id) && isHorseTierEligible(race.tier_restriction, h.tier))
                               .map((h) => ({ ...h, isNonMatching: !matchedIds.has(h.id) } as any))
                               .sort((a, b) => (timesForRace.get(a.id) ?? Infinity) - (timesForRace.get(b.id) ?? Infinity));
 

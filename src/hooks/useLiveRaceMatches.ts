@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isHorseTierEligible } from "@/utils/raceTierUtils";
 import {
   buildRaceNumberMap,
   dedupeRacesLikeLiveEvents,
@@ -21,10 +22,6 @@ export interface LiveRaceMatch {
   race: LiveRaceRow;
   number: number | null;
 }
-
-// Same rules as the breeding-suggestions edge function / Live Events view
-const ODD_TIERS = new Set([3, 5, 7, 9]);
-const EVEN_TIERS = new Set([2, 4, 6, 8]);
 
 export const useLiveRacesList = () =>
   useQuery({
@@ -55,14 +52,7 @@ export const computeHorseRaceMatches = (
       if (kind !== "sj" && !horse.surfaces.includes(race.surface)) return false;
       const checkDistance = kind !== "xc" && kind !== "sj" && String(race.distance) !== "0";
       if (checkDistance && !horse.distances.includes(String(race.distance))) return false;
-      const tierSet =
-        race.tier_restriction === "odd_grades"
-          ? ODD_TIERS
-          : race.tier_restriction === "even_grades"
-          ? EVEN_TIERS
-          : null;
-      if (tierSet && (!horse.tier || !tierSet.has(horse.tier))) return false;
-      return true;
+      return isHorseTierEligible(race.tier_restriction, horse.tier);
     })
     .map((race) => ({ race, number: numbers.get(race.id) ?? null }));
 };
