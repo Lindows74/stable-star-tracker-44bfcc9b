@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add Lineage view with horse selection, ancestors and descendants; verify on mobile and desktop.
+
 - [x] Add horse-name lineage editor, share parents with breeding ancestry, and verify mobile selection and saving.
 
 - [x] Audit and fix mobile Breeding and Training pickers, menus, and scrolling.

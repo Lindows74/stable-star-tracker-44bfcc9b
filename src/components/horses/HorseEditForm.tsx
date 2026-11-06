@@ -308,6 +308,8 @@ export const HorseEditForm = ({ horse, onCancel }: HorseEditFormProps) => {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["horses"] });
+      await queryClient.invalidateQueries({ queryKey: ["breeding_notes"] });
+      await queryClient.invalidateQueries({ queryKey: ["horse", horse.id] });
       toast.success("Horse updated successfully!");
       onCancel();
     } catch (error) {

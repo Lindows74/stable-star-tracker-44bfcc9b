@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { buildHorseAncestry, validateHorseParents } from './horseLineageUtils';
+import { buildHorseAncestry, buildHorseDescendants, validateHorseParents } from './horseLineageUtils';
 
 const dad = { id: 1, name: 'Dad', gender: 'stallion' };
 const mum = { id: 2, name: 'Mum', gender: 'mare' };
@@ -27,4 +27,22 @@ test('mother and father choices respect their genders', () => {
 test('reject self-parent and descendant-parent cycles', () => {
   expect(validateHorseParents(1, dad, null, {})).toBe('A horse cannot be its own ancestor. Choose another parent.');
   expect(validateHorseParents(2, null, foal, { 3: { mare: mum } })).toBe('A horse cannot be its own ancestor. Choose another parent.');
+});
+test('bloodline includes both earlier and later generations from the same links', () => {
+  const horses = [dad, mum, foal, { id: 4, name: 'Grandchild', gender: 'stallion', dam_id: 3 }];
+  const ancestry = buildHorseAncestry(horses, [{ stallion_id: 1, mare_id: 2, breeding_note_foals: [{ foal_id: 3 }] }]);
+  const descendants = buildHorseDescendants(horses, ancestry);
+  expect(ancestry[3].mare.id).toBe(2);
+  expect(descendants[1].map(h => h.id)).toEqual([3]);
+  expect(descendants[2].map(h => h.id)).toEqual([3]);
+  expect(descendants[3].map(h => h.id)).toEqual([4]);
+  expect(descendants[4]).toBeUndefined();
+});
+test('descendants follow corrected manual parents without duplicating offspring', () => {
+  const otherDad = { id: 5, name: 'Other dad', gender: 'stallion' };
+  const horses = [dad, mum, otherDad, { ...foal, sire_id: 5 }];
+  const children = buildHorseDescendants(horses, buildHorseAncestry(horses, [{ stallion_id: 1, mare_id: 2, breeding_note_foals: [{ foal_id: 3 }] }]));
+  expect(children[1]).toBeUndefined();
+  expect(children[5].map(h => h.id)).toEqual([3]);
+  expect(children[2].map(h => h.id)).toEqual([3]);
 });

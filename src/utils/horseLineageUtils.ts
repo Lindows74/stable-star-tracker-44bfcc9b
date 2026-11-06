@@ -2,6 +2,19 @@ export type LineageHorse = { id: number; name: string; gender: string | null; ti
 export type LineageNote = { stallion_id: number | null; mare_id: number | null; foal_id?: number | null; title?: string; breeding_note_foals?: { foal_id: number }[] };
 export type HorseAncestry = Record<number, { stallion?: LineageHorse; mare?: LineageHorse; title?: string }>;
 
+export function buildHorseDescendants(horses: LineageHorse[], ancestry: HorseAncestry): Record<number, LineageHorse[]> {
+  const children: Record<number, LineageHorse[]> = {};
+  for (const horse of horses) {
+    const parents = new Set([ancestry[horse.id]?.stallion?.id, ancestry[horse.id]?.mare?.id]);
+    for (const parentId of parents) {
+      if (parentId == null || parentId === horse.id) continue;
+      (children[parentId] ??= []).push(horse);
+    }
+  }
+  for (const list of Object.values(children)) list.sort((a, b) => a.name.localeCompare(b.name));
+  return children;
+}
+
 export function buildHorseAncestry(horses: LineageHorse[], notes: LineageNote[]): HorseAncestry {
   const byId = new Map(horses.map(h => [h.id, h]));
   const map: HorseAncestry = {};

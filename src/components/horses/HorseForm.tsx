@@ -321,6 +321,7 @@ export const HorseForm = ({ onSuccess }: HorseFormProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["horses"] });
       queryClient.invalidateQueries({ queryKey: ["horses", "names"] });
+      queryClient.invalidateQueries({ queryKey: ["breeding_notes", "lineage"] });
       toast({
         title: "Success!",
         description: "Horse created successfully",

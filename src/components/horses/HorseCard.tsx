@@ -172,6 +172,8 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
     onSuccess: () => {
       console.log("HorseCard: Horse deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["horses"] });
+      queryClient.invalidateQueries({ queryKey: ["breeding_notes"] });
+      queryClient.invalidateQueries({ queryKey: ["horse"] });
       toast({
         title: "Success",
         description: "Horse deleted successfully",
