@@ -12,12 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { MasterKeyDialog } from "@/components/auth/MasterKeyDialog";
 import { formatSurfaceName } from "@/utils/liveRaces";
-import { useHorseLiveRaceMatches } from "@/hooks/useLiveRaceMatches";
+import { useHorseLiveRaceMatches, useLiveRacesList } from "@/hooks/useLiveRaceMatches";
 import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullStaminaTrait, checkHorseHasSpeedStackingTraits, checkHorseHasJumpingStackingTraits } from "@/utils/horseTraitUtils";
 import { calculateAllStats, getMaxTrainedStats, isMaxTrained } from "@/utils/horseUtils";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
-import { useBestTimesForHorse, useTierBestTimes, raceTypeKey } from "@/hooks/useRaceResults";
-import { formatRaceLabel, formatRaceTime, getRaceKind } from "@/utils/raceTimeUtils";
+import { useBestTimesForHorse, useTierBestTimes } from "@/hooks/useRaceResults";
+import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, getRaceKind } from "@/utils/raceTimeUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,13 +48,15 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { bestTimes } = useBestTimesForHorse(horse.id);
+  const { data: liveRaces } = useLiveRacesList();
+  const raceNumbers = buildRaceNumberMap(liveRaces || []);
   const tierBestTimes = useTierBestTimes();
 
   // True when this horse's best time for the race equals the fastest time
   // recorded by any horse in the same tier for that race
   const isTierBest = (bt: { timeMs: number; race: any; raceId: number }) => {
     if (horse.tier == null) return false;
-    const key = `${raceTypeKey(bt.race) || `race-${bt.raceId}`}|${horse.tier}`;
+    const key = `race-${bt.raceId}|${horse.tier}`;
     const best = tierBestTimes.get(key);
     return best != null && bt.timeMs <= best;
   };
@@ -566,12 +568,19 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
               {bestTimes.map((bt) => (
                 <div
                   key={bt.raceId}
-                  className="flex items-center justify-between gap-2 text-[10px] md:text-xs rounded-md border px-2 py-1"
+                  className="flex flex-wrap items-center justify-between gap-2 text-[10px] md:text-xs rounded-md border px-2 py-1"
                 >
-                  <span className="truncate flex items-center gap-1">
-                    {formatRaceLabel(bt.race)}
+                  <span className="flex flex-wrap items-center gap-1">
+                    {formatRaceLabel(bt.race, raceNumbers.get(bt.raceId) ?? null)}
                     {isTierBest(bt) && (
                       <Trophy className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                    )}
+                    {bt.placement != null && (
+                      <Badge variant={bt.placement === 1 ? "default" : "secondary"}
+                        className="text-[10px] px-1.5 py-0"
+                        title={`Placement ${bt.placement} by best recorded time in Tier ${horse.tier}`}>
+                        Place {bt.placement} · T{horse.tier}
+                      </Badge>
                     )}
                   </span>
                   <span className="font-mono font-medium flex-shrink-0">
