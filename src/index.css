@@ -36,6 +36,7 @@
 
     --trait-exotic: 20 86% 52%;
     --trait-club: 276 62% 48%;
+    --access-unlocked: 142 76% 36%;
 
     --radius: 0.5rem;
 
@@ -86,6 +87,7 @@
     --ring: 212.7 26.8% 83.9%;
     --trait-exotic: 24 94% 60%;
     --trait-club: 276 76% 70%;
+    --access-unlocked: 142 69% 58%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

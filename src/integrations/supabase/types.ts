@@ -371,6 +371,7 @@ export type Database = {
           agility: number | null
           category: string | null
           created_at: string
+          dam_id: number | null
           diet_acceleration: number | null
           diet_agility: number | null
           diet_jump: number | null
@@ -387,6 +388,7 @@ export type Database = {
           max_sprint_energy: boolean | null
           name: string
           notes: string | null
+          sire_id: number | null
           sold_at: string | null
           speed: number | null
           sprint_energy: number | null
@@ -399,6 +401,7 @@ export type Database = {
           agility?: number | null
           category?: string | null
           created_at?: string
+          dam_id?: number | null
           diet_acceleration?: number | null
           diet_agility?: number | null
           diet_jump?: number | null
@@ -415,6 +418,7 @@ export type Database = {
           max_sprint_energy?: boolean | null
           name: string
           notes?: string | null
+          sire_id?: number | null
           sold_at?: string | null
           speed?: number | null
           sprint_energy?: number | null
@@ -427,6 +431,7 @@ export type Database = {
           agility?: number | null
           category?: string | null
           created_at?: string
+          dam_id?: number | null
           diet_acceleration?: number | null
           diet_agility?: number | null
           diet_jump?: number | null
@@ -443,6 +448,7 @@ export type Database = {
           max_sprint_energy?: boolean | null
           name?: string
           notes?: string | null
+          sire_id?: number | null
           sold_at?: string | null
           speed?: number | null
           sprint_energy?: number | null
@@ -450,7 +456,22 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "horses_dam_id_fkey"
+            columns: ["dam_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horses_sire_id_fkey"
+            columns: ["sire_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       live_races: {
         Row: {

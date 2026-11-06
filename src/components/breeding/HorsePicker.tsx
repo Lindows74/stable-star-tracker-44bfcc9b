@@ -18,9 +18,10 @@ interface HorsePickerProps {
   onSelect: (horse: any) => void;
   triggerLabel?: string;
   size?: "default" | "sm";
+  excludeHorseIds?: number[];
 }
 
-export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "default" }: HorsePickerProps) => {
+export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "default", excludeHorseIds = [] }: HorsePickerProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
@@ -55,10 +56,11 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
     () =>
       (horses || []).filter(
         (h: any) =>
+          !excludeHorseIds.includes(h.id) &&
           (gender === "any" || h.gender === gender) &&
           (selectedTiers.length === 0 || selectedTiers.includes(String(h.tier)))
       ),
-    [horses, gender, selectedTiers]
+    [horses, gender, selectedTiers, excludeHorseIds]
   );
 
   const toggle = (list: string[], set: (v: string[]) => void, value: string) =>

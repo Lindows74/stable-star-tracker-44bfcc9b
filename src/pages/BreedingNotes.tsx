@@ -19,10 +19,12 @@ import { ArrowUp, Heart, Save, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useHorseLineage } from "@/hooks/useHorseLineage";
 
 const BreedingNotes = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: lineage } = useHorseLineage();
 
   const [stallion, setStallion] = useState<any | null>(null);
   const [mare, setMare] = useState<any | null>(null);
@@ -247,8 +249,8 @@ const BreedingNotes = () => {
         if (foal?.id != null) map[foal.id] = { stallion: n.stallion, mare: n.mare, title: n.title };
       });
     });
-    return map;
-  }, [notes]);
+    return { ...map, ...lineage?.ancestry };
+  }, [notes, lineage]);
 
   const handleSave = () => {
     if (!note.trim()) {

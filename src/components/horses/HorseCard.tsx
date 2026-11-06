@@ -6,6 +6,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { HorseEditForm } from "./HorseEditForm";
+import { HorseLineageDialog } from "./HorseLineageDialog";
+import { useHorseLineage } from "@/hooks/useHorseLineage";
 import { TraitBadge } from "./TraitBadge";
 import { TraitsByDiscipline } from "./TraitsByDiscipline";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +44,8 @@ interface HorseCardProps {
 }
 
 export const HorseCard = ({ horse }: HorseCardProps) => {
+  const [lineageOpen, setLineageOpen] = useState(false);
+  const { data: lineage, isError: lineageError } = useHorseLineage();
   const [isEditing, setIsEditing] = useState(false);
   const [showMasterKeyDialog, setShowMasterKeyDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<'edit' | 'delete' | 'sold' | null>(null);
@@ -252,7 +256,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
           {/* Horse name - full width */}
           <div className={`inline-block px-2 py-1 md:px-3 md:py-2 rounded-lg ${getGenderNameBackgroundClass(horse.gender || '')} ${fullyMaxTrained ? `border-[5px] ${horse.gender === 'stallion' ? 'border-blue-600' : horse.gender === 'mare' ? 'border-pink-600' : 'border-gray-600'}` : ''}`}>
             <CardTitle className="text-sm md:text-lg flex items-center gap-1 flex-wrap">
-              <span className={isSold ? 'line-through' : ''}>{horse.name}</span>
+              <Button variant="ghost" title="View or edit lineage" aria-label={`Lineage for ${horse.name}`} className={`h-auto p-0 text-inherit whitespace-normal break-words text-left justify-start ${isSold ? 'line-through' : ''}`} onClick={() => setLineageOpen(true)}>{horse.name}</Button>
               {isSold && (
                 <Badge variant="secondary" className="text-[10px] md:text-xs bg-gray-700 text-white">
                   Sold
@@ -369,6 +373,8 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
           </div>
         </div>
 
+        {lineageOpen && lineage && <HorseLineageDialog horse={horse} ancestry={lineage.ancestry} onClose={() => setLineageOpen(false)} />}
+        {lineageOpen && !lineage && <Dialog open onOpenChange={setLineageOpen}><DialogContent><DialogHeader><DialogTitle>Lineage · {horse.name}</DialogTitle></DialogHeader><p>{lineageError ? 'Could not load lineage. Please try again.' : 'Loading lineage…'}</p></DialogContent></Dialog>}
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
           <DialogContent className="w-screen max-w-none h-[100dvh] max-h-none rounded-none p-4 md:p-8 overflow-y-auto">
             <DialogHeader>
