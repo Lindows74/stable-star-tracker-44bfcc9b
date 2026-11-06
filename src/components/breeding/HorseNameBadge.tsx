@@ -64,10 +64,10 @@ export const HorseNameBadge = ({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center"
+        className="inline-flex max-w-full items-center text-left"
       >
         <Badge
-          className={`cursor-pointer ${getGenderNameBackgroundClass(gender)} text-foreground hover:opacity-90 ${className ?? ""}`}
+          className={`cursor-pointer whitespace-normal break-words ${getGenderNameBackgroundClass(gender)} text-foreground hover:opacity-90 ${className ?? ""}`}
         >
           {icon} {name}
         </Badge>

@@ -85,7 +85,7 @@ const ParentNode = ({ horse, role, icon, ancestry }: { horse: any; role: string;
     <p className="text-[10px] font-bold uppercase text-muted-foreground">{role}</p>
     {horse?.name ? (
       <>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <HorseNameBadge horse={horse} icon={icon} />
           {horse.tier != null && <Badge variant="outline">Tier {horse.tier}</Badge>}
         </div>
@@ -165,7 +165,7 @@ export const BreedingLineageCard = ({
                       <HorseNameBadge horse={foal} icon="🐴" />
                       {foal.tier != null && <Badge variant="outline">Tier {foal.tier}</Badge>}
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Remove foal" onClick={() => onRemoveFoal(pairing.id, foal.id)}>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="Remove foal" onClick={() => onRemoveFoal(pairing.id, foal.id)}>
                       <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -244,7 +244,7 @@ export const BreedingProjects = ({
               className={`${dragOver === p.id ? "ring-2 ring-primary" : ""} ${isOpen ? "xl:col-span-2" : ""}`}
             >
               <CardContent className="p-3 md:p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-wrap items-start justify-between gap-2">
                   {edit ? (
                     <div className="flex-1 space-y-2">
                       <Input value={edit.title} onChange={(e) => setEditing((s) => ({ ...s, [p.id]: { ...edit, title: e.target.value } }))} placeholder="Race / goal" className="h-8 text-sm font-semibold" />
@@ -255,7 +255,7 @@ export const BreedingProjects = ({
                       </div>
                     </div>
                   ) : (
-                    <Button variant="ghost" className="h-auto flex-1 justify-start whitespace-normal px-1 py-1 text-left" onClick={() => setOpen((o) => ({ ...o, [p.id]: !isOpen }))}>
+                    <Button variant="ghost" className="h-auto w-full sm:w-auto sm:flex-1 justify-start whitespace-normal px-1 py-1 text-left" onClick={() => setOpen((o) => ({ ...o, [p.id]: !isOpen }))}>
                       {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       <span className="font-semibold break-words">{p.title || "Untitled race"}</span>
                       <Badge variant="outline">{list.length}</Badge>

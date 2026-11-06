@@ -154,7 +154,7 @@ const Training = () => {
             <div className="space-y-1">
               <label className="text-xs font-medium">Horse</label>
               {horse ? (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <HorseNameBadge horse={horse} />
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setHorse(null)}><X className="h-4 w-4" /></Button>
                 </div>
@@ -198,7 +198,7 @@ const Training = () => {
                 return (
                   <div key={e.id} className={`border rounded-md p-2 space-y-2 ${doubleGreen ? "border-green-500 border-2" : ""}`}>
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="flex flex-1 items-center gap-1.5 flex-wrap overflow-hidden">
                         <HorseNameBadge horse={e.horses} />
                         <HorseSpecialIcons traits={(e.horses?.horse_traits || []).map((t: any) => t.trait_name)} />
                         {e.horses?.tier != null && (
@@ -207,7 +207,7 @@ const Training = () => {
                         <MatchBadge label="Surface" value={match.surface} />
                         <MatchBadge label="Distance" value={match.distance} />
                       </div>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => guard(() => deleteMutation.mutate(e.id))}>
+                      <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" aria-label="Remove from training" onClick={() => guard(() => deleteMutation.mutate(e.id))}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

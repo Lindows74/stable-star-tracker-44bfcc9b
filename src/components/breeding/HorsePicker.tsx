@@ -77,7 +77,7 @@ export const HorsePicker = ({ gender, label, onSelect, triggerLabel, size = "def
           <DialogTitle>Choose {label}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-3">
           <Input
             placeholder="Search by name..."
             value={searchTerm}

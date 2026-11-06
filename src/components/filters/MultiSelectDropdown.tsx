@@ -30,11 +30,12 @@ export const MultiSelectDropdown = ({
   return (
     <div>
       <Label>{label}</Label>
-      <Popover open={open} onOpenChange={onOpenChange}>
+      <Popover modal open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
+            aria-label={label}
             aria-expanded={open}
             className="w-full justify-between mt-1"
           >
@@ -46,12 +47,12 @@ export const MultiSelectDropdown = ({
         </PopoverTrigger>
         <PopoverContent 
           onOpenAutoFocus={(e) => e.preventDefault()} 
-          className="z-50 w-full p-0 bg-popover" 
+          className="z-[70] w-[var(--radix-popover-trigger-width)] p-0 bg-popover overflow-hidden" 
           align="start"
         >
           <Command>
             <CommandInput placeholder={searchPlaceholder} className="h-9" />
-            <CommandList>
+            <CommandList className="max-h-[min(18rem,calc(var(--radix-popover-content-available-height)-3rem))] overscroll-contain touch-pan-y">
               <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => (
