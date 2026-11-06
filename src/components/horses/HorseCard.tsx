@@ -17,6 +17,7 @@ import { getHorseSpecialIcons, checkHorseHasStackingTraits, checkHorseHasFullSta
 import { calculateAllStats, getMaxTrainedStats, isMaxTrained } from "@/utils/horseUtils";
 import { getGenderNameBackgroundClass } from "@/utils/formatUtils";
 import { useBestTimesForHorse, useTierBestTimes } from "@/hooks/useRaceResults";
+import { getResultRaceKey } from "@/utils/racePlacementUtils";
 import { buildRaceNumberMap, formatRaceLabel, formatRaceTime, getRaceKind } from "@/utils/raceTimeUtils";
 import {
   AlertDialog,
@@ -56,7 +57,7 @@ export const HorseCard = ({ horse }: HorseCardProps) => {
   // recorded by any horse in the same tier for that race
   const isTierBest = (bt: { timeMs: number; race: any; raceId: number }) => {
     if (horse.tier == null) return false;
-    const key = `race-${bt.raceId}|${horse.tier}`;
+    const key = `${getResultRaceKey({ race_id: bt.raceId, live_races: bt.race })}|${horse.tier}`;
     const best = tierBestTimes.get(key);
     return best != null && bt.timeMs <= best;
   };
