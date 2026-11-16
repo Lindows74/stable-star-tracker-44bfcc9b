@@ -285,18 +285,18 @@ const RacesMade = () => {
                       {group.rows.map((row, idx) => (
                         <div
                           key={row.id}
-                          className="flex items-center justify-between gap-2 rounded-md border p-2 text-xs md:text-sm"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 rounded-md border p-2 text-xs md:text-sm"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             {group.bestByTier.get(row.horses?.tier ?? 0) === row.time_ms && (
                               <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0" />
                             )}
-                            <span className="font-medium truncate">{row.horses?.name || "Unknown horse"}</span>
+                            <span className="font-medium break-words">{row.horses?.name || "Unknown horse"}</span>
                             {row.horses?.tier != null && (
-                              <Badge variant="secondary" className="text-[10px]">Tier {row.horses.tier}</Badge>
+                              <Badge variant="secondary" className="text-[10px] whitespace-nowrap shrink-0">Tier {row.horses.tier}</Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center justify-between sm:justify-end gap-2 sm:flex-shrink-0">
                             <span className="font-mono">{formatRaceTime(row.time_ms)}</span>
                             <RaceResultDate
                               horseName={row.horses?.name || "Horse"}
