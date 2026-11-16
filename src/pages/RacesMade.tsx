@@ -139,7 +139,7 @@ const RacesMade = () => {
     });
     return Array.from(byRace.entries())
       .map(([id, rows]) => {
-        const sorted = [...rows].sort((a, b) => a.time_ms - b.time_ms);
+        const sorted = [...rows].sort((a, b) => (b.horses?.tier ?? 0) - (a.horses?.tier ?? 0) || a.time_ms - b.time_ms);
         const bestByTier = new Map<number, number>();
         sorted.forEach((row) => {
           const tier = row.horses?.tier ?? 0;
