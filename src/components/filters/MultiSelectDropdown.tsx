@@ -46,12 +46,16 @@ export const MultiSelectDropdown = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          onOpenAutoFocus={(e) => e.preventDefault()} 
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            const input = (e.currentTarget as HTMLElement | null)?.querySelector<HTMLInputElement>("input");
+            input?.focus();
+          }}
           className="z-[70] w-[var(--radix-popover-trigger-width)] p-0 bg-popover overflow-hidden" 
           align="start"
         >
           <Command>
-            <CommandInput placeholder={searchPlaceholder} className="h-9" />
+            <CommandInput autoFocus placeholder={searchPlaceholder} className="h-9" />
             <CommandList className="max-h-[min(18rem,calc(var(--radix-popover-content-available-height)-3rem))] overscroll-contain touch-pan-y">
               <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
               <CommandGroup>
