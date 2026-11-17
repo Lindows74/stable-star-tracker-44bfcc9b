@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { GitBranch, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { GitBranch, ArrowUp, ArrowDown, RefreshCw, Pencil } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { HorsePicker } from '@/components/breeding/HorsePicker';
 import { HorseNameBadge } from '@/components/breeding/HorseNameBadge';
+import { HorseLineageDialog } from '@/components/horses/HorseLineageDialog';
 import { BloodlineBranch } from '@/components/breeding/BloodlineBranch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,11 +12,15 @@ import { useHorseLineage } from '@/hooks/useHorseLineage';
 import { buildHorseDescendants, type LineageHorse } from '@/utils/horseLineageUtils';
 
 export default function Lineage() {
+  const [editingParents, setEditingParents] = useState(false);
   const [params, setParams] = useSearchParams();
   const { data, isLoading, isError, refetch } = useHorseLineage();
   const selected = data?.horses.find(h => h.id === Number(params.get('horse')));
   const descendants = useMemo(() => buildHorseDescendants(data?.horses || [], data?.ancestry || {}), [data]);
-  const choose = (horse: LineageHorse) => setParams({ horse: String(horse.id) });
+  const choose = (horse: LineageHorse) => {
+    setEditingParents(false);
+    setParams({ horse: String(horse.id) });
+  };
   const parents = selected ? [
     { horse: data?.ancestry[selected.id]?.stallion, role: 'Father' },
     { horse: data?.ancestry[selected.id]?.mare, role: 'Mother' },
@@ -44,6 +49,7 @@ export default function Lineage() {
           <HorseNameBadge horse={{ ...selected, gender: selected.gender ?? '' }} className="text-base" />
           {selected.tier != null && <Badge variant="outline">Tier {selected.tier}</Badge>}
           <span className="text-sm text-muted-foreground">{children.length} {children.length === 1 ? 'foal' : 'foals'}</span>
+          <Button variant="outline" className="w-full sm:ml-auto sm:w-auto" onClick={() => setEditingParents(true)}><Pencil className="h-4 w-4" />Edit parents</Button>
         </section>
         <section aria-label="Descendants" className="space-y-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold"><ArrowDown className="h-4 w-4" />Descendants</h2>
@@ -51,6 +57,7 @@ export default function Lineage() {
             {children.map(child => <BloodlineBranch key={`${selected.id}-${child.id}`} horse={child} role={child.gender === 'stallion' ? 'Son' : child.gender === 'mare' ? 'Daughter' : 'Foal'} direction="descendants" ancestry={data.ancestry} descendants={descendants} onChoose={choose} visited={[selected.id]} />)}
           </ul>}
         </section>
+        {editingParents && <HorseLineageDialog key={selected.id} horse={selected} ancestry={data.ancestry} onClose={() => setEditingParents(false)} />}
       </>}
     </div>
   </Layout>;

@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add direct mother/father editing for the selected horse in Lineage; verify saving and refreshed ancestry on mobile and desktop.
+
 - [x] Add Lineage view with horse selection, ancestors and descendants; verify on mobile and desktop.
 
 - [x] Add horse-name lineage editor, share parents with breeding ancestry, and verify mobile selection and saving.

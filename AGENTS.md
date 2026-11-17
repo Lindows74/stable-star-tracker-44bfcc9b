@@ -6,3 +6,4 @@
 - Keep shared dialogs, sheets and dropdowns bounded to available viewport space; nested filter popovers are modal so dialog scroll locking allows their lists to scroll, and mobile filter actions stay outside the scrolling body.
 - Store manual horse parents independently on horses and merge them over breeding-record ancestry through useHorseLineage, so correcting one horse never rewrites siblings or archived projects.
 - Derive descendant links by reversing the shared merged ancestry map, so the Lineage view uses the same bloodline as breeding and parent editing.
+- Reuse HorseLineageDialog for parent editing from both horse cards and Lineage, so validation, saving and ancestry refresh remain identical.
